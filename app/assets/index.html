@@ -56,7 +56,10 @@
     border-radius:10px;padding:9px 2px;font-size:12px;text-align:center;transition:.12s}
   .tool:active{transform:scale(.96);background:var(--card2);color:#fff}
 
-  .listwrap{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px 12px 132px}
+  .listwrap{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px 12px 132px;
+    position:relative}
+  .ptr{position:absolute;left:0;right:0;top:0;text-align:center;font-size:12px;color:var(--dim);
+    padding:10px 0;opacity:0;transform:translateY(-44px);transition:.18s;pointer-events:none;z-index:3}
   .list{display:flex;flex-direction:column;gap:7px}
   .row{display:flex;align-items:center;gap:11px;background:var(--card);
     border:1px solid var(--line);border-radius:14px;padding:10px 12px;transition:.13s;
@@ -181,6 +184,7 @@
   </div>
 
   <div class="listwrap" id="listwrap">
+    <div class="ptr" id="ptr">下拉刷新</div>
     <div class="list" id="list"></div>
   </div>
 </div>
@@ -220,6 +224,10 @@
     <div class="abtn red" id="dFreeze">冻结</div>
     <div class="abtn green" id="dUnfreeze">解冻</div>
     <div class="abtn ghost" id="dClose">关闭</div>
+  </div>
+  <div class="row2">
+    <div class="abtn" id="dShortF">＋ 冻结快捷方式</div>
+    <div class="abtn" id="dShortU">＋ 解冻快捷方式</div>
   </div>
 </div>
 
@@ -264,8 +272,8 @@
     <div class="abtn red" id="lockClear">清空全部</div>
   </div>
   <div class="hint" style="margin-top:12px">
-    「恢复默认」只重置系统应用部分（系统界面 / 桌面 / 输入法 / 电话 / 短信 / 设置等），
-    你自己给第三方应用加的锁会保留。
+    「恢复默认」会把加锁清单还原为默认（保留你自定义的锁），
+    并把系统应用的冻结状态恢复成初始的精简集合；第三方应用不会被改动。
   </div>
 </div>
 
@@ -317,10 +325,10 @@ function skeleton(n){
 }
 
 function loadProtect(){
-  try { PROT = JSON.parse(Native.protectStatus()); }
-  catch(e){ PROT = {list:[], defaults:[]}; }
-  PROT.list = PROT.list || [];
-  PROT.defaults = PROT.defaults || [];
+  try {
+    var st = JSON.parse(Native.protectStatus());
+    PROT = { list: st.protected || [], defaults: st.defaults || [], defaultFrozen: st.defaultFrozen || 0 };
+  } catch(e){ PROT = {list:[], defaults:[]}; }
 }
 
 function load(){
@@ -593,8 +601,9 @@ function renderLock(){
   var mine = (PROT.list||[]).filter(function(p){ return (PROT.defaults||[]).indexOf(p) < 0; });
   document.getElementById('lockInfo').innerHTML = ''
     + '<div class="kvrow"><div class="k">已加锁</div><div class="v">' + (PROT.list||[]).length + ' 个应用</div></div>'
-    + '<div class="kvrow"><div class="k">默认</div><div class="v">' + (PROT.defaults||[]).length + ' 个系统应用</div></div>'
-    + '<div class="kvrow"><div class="k">自定义</div><div class="v">' + mine.length + ' 个</div></div>';
+    + '<div class="kvrow"><div class="k">默认锁</div><div class="v">' + (PROT.defaults||[]).length + ' 个</div></div>'
+    + '<div class="kvrow"><div class="k">自定义</div><div class="v">' + mine.length + ' 个</div></div>'
+    + '<div class="kvrow"><div class="k">默认冻结</div><div class="v">' + (PROT.defaultFrozen||0) + ' 个系统应用</div></div>';
 }
 
 var q = document.getElementById('q');
@@ -757,13 +766,14 @@ document.getElementById('lockRemoveSel').onclick = function(){
   toast('已解锁 ' + removed + ' 个', 'ok');
 };
 document.getElementById('lockReset').onclick = function(){
-  if (!confirm('恢复默认加锁清单？\n只会重置系统应用部分，你给第三方应用加的锁会保留。')) return;
-  var out;
-  try { out = JSON.parse(Native.resetProtected()); } catch(e){ out = []; }
+  if (!confirm('恢复默认？\n\n• 加锁清单还原为默认（保留你自定义的锁）\n• 系统应用冻结状态恢复到初始集合\n• 第三方应用不会被改动')) return;
+  toast('正在恢复…');
+  var r;
+  try { r = JSON.parse(Native.resetDefaults()); } catch(e){ r = {ok:0}; }
+  if (!r.ok){ toast('恢复失败', 'err'); return; }
   loadProtect();
-  renderLock(); render();
-  toast('已恢复默认（自定义保留 ' + (PROT.list||[]).filter(function(p){
-    return (PROT.defaults||[]).indexOf(p) < 0; }).length + ' 个）', 'ok');
+  load();
+  toast('已恢复：加锁 ' + r.locks + ' 个，新冻结 ' + r.frozen + ' 个，解冻 ' + r.unfrozen + ' 个', 'ok');
 };
 document.getElementById('lockClear').onclick = function(){
   var n = (PROT.list||[]).length;
@@ -774,6 +784,15 @@ document.getElementById('lockClear').onclick = function(){
   toast('已清空加锁清单', 'warn');
 };
 
+function makeShortcut(freeze){
+  if (!DETAIL_PKG) return;
+  var r = Native.createShortcut(DETAIL_PKG, freeze);
+  if (r === '1') toast('已请求添加，请在桌面确认', 'ok');
+  else toast('桌面不支持固定快捷方式，或请求被拒绝', 'err');
+}
+document.getElementById('dShortF').onclick = function(){ makeShortcut(true); };
+document.getElementById('dShortU').onclick = function(){ makeShortcut(false); };
+
 document.getElementById('dClose').onclick = closeDetail;
 document.getElementById('dFreeze').onclick = function(){ detailAction(true); };
 document.getElementById('dUnfreeze').onclick = function(){ detailAction(false); };
@@ -783,6 +802,39 @@ document.getElementById('dLaunch').onclick = function(){
   if (ok){ toast('正在打开…', 'ok'); closeDetail(); }
   else toast('这个应用没有可启动的界面', 'err');
 };
+
+/* 下拉刷新 */
+(function(){
+  var wrap = document.getElementById('listwrap');
+  var ptr = document.getElementById('ptr');
+  var startY = 0, pull = 0, pulling = false;
+  function reset(){
+    ptr.style.opacity = 0;
+    ptr.style.transform = 'translateY(-44px)';
+    pulling = false; pull = 0;
+  }
+  wrap.addEventListener('touchstart', function(e){
+    if (wrap.scrollTop <= 0){ startY = e.touches[0].clientY; pulling = true; pull = 0; }
+  }, {passive:true});
+  wrap.addEventListener('touchmove', function(e){
+    if (!pulling) return;
+    pull = e.touches[0].clientY - startY;
+    if (pull > 0){
+      var d = Math.min(pull, 90);
+      ptr.style.opacity = d / 90;
+      ptr.style.transform = 'translateY(' + (d - 44) + 'px)';
+      ptr.textContent = d > 60 ? '松手刷新' : '下拉刷新';
+    }
+  }, {passive:true});
+  wrap.addEventListener('touchend', function(){
+    if (pulling && pull > 60){
+      ptr.textContent = '刷新中…';
+      load();
+      loadProtect();
+    }
+    reset();
+  }, {passive:true});
+})();
 
 skeleton(7);
 loadProtect();

@@ -52,26 +52,155 @@ public class MainActivity extends Activity {
     private WebView web;
     private android.content.SharedPreferences prefs;
 
-    /** 默认核心系统应用：首次运行注入保护清单；
-     *  「恢复默认」只重置这部分，用户自己加的第三方应用不受影响 */
-    private static final String[] DEFAULT_PROTECTED = {
-            "com.android.systemui",
-            "com.meizu.flyme.launcher",
-            "com.sohu.inputmethod.sogou.meizu",
-            "com.android.settings",
-            "com.android.phone",
-            "com.android.providers.telephony",
-            "com.android.dialer",
-            "com.android.mms",
-            "com.android.server.telecom",
-            "com.android.permissioncontroller",
-            "com.android.webview",
-            "com.google.android.webview",
+    /** 默认加锁清单：核心系统组件 + 不该冻结的功能组件（恢复默认时使用） */
+    private static final String[] DEFAULT_LOCK = {
+            "com.android.avatarpicker",
+            "com.android.backupconfirm",
+            "com.android.bips",
             "com.android.bluetooth",
-            "com.android.nfc",
+            "com.android.bluetoothmidiservice",
+            "com.android.bookmarkprovider",
+            "com.android.calllogbackup",
+            "com.android.carrierdefaultapp",
+            "com.android.cellbroadcastreceiver",
+            "com.android.cellbroadcastreceiver.module",
+            "com.android.cellbroadcastservice",
+            "com.android.companiondevicemanager",
+            "com.android.compos.payload",
+            "com.android.customization.themes",
+            "com.android.devicediagnostics",
+            "com.android.devicelockcontroller",
+            "com.android.dialer",
+            "com.android.dreams.basic",
+            "com.android.dreams.phototable",
+            "com.android.federatedcompute.services",
+            "com.android.health.connect.backuprestore",
+            "com.android.hotspot2.osulogin",
+            "com.android.htmlviewer",
+            "com.android.managedprovisioning",
+            "com.android.microdroid.empty_payload",
+            "com.android.mms",
+            "com.android.musicfx",
             "com.android.networkstack",
+            "com.android.networkstack.tethering",
+            "com.android.nfc",
+            "com.android.ondevicepersonalization.services",
+            "com.android.ons",
+            "com.android.permissioncontroller",
+            "com.android.phone",
+            "com.android.printspooler",
+            "com.android.providers.contactkeys",
+            "com.android.providers.partnerbookmarks",
             "com.android.providers.settings",
-            "com.android.shell"
+            "com.android.providers.telephony",
+            "com.android.safetycenter.resources",
+            "com.android.server.deviceconfig.resources",
+            "com.android.server.telecom",
+            "com.android.settings",
+            "com.android.sharedstoragebackup",
+            "com.android.shell",
+            "com.android.simappdialog",
+            "com.android.smspush",
+            "com.android.stk",
+            "com.android.systemui",
+            "com.android.systemui.accessibility.accessibilitymenu",
+            "com.android.uwb.resources",
+            "com.android.virtualmachine.res",
+            "com.android.wallpaper.livepicker",
+            "com.android.wallpaperbackup",
+            "com.android.wallpapercropper",
+            "com.android.webview",
+            "com.google.android.marvin.talkback",
+            "com.google.android.webview",
+            "com.ibimuyu.lockscreen",
+            "com.meizu.flyme.launcher",
+            "com.meizu.mznfcpay",
+            "com.sohu.inputmethod.sogou.meizu",
+            "com.sprd.omacp",
+            "com.unionpay.tsmservice"
+    };
+
+
+    /** 默认冻结清单：初始精简后的系统应用集合（恢复默认时按此还原系统应用状态） */
+    private static final String[] DEFAULT_FROZEN = {
+            "com.android.adservices.api",
+            "com.android.egg",
+            "com.android.healthconnect.controller",
+            "com.android.traceur",
+            "com.flyme.ability",
+            "com.flyme.agentruntime",
+            "com.flyme.ai.taskagent",
+            "com.flyme.alivewallpaper",
+            "com.flyme.callagent",
+            "com.flyme.intelliLife",
+            "com.flyme.linkpc",
+            "com.flyme.linkUnion",
+            "com.flyme.meizu.store",
+            "com.flyme.scanner",
+            "com.flyme.videoclips",
+            "com.flyme.virtualdevice",
+            "com.flyme.wordwallpaper.stroke",
+            "com.google.android.apps.docs",
+            "com.google.android.apps.docs.editors.sheets",
+            "com.google.android.apps.photos",
+            "com.google.android.apps.photosgo",
+            "com.google.android.apps.translate",
+            "com.google.android.apps.walletnfcrel",
+            "com.google.android.deskclock",
+            "com.google.android.gm",
+            "com.google.android.googlequicksearchbox",
+            "com.google.ar.lens",
+            "com.meizu.account",
+            "com.meizu.account.pay",
+            "com.meizu.activeviewlivewallpaper",
+            "com.meizu.alphame",
+            "com.meizu.assistant",
+            "com.meizu.cloud",
+            "com.meizu.commdiagnostic",
+            "com.meizu.customizecenter",
+            "com.meizu.datamigration",
+            "com.meizu.dataservice",
+            "com.meizu.earphone",
+            "com.meizu.ems",
+            "com.meizu.feedback",
+            "com.meizu.flyme.agentstore",
+            "com.meizu.flyme.directservice",
+            "com.meizu.flyme.find",
+            "com.meizu.flyme.flymebbs",
+            "com.meizu.flyme.gamecenter",
+            "com.meizu.flyme.sdkstage",
+            "com.meizu.flyme.service.find",
+            "com.meizu.flyme.toolbox",
+            "com.meizu.flyme.update",
+            "com.meizu.flyme.weather",
+            "com.meizu.gamecenter.service",
+            "com.meizu.hotapp",
+            "com.meizu.mcare",
+            "com.meizu.media.music",
+            "com.meizu.media.reader",
+            "com.meizu.media.video",
+            "com.meizu.meizuiot",
+            "com.meizu.mstore",
+            "com.meizu.mzbasestationsafe",
+            "com.meizu.net.pedometer",
+            "com.meizu.net.search",
+            "com.meizu.picker",
+            "com.meizu.pps",
+            "com.meizu.remotecooperation",
+            "com.meizu.smarthome",
+            "com.meizu.suggestion",
+            "com.meizu.voiceassistant",
+            "com.meizu.wallpapersetting",
+            "com.sprd.camta",
+            "com.sprd.engineermode",
+            "com.sprd.linkturbo",
+            "com.sprd.logmanager",
+            "com.sprd.powersavemodelauncher",
+            "com.sprd.uasetting",
+            "com.sprd.validationtools",
+            "com.unisoc.silent.reboot",
+            "com.unisoc.soundtrigger",
+            "com.unisoc.tui"
     };
     private boolean unlockedThisSession = false;
 
@@ -90,7 +219,7 @@ public class MainActivity extends Activity {
     private void ensureDefaultProtected() {
         if (!prefs.contains("protected")) {
             JSONArray a = new JSONArray();
-            for (String p : DEFAULT_PROTECTED) a.put(p);
+            for (String p : DEFAULT_LOCK) a.put(p);
             prefs.edit().putString("protected", a.toString()).apply();
         }
     }
@@ -374,6 +503,39 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String createShortcut(String pkg, boolean freeze) {
+            try {
+                if (android.os.Build.VERSION.SDK_INT < 26) return "0";
+                android.content.pm.ShortcutManager sm =
+                        (android.content.pm.ShortcutManager) getSystemService(SHORTCUT_SERVICE);
+                if (sm == null || !sm.isRequestPinShortcutSupported()) return "0";
+                String label;
+                try {
+                    label = getPackageManager().getApplicationLabel(
+                            getPackageManager().getApplicationInfo(pkg, 0)).toString();
+                } catch (Throwable t) { label = pkg; }
+
+                android.content.Intent it = new android.content.Intent(MainActivity.this, ShortcutActivity.class);
+                it.setAction(android.content.Intent.ACTION_VIEW);
+                it.putExtra("pkg", pkg);
+                it.putExtra("freeze", freeze);
+
+                android.content.pm.ShortcutInfo si =
+                        new android.content.pm.ShortcutInfo.Builder(MainActivity.this,
+                                "mzf_" + (freeze ? "f" : "u") + "_" + pkg)
+                                .setShortLabel((freeze ? "冻结 " : "解冻 ") + label)
+                                .setLongLabel((freeze ? "冻结 " : "解冻 ") + label)
+                                .setIcon(android.graphics.drawable.Icon.createWithResource(
+                                        MainActivity.this, android.R.drawable.ic_lock_lock))
+                                .setIntent(it)
+                                .build();
+                return sm.requestPinShortcut(si, null) ? "1" : "0";
+            } catch (Throwable t) {
+                return "0";
+            }
+        }
+
+        @JavascriptInterface
         public String launchApp(String pkg) {
             try {
                 android.content.Intent it = getPackageManager().getLaunchIntentForPackage(pkg);
@@ -393,15 +555,71 @@ public class MainActivity extends Activity {
                 JSONObject o = new JSONObject();
                 o.put("protected", new JSONArray(prefs.getString("protected", "[]")));
                 JSONArray def = new JSONArray();
-                for (String p : DEFAULT_PROTECTED) def.put(p);
+                for (String p : DEFAULT_LOCK) def.put(p);
                 o.put("defaults", def);
+                o.put("defaultFrozen", DEFAULT_FROZEN.length);
                 return o.toString();
             } catch (Exception e) {
                 return "{\"protected\":[],\"defaults\":[]}";
             }
         }
 
-        /** 恢复默认：只重置系统应用部分，用户自己加的第三方保护保留 */
+        /** 一键恢复初始状态：加锁清单 + 系统应用冻结状态（第三方应用不动） */
+        @JavascriptInterface
+        public String resetDefaults() {
+            try {
+                PackageManager pm = getPackageManager();
+
+                // 1) 加锁清单 = 默认清单 + 保留用户自定义的非系统应用
+                JSONArray old = new JSONArray(prefs.getString("protected", "[]"));
+                JSONArray locks = new JSONArray();
+                HashSet<String> seen = new HashSet<>();
+                for (int i = 0; i < old.length(); i++) {
+                    String p = old.optString(i);
+                    if (p.isEmpty() || seen.contains(p)) continue;
+                    boolean sys = true;
+                    try {
+                        sys = (pm.getApplicationInfo(p, 0).flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    } catch (Throwable ignored) {}
+                    if (!sys) { locks.put(p); seen.add(p); }
+                }
+                for (String p : DEFAULT_LOCK) {
+                    if (!seen.contains(p)) { locks.put(p); seen.add(p); }
+                }
+                prefs.edit().putString("protected", locks.toString()).apply();
+
+                // 2) 系统应用冻结状态还原到 DEFAULT_FROZEN
+                Set<String> want = new HashSet<>(Arrays.asList(DEFAULT_FROZEN));
+                StringBuilder add = new StringBuilder();
+                StringBuilder del = new StringBuilder();
+                int nf = 0, nu = 0;
+                for (ApplicationInfo ai : pm.getInstalledApplications(0)) {
+                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0) continue; // 第三方不动
+                    boolean frozen = isFrozen(ai.packageName);
+                    boolean should = want.contains(ai.packageName);
+                    if (should && !frozen) {
+                        add.append("pm disable-user --user 0 ").append(ai.packageName).append("; ");
+                        nf++;
+                    } else if (!should && frozen) {
+                        del.append("pm enable ").append(ai.packageName).append("; ");
+                        nu++;
+                    }
+                }
+                if (nf > 0) su(add.toString());
+                if (nu > 0) su(del.toString());
+
+                JSONObject r = new JSONObject();
+                r.put("ok", 1);
+                r.put("locks", locks.length());
+                r.put("frozen", nf);
+                r.put("unfrozen", nu);
+                return r.toString();
+            } catch (Throwable t) {
+                return "{\"ok\":0}";
+            }
+        }
+
+        /** 只恢复加锁清单 */
         @JavascriptInterface
         public String resetProtected() {
             try {
@@ -419,7 +637,7 @@ public class MainActivity extends Activity {
                     if (!sys) { out.put(p); seen.add(p); }
                 }
                 // 2) 并入默认系统清单
-                for (String p : DEFAULT_PROTECTED) {
+                for (String p : DEFAULT_LOCK) {
                     if (!seen.contains(p)) { out.put(p); seen.add(p); }
                 }
                 prefs.edit().putString("protected", out.toString()).apply();

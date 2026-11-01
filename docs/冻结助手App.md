@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：8.0　·　2026-11-01
+> 版本：9.2　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-8.0.apk`（25 KB）
+> APK：`app/release/meizu-freezer-9.2.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -440,3 +440,51 @@ setFrozen(pkg, freeze)       → "1"/"0"
 - 首次启动自动写入 17 项默认清单（`/data/data/.../shared_prefs/freezer.xml` 已确认）
 - JS 正常（logcat：`protectStatus called` / `listApps called`）
 - 冻结数保持 124，未影响现有状态
+---
+
+## 十三、核心/冗余分类（v9.x）
+
+按「**涉及核心操作的加锁保护，冗余定制的才冻结**」原则重新梳理全部 317 个包。
+
+### 加锁清单（64 个，保持启用 + 保护）
+
+| 分类 | 包 |
+|---|---|
+| 系统界面/桌面/输入法/设置 | systemui、flyme.launcher、sogou.meizu、settings |
+| 电话短信 | phone、providers.telephony、dialer、mms、server.telecom、ons、smspush、stk、simappdialog、carrierdefaultapp、sprd.omacp |
+| 紧急广播 | cellbroadcastreceiver(.module)、cellbroadcastservice |
+| 权限/WebView/备份 | permissioncontroller、webview、google.android.webview、backupconfirm、sharedstoragebackup、calllogbackup、health.connect.backuprestore |
+| 网络/蓝牙/NFC | bluetooth、nfc、networkstack、networkstack.tethering、bluetoothmidiservice、hotspot2.osulogin、companiondevicemanager |
+| **锁屏 / 壁纸 / 屏保** | **ibimuyu.lockscreen**、wallpapercropper、wallpaperbackup、wallpaper.livepicker、dreams.basic、dreams.phototable |
+| 打印 | printspooler、bips |
+| 无障碍 | systemui.accessibility.accessibilitymenu、marvin.talkback |
+| 设备管理/诊断/虚拟化 | devicelockcontroller、managedprovisioning、devicediagnostics、microdroid.empty_payload、virtualmachine.res、federatedcompute.services、ondevicepersonalization.services |
+| 支付 | meizu.mznfcpay、unionpay.tsmservice |
+| 系统 Provider/资源 | providers.settings、shell、providers.contactkeys、providers.partnerbookmarks、bookmarkprovider、avatarpicker、htmlviewer、safetycenter.resources、server.deviceconfig.resources、customization.themes、uwb.resources、compos.payload、musicfx |
+
+完整清单：`app/default-lock.txt`
+
+### 默认冻结清单（78 个）
+
+| 分类 | 说明 |
+|---|---|
+| 魅族定制 | 天气/音乐/视频/阅读/商店/游戏中心/账号/云服务/反馈/社区/工具箱/更新/MCare/Aicy 全家桶/场景引擎/智慧识屏/主题/壁纸服务等 ~55 个 |
+| 谷歌全家桶 | Docs/Sheets/Photos/Translate/Wallet/Lens/Gmail/DeskClock/QuickSearch 等 10 个 |
+| 展锐工程与冗余 | engineermode/validationtools/logmanager/uasetting/camta/linkturbo/powersavemodelauncher/silent.reboot/soundtrigger/tui |
+| 其它 | adservices.api、egg、traceur、healthconnect.controller |
+
+完整清单：`app/default-freeze.txt`
+
+### 「恢复默认」的行为
+
+1. **加锁清单**：还原为默认 64 个，同时保留用户自定义的**非系统**应用锁
+2. **冻结状态**：把**系统应用**的冻结状态还原成默认 78 个（该冻的冻上、该启用的启用）
+3. **第三方应用**：完全不动
+
+### 实测
+
+```
+应用后：已冻结 78 / 已加锁 64
+核心包抽查（18 个）：全部 ✅启用（含锁屏 ibimuyu.lockscreen、打印、TalkBack、紧急广播、SIM 工具包）
+prefs 加锁条目：64
+```
