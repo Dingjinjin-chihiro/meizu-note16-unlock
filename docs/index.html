@@ -206,6 +206,7 @@ kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;bor
   <a href="#protocol">14 · BROM 协议逐帧解析</a>
   <div class="grp">后 续</div>
   <a href="#debloat">15 · 系统精简</a>
+  <a href="#gsi">16 · GSI 尝试</a>
 </nav>
 
 <main>
@@ -1446,6 +1447,64 @@ adb shell cmd package install-existing com.ss.android.ugc.aweme</pre>
   <div class="note">
     <b>未采用的方案：</b>曾尝试用 Private DNS（AdGuard DoT）做系统级去广告，但实测
     <code class="inl">dns.adguard-dns.com</code> 在当前网络下 ICMP 100% 丢包，强行启用有整机断网风险，遂放弃。
+  </div>
+</section>
+
+<!-- 16 -->
+<section id="gsi">
+  <h2 class="sec"><span class="num">16</span>GSI 尝试与回滚</h2>
+  <p class="lead">解锁 root 之后自然想试原生系统。这一节记录一次真实的失败尝试与完整救援，
+    完整时间线见
+    <a href="https://github.com/Dingjinjin-chihiro/meizu-note16-unlock/blob/main/docs/GSI%E5%B0%9D%E8%AF%95%E8%AE%B0%E5%BD%95.md">GSI 尝试记录.md</a>。</p>
+
+  <div class="grid g4">
+    <div class="card"><div class="k">DSU 可用性</div><div class="v red">不可用</div><div class="d">dynsystem 服务被阉割</div></div>
+    <div class="card"><div class="k">GSI 能否刷入</div><div class="v amber">能</div><div class="d">system_a 4.53 GiB 装得下</div></div>
+    <div class="card"><div class="k">GSI 能否启动</div><div class="v red">不能</div><div class="d">boot 链不认这套 system</div></div>
+    <div class="card"><div class="k">最终结果</div><div class="v green">已回滚</div><div class="d">Flyme / root / BL 全部恢复</div></div>
+  </div>
+
+  <h3>16.1 三个技术发现</h3>
+  <table class="tbl">
+    <tr><th style="width:170px">发现</th><th>说明</th></tr>
+    <tr><td>DSU 被阉割</td><td><code class="inl">com.android.dynsystem</code> APK 在，但 361 个系统服务里没有 <code class="inl">dynsystem</code>，<code class="inl">cmd dynsystem</code> 直接报找不到</td></tr>
+    <tr><td>fastbootd 有 70 秒会话超时</td><td>写 1.5–1.66 GB 后必然 <code class="inl">Invalid argument</code>，三次实测分别耗时 71.2 / 67.1 / 70.9 秒。10 GiB 一次写不完</td></tr>
+    <tr><td>sparse 分片可绕过</td><td>用 <code class="inl">DONT_CARE</code> 块跳过已写区间，每次会话只搬 1.2 GB，7 次写完 10 GiB</td></tr>
+  </table>
+
+  <h3>16.2 关掉 verity 是净负收益</h3>
+  <table class="tbl">
+    <tr><th style="width:200px">vbmeta 状态</th><th>启动失败时的表现</th></tr>
+    <tr><td>原厂（verity enforcing）</td><td>落到 <b>recovery</b>，adb 可用，能救</td></tr>
+    <tr><td>关掉 verity 标志</td><td><b>无限重启</b>，连 recovery 都进不去，adb 完全不可用</td></tr>
+  </table>
+  <p class="count">教训：为了跑 GSI 去关 verity，把一条"可救援"的失败路径变成了"不可救援"的路径。</p>
+
+  <h3>16.3 救援关键动作</h3>
+<pre><span class="c"># 1. 强制复位（电源键在重启循环里会被吞掉，必须双键）</span>
+按住 电源 + 音量下 20 秒  →  停在 fastboot mode
+
+<span class="c"># 2. 先把 vbmeta 还原成原厂（恢复"能落 recovery"的兜底）</span>
+fastboot flash vbmeta_a        _backup\vbmeta_a.bin
+fastboot flash vbmeta_system_a _backup\vbmeta_system_a.bin
+
+<span class="c"># 3. 借 recovery 的 adb 进 fastbootd</span>
+fastboot reboot recovery   →  adb 上线  →  adb reboot fastboot
+
+<span class="c"># 4. 分片写回 super（720 MB × 15 + 160 MB）</span>
+python make_sparse_slice.py super.bin slice.simg &lt;start&gt; &lt;end&gt; 10737418240
+fastboot flash super slice.simg</pre>
+
+  <div class="note good">
+    <b>关键事实：解锁和 root 不依赖 /data。</b>BL 锁状态存在 misc 分区，root 存在 init_boot 分区，
+    两者都不在 super 里 —— 所以刷 GSI、清数据、恢复 super 都不会动它们。
+    回滚后实测：<code class="inl">locked=0</code>、<code class="inl">ksu=1</code>，
+    重装 KernelSU 管理器（13 MB，SHA256 前缀 <code class="inl">B4A059AC</code>）即恢复 root。
+  </div>
+
+  <div class="note bad">
+    <b>结论：这台机器跑不了 GSI，不要再试。</b>展锐 vendor HAL 与 AOSP 不匹配，
+    关 verity 只会把设备推向不可救援的无限重启。想体验原生，只能等第三方设备适配。
   </div>
 </section>
 
