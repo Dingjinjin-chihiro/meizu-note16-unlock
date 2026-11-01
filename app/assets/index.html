@@ -7,60 +7,70 @@
 <style>
   :root{
     --bg:#0f1115; --card:#171a21; --card2:#1d2129; --line:#262b35;
-    --txt:#e8eaed; --dim:#8b93a1; --acc:#4f8cff; --ok:#33c47a; --warn:#ff5c5c; --chip:#242a35;
+    --txt:#e8eaed; --dim:#8b93a1; --acc:#4f8cff; --ok:#33c47a; --warn:#ff5c5c;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
     font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;}
-  .wrap{padding:14px 12px 90px}
+  .wrap{padding:14px 12px 130px}
   h1{font-size:20px;margin:0 0 2px;letter-spacing:.5px}
-  .sub{font-size:12px;color:var(--dim);margin-bottom:12px}
+  .sub{font-size:12px;color:var(--dim);margin-bottom:10px}
   .sub b{color:var(--ok)}
-  .search{display:flex;gap:8px;margin-bottom:10px}
-  input[type=text]{flex:1;background:var(--card);border:1px solid var(--line);color:var(--txt);
-    border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
+  input[type=text]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:10px 12px;font-size:14px;outline:none;margin-bottom:8px}
   input[type=text]:focus{border-color:var(--acc)}
-  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px}
-  .chip{flex:0 0 auto;background:var(--chip);color:var(--dim);border:1px solid var(--line);
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:4px}
+  .chip{flex:0 0 auto;background:var(--card2);color:var(--dim);border:1px solid var(--line);
     padding:6px 12px;border-radius:999px;font-size:12px}
   .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
-  .bar{display:flex;gap:8px;margin:8px 0 12px}
-  .btn{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);
-    border-radius:10px;padding:11px 4px;font-size:12px;text-align:center}
-  .btn:active{background:#2a3140}
-  .btn.red{color:var(--warn);border-color:#4a2830}
-  .btn.green{color:var(--ok);border-color:#22452f}
+  .tools{display:flex;gap:6px;margin:6px 0 12px}
+  .tool{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+    border-radius:9px;padding:9px 2px;font-size:12px;text-align:center}
+  .tool:active{background:#2a3140}
   .list{display:flex;flex-direction:column;gap:6px}
   .row{display:flex;align-items:center;gap:10px;background:var(--card);
-    border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .row .info{flex:1;min-width:0}
-  .row .name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .row .pkg{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sw{position:relative;width:46px;height:26px;flex:0 0 auto}
-  .sw input{display:none}
-  .sw span{position:absolute;inset:0;background:#2b3140;border-radius:999px;transition:.18s}
-  .sw span:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;
-    background:#fff;top:3px;left:3px;transition:.18s}
-  .sw input:checked + span{background:var(--ok)}
-  .sw input:checked + span:after{transform:translateX(20px)}
-  .empty{text-align:center;color:var(--dim);font-size:13px;padding:40px 0}
-  .fab{position:fixed;right:14px;bottom:16px;background:var(--acc);color:#fff;border:none;
-    border-radius:50%;width:52px;height:52px;font-size:20px;box-shadow:0 6px 18px rgba(79,140,255,.4)}
+    border:1px solid var(--line);border-radius:12px;padding:11px 12px;transition:.12s}
+  .row.sel{border-color:var(--acc);background:#16213a}
+  .box{width:22px;height:22px;flex:0 0 auto;border:2px solid #4a5262;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent}
+  .row.sel .box{background:var(--acc);border-color:var(--acc);color:#fff}
+  .info{flex:1;min-width:0}
+  .name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pkg{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{flex:0 0 auto;font-size:11px;padding:3px 8px;border-radius:999px}
+  .badge.f{background:#3a1f26;color:#ff7b7b}
+  .badge.e{background:#16311f;color:#4ad98a}
+  .empty,.spinner{text-align:center;color:var(--dim);font-size:13px;padding:36px 0}
+
+  /* 底部操作栏：只有在选中应用后才出现 */
+  .actionbar{position:fixed;left:0;right:0;bottom:0;background:#151922;
+    border-top:1px solid var(--line);padding:12px 12px calc(12px + env(safe-area-inset-bottom));
+    transform:translateY(110%);transition:.2s;z-index:5}
+  .actionbar.on{transform:translateY(0)}
+  .actionbar .cnt{font-size:12px;color:var(--dim);margin-bottom:8px}
+  .actionbar .cnt b{color:var(--acc);font-size:14px}
+  .abtns{display:flex;gap:8px}
+  .abtn{flex:1;border:1px solid var(--line);background:var(--card2);color:var(--txt);
+    border-radius:10px;padding:12px 4px;font-size:13px;text-align:center}
+  .abtn.red{color:#ff7b7b;border-color:#4a2830;background:#2a1a1f}
+  .abtn.green{color:#4ad98a;border-color:#22452f;background:#132a1e}
+  .abtn.ghost{flex:0 0 84px;color:var(--dim)}
+
   .mask{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:9}
   .mask.on{display:block}
   .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:16px 16px 0 0;
     padding:16px;z-index:10;transform:translateY(110%);transition:.22s}
   .sheet.on{transform:translateY(0)}
-  .sheet h3{margin:0 0 8px;font-size:15px}
-  .sheet textarea{width:100%;height:180px;background:#0b0d11;color:var(--txt);
+  .sheet h3{margin:0 0 6px;font-size:15px}
+  .sheet .hint{font-size:12px;color:var(--dim);margin-bottom:10px}
+  .sheet textarea{width:100%;height:170px;background:#0b0d11;color:var(--txt);
     border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;
     font-family:ui-monospace,monospace;resize:none;outline:none}
   .sheet .row2{display:flex;gap:8px;margin-top:10px}
-  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);
     background:#2a3140;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;
     opacity:0;transition:.2s;pointer-events:none;max-width:80%;text-align:center}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-  .spinner{text-align:center;color:var(--dim);padding:30px 0;font-size:13px}
 </style>
 </head>
 <body>
@@ -68,9 +78,7 @@
   <h1>魅族冻结助手</h1>
   <div class="sub" id="sub">正在读取…</div>
 
-  <div class="search">
-    <input type="text" id="q" placeholder="搜索应用名或包名" autocomplete="off">
-  </div>
+  <input type="text" id="q" placeholder="按应用名或包名搜索" autocomplete="off">
 
   <div class="chips" id="chips">
     <div class="chip on" data-f="all">全部</div>
@@ -80,62 +88,61 @@
     <div class="chip" data-f="system">系统</div>
   </div>
 
-  <div class="bar">
-    <div class="btn red" id="freezeAll">全部冻结</div>
-    <div class="btn green" id="unfreezeAll">全部解冻</div>
-  </div>
-  <div class="bar" style="margin-top:-4px">
-    <div class="btn" id="importBtn">导入列表</div>
-    <div class="btn" id="exportBtn">导出冻结</div>
-    <div class="btn" id="refreshBtn">刷新</div>
+  <div class="tools">
+    <div class="tool" id="selAll">全选</div>
+    <div class="tool" id="selNone">取消选择</div>
+    <div class="tool" id="importBtn">导入列表</div>
+    <div class="tool" id="exportBtn">导出</div>
+    <div class="tool" id="refreshBtn">刷新</div>
   </div>
 
   <div class="list" id="list"><div class="spinner">加载中…</div></div>
 </div>
 
-<div class="fab" id="fab">⟳</div>
+<!-- 选中应用后才出现 -->
+<div class="actionbar" id="actionbar">
+  <div class="cnt">已选择 <b id="selCount">0</b> 个应用</div>
+  <div class="abtns">
+    <div class="abtn red" id="doFreeze">冻结</div>
+    <div class="abtn green" id="doUnfreeze">解冻</div>
+    <div class="abtn ghost" id="doClear">取消</div>
+  </div>
+</div>
 
 <div class="mask" id="mask"></div>
 <div class="sheet" id="sheet">
   <h3>导入包名列表</h3>
-  <div class="sub">每行一个包名，支持 # 注释；也可以直接粘一整段文本。</div>
+  <div class="hint">每行一个包名，支持 # 注释；也可以整段粘贴。</div>
   <textarea id="ta" placeholder="com.meizu.flyme.weather&#10;com.meizu.media.music&#10;# 注释会被忽略"></textarea>
   <div class="row2">
-    <div class="btn" id="cancelImport">取消</div>
-    <div class="btn red" id="doImport">冻结这些应用</div>
+    <div class="abtn ghost" id="cancelImport">取消</div>
+    <div class="abtn red" id="doImport">冻结这些应用</div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-var ALL = [], FILTER = 'all', Q = '', BUSY = false;
+var ALL = [], FILTER = 'all', Q = '', SEL = {}, BUSY = false;
 
-function toast(msg){
+function toast(m){
   var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('on');
+  t.textContent = m; t.classList.add('on');
   clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove('on'); }, 1800);
 }
-function esc(s){ return (s||'').replace(/[&<>"]/g, function(c){
+function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
 function load(){
   document.getElementById('list').innerHTML = '<div class="spinner">加载中…</div>';
-  try {
-    ALL = JSON.parse(Native.listApps());
-  } catch(e) {
-    document.getElementById('sub').textContent = '读取失败：' + e;
-    return;
-  }
+  try { ALL = JSON.parse(Native.listApps()); }
+  catch(e){ document.getElementById('sub').textContent = '读取失败：' + e; return; }
+  SEL = {};
   render();
 }
 
-function render(){
-  var frozen = ALL.filter(function(a){ return a.f; }).length;
-  document.getElementById('sub').innerHTML =
-    '共 <b>' + ALL.length + '</b> 个应用　已冻结 <b>' + frozen + '</b> 个';
-
-  var out = ALL.filter(function(a){
+function filtered(){
+  return ALL.filter(function(a){
     if (Q && a.l.toLowerCase().indexOf(Q) < 0 && a.p.toLowerCase().indexOf(Q) < 0) return false;
     if (FILTER === 'frozen') return a.f;
     if (FILTER === 'enabled') return !a.f;
@@ -143,92 +150,104 @@ function render(){
     if (FILTER === 'system') return a.s;
     return true;
   });
-
-  if (!out.length){ document.getElementById('list').innerHTML = '<div class="empty">没有匹配的应用</div>'; return; }
-
-  var html = '';
-  for (var i=0;i<out.length;i++){
-    var a = out[i];
-    html += '<div class="row" data-p="' + esc(a.p) + '">'
-         +  '<div class="info"><div class="name">' + esc(a.l) + '</div>'
-         +  '<div class="pkg">' + esc(a.p) + '</div></div>'
-         +  '<label class="sw"><input type="checkbox" ' + (a.f?'checked':'') + '>'
-         +  '<span></span></label></div>';
-  }
-  document.getElementById('list').innerHTML = html;
-
-  var boxes = document.querySelectorAll('#list .sw input');
-  for (var k=0;k<boxes.length;k++){
-    boxes[k].addEventListener('change', function(ev){
-      var row = ev.target.closest('.row');
-      var pkg = row.getAttribute('data-p');
-      var want = ev.target.checked;
-      var ok = Native.setFrozen(pkg, want) === '1';
-      if (!ok){ ev.target.checked = !want; toast('操作失败'); return; }
-      for (var j=0;j<ALL.length;j++){ if (ALL[j].p === pkg) ALL[j].f = want; }
-      updateSub();
-      toast((want?'已冻结 ':'已解冻 ') + pkg);
-      if (FILTER === 'frozen' || FILTER === 'enabled') setTimeout(render, 250);
-    });
-  }
 }
 
-function updateSub(){
+function render(){
+  var out = filtered();
   var frozen = ALL.filter(function(a){ return a.f; }).length;
   document.getElementById('sub').innerHTML =
     '共 <b>' + ALL.length + '</b> 个应用　已冻结 <b>' + frozen + '</b> 个';
+
+  if (!out.length){
+    document.getElementById('list').innerHTML = '<div class="empty">没有匹配的应用</div>';
+    updateBar(); return;
+  }
+
+  var html = '';
+  for (var i=0;i<out.length;i++){
+    var a = out[i], on = !!SEL[a.p];
+    html += '<div class="row' + (on?' sel':'') + '" data-p="' + esc(a.p) + '">'
+         +  '<div class="box">✓</div>'
+         +  '<div class="info"><div class="name">' + esc(a.l) + '</div>'
+         +  '<div class="pkg">' + esc(a.p) + '</div></div>'
+         +  '<div class="badge ' + (a.f?'f':'e') + '">' + (a.f?'已冻结':'启用中') + '</div>'
+         +  '</div>';
+  }
+  document.getElementById('list').innerHTML = html;
+
+  var rows = document.querySelectorAll('#list .row');
+  for (var k=0;k<rows.length;k++){
+    rows[k].addEventListener('click', function(){
+      var p = this.getAttribute('data-p');
+      if (SEL[p]) delete SEL[p]; else SEL[p] = 1;
+      this.classList.toggle('sel');
+      updateBar();
+    });
+  }
+  updateBar();
 }
 
-function visiblePkgs(){
-  return Array.prototype.map.call(document.querySelectorAll('#list .row'),
-    function(r){ return r.getAttribute('data-p'); });
+function selList(){
+  var out = [];
+  for (var p in SEL) if (SEL.hasOwnProperty(p)) out.push(p);
+  return out;
 }
 
-function batch(freeze){
+function updateBar(){
+  var n = selList().length;
+  document.getElementById('selCount').textContent = n;
+  var bar = document.getElementById('actionbar');
+  if (n > 0) bar.classList.add('on'); else bar.classList.remove('on');
+}
+
+function runBatch(freeze){
   if (BUSY) return;
-  var pkgs = visiblePkgs().filter(function(p){
-    for (var i=0;i<ALL.length;i++) if (ALL[i].p===p) return freeze ? !ALL[i].f : ALL[i].f;
-    return false;
-  });
-  if (!pkgs.length){ toast('没有需要处理的应用'); return; }
-  if (!confirm((freeze?'冻结':'解冻') + '当前列表的 ' + pkgs.length + ' 个应用？')) return;
+  var pkgs = selList();
+  if (!pkgs.length){ toast('先选应用'); return; }
+  var what = freeze ? '冻结' : '解冻';
+  if (!confirm(what + '选中的 ' + pkgs.length + ' 个应用？')) return;
   BUSY = true;
   var n = parseInt(Native.batch(JSON.stringify(pkgs), freeze), 10) || 0;
   BUSY = false;
-  for (var i=0;i<ALL.length;i++) if (pkgs.indexOf(ALL[i].p) >= 0) ALL[i].f = freeze;
+  for (var i=0;i<ALL.length;i++) if (SEL[ALL[i].p]) ALL[i].f = freeze;
+  SEL = {};
   render();
-  toast('已' + (freeze?'冻结':'解冻') + ' ' + n + ' 个');
+  toast('已' + what + ' ' + n + ' 个');
 }
 
+/* 事件 */
 document.getElementById('q').addEventListener('input', function(e){
   Q = e.target.value.trim().toLowerCase(); render();
 });
-
 document.getElementById('chips').addEventListener('click', function(e){
   if (!e.target.classList.contains('chip')) return;
-  var chips = document.querySelectorAll('.chip');
-  for (var i=0;i<chips.length;i++) chips[i].classList.remove('on');
+  var cs = document.querySelectorAll('.chip');
+  for (var i=0;i<cs.length;i++) cs[i].classList.remove('on');
   e.target.classList.add('on');
   FILTER = e.target.getAttribute('data-f');
   render();
 });
-
-document.getElementById('freezeAll').onclick = function(){ batch(true); };
-document.getElementById('unfreezeAll').onclick = function(){ batch(false); };
+document.getElementById('selAll').onclick = function(){
+  var out = filtered();
+  for (var i=0;i<out.length;i++) SEL[out[i].p] = 1;
+  render();
+};
+document.getElementById('selNone').onclick = function(){ SEL = {}; render(); };
 document.getElementById('refreshBtn').onclick = load;
-document.getElementById('fab').onclick = load;
+document.getElementById('doFreeze').onclick = function(){ runBatch(true); };
+document.getElementById('doUnfreeze').onclick = function(){ runBatch(false); };
+document.getElementById('doClear').onclick = function(){ SEL = {}; render(); };
 
 document.getElementById('importBtn').onclick = function(){
   document.getElementById('mask').classList.add('on');
   document.getElementById('sheet').classList.add('on');
 };
-document.getElementById('cancelImport').onclick = closeSheet;
-document.getElementById('mask').onclick = closeSheet;
 function closeSheet(){
   document.getElementById('mask').classList.remove('on');
   document.getElementById('sheet').classList.remove('on');
 }
-
+document.getElementById('mask').onclick = closeSheet;
+document.getElementById('cancelImport').onclick = closeSheet;
 document.getElementById('doImport').onclick = function(){
   var text = document.getElementById('ta').value || '';
   var r;
@@ -238,7 +257,6 @@ document.getElementById('doImport').onclick = function(){
   toast('已冻结 ' + r.ok + ' 个（跳过 ' + r.skip + ' 个）');
   load();
 };
-
 document.getElementById('exportBtn').onclick = function(){
   var p;
   try { p = Native.exportFrozen(); } catch(e){ toast('导出失败'); return; }
