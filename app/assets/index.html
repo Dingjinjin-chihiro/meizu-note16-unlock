@@ -8,33 +8,30 @@
   :root{
     --bg:#0B0D10; --card:#15181F; --card2:#1B1F27; --line:#23272F;
     --txt:#E9ECF1; --dim:#8791A1; --mute:#5C6675;
-    --acc:#4C8DFF; --acc2:#6FA8FF; --ok:#3DD68C; --err:#FF5C5C;
+    --acc:#4C8DFF; --ok:#3DD68C; --err:#FF5C5C;
     --dangerbg:#2A161A; --dangerline:#4A2830;
     --okbg:#10261B; --okline:#1E4A33;
+    --lockbg:#2E2A14; --lockfg:#E8C451;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);color:var(--txt);
     font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased}
-
   .app{height:100%;display:flex;flex-direction:column}
 
-  /* ============ 头部 ============ */
   .hdr{flex:0 0 auto;background:linear-gradient(180deg,#101318 0%,var(--bg) 100%);
        border-bottom:1px solid var(--line);padding:14px 14px 10px}
-
   .titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px}
   h1{font-size:19px;font-weight:650;margin:0;letter-spacing:.3px;
      background:linear-gradient(92deg,#fff 0%,#A9C4F5 100%);
      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .stats{font-size:11.5px;color:var(--dim);margin:3px 0 10px;letter-spacing:.2px}
+  .stats{font-size:11.5px;color:var(--dim);margin:3px 0 10px}
   .stats b{color:var(--txt);font-weight:600}
   .stats i{color:var(--err);font-style:normal;font-weight:600}
-
   .pill{flex:0 0 auto;font-size:11.5px;font-weight:500;color:#FF9AA5;
     border:1px solid var(--dangerline);background:var(--dangerbg);
     padding:6px 11px;border-radius:999px;transition:.15s}
-  .pill:active{transform:scale(.95);background:#331A20}
+  .pill:active{transform:scale(.95)}
 
   .searchbox{position:relative;margin-bottom:9px}
   .searchbox input{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);
@@ -44,48 +41,23 @@
   .searchbox input::placeholder{color:var(--mute)}
   .clr{position:absolute;right:10px;top:50%;transform:translateY(-50%);
     width:22px;height:22px;border-radius:50%;background:#2B313B;color:#B9C2CF;
-    display:none;align-items:center;justify-content:center;font-size:13px;line-height:1}
+    display:none;align-items:center;justify-content:center;font-size:13px}
   .clr.on{display:flex}
 
   .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:9px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
   .chip{flex:0 0 auto;background:var(--card);color:var(--dim);border:1px solid var(--line);
     padding:6px 13px;border-radius:999px;font-size:12px;transition:.15s}
-  .chip:active{transform:scale(.96)}
   .chip.on{background:linear-gradient(135deg,var(--acc) 0%,#3E7BEA 100%);
     border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(76,141,255,.32)}
 
   .tools{display:flex;flex-wrap:wrap;gap:7px}
-  .tool{flex:1 0 calc(25% - 7px);min-width:0;background:var(--card);border:1px solid var(--line);
-    color:#C7CFDB;border-radius:10px;padding:9px 2px;font-size:12px;text-align:center;transition:.12s}
-
-  /* 锁屏 */
-  .lock{position:fixed;inset:0;background:rgba(8,10,14,.985);z-index:100;display:none;
-    flex-direction:column;align-items:center;justify-content:center;padding:24px}
-  .lock.on{display:flex}
-  .lock .lico{font-size:42px;margin-bottom:14px;opacity:.9}
-  .lock h2{margin:0 0 6px;font-size:17px;font-weight:600}
-  .lock .lh{font-size:12px;color:var(--dim);margin-bottom:24px}
-  .dots{display:flex;gap:15px;margin-bottom:26px}
-  .dots i{width:14px;height:14px;border-radius:50%;background:#2A303B;border:1px solid #39414F}
-  .dots i.on{background:var(--acc);border-color:var(--acc);box-shadow:0 0 10px rgba(76,141,255,.5)}
-  .keypad{display:grid;grid-template-columns:repeat(3,74px);gap:14px}
-  .keypad .k{height:60px;border-radius:16px;background:var(--card2);border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--txt);transition:.1s}
-  .keypad .k:active{background:#2A3140;transform:scale(.94)}
-  .keypad .k.small{font-size:13px;color:var(--dim)}
-  .shake{animation:shake .32s}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-  .pininput{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
-    border-radius:12px;padding:13px;font-size:21px;letter-spacing:10px;text-align:center;
-    outline:none;font-family:ui-monospace,monospace;margin:6px 0 2px}
-  .badge.lock{background:#2E2A14;color:#E8C451}
+  .tool{flex:1 0 calc(25% - 7px);background:var(--card);border:1px solid var(--line);color:#C7CFDB;
+    border-radius:10px;padding:9px 2px;font-size:12px;text-align:center;transition:.12s}
   .tool:active{transform:scale(.96);background:var(--card2);color:#fff}
 
-  /* ============ 列表 ============ */
   .listwrap{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px 12px 132px}
   .list{display:flex;flex-direction:column;gap:7px}
-
   .row{display:flex;align-items:center;gap:11px;background:var(--card);
     border:1px solid var(--line);border-radius:14px;padding:10px 12px;transition:.13s;
     animation:pop .22s ease both}
@@ -93,26 +65,19 @@
   .row:active{transform:scale(.992);background:var(--card2)}
   .row.sel{border-color:var(--acc);background:#141C2E;
     box-shadow:0 0 0 1px rgba(76,141,255,.45),0 4px 14px rgba(76,141,255,.12)}
-
   .box{width:21px;height:21px;flex:0 0 auto;border:2px solid #3E4653;border-radius:7px;
-    display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:.13s}
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent}
   .row.sel .box{background:var(--acc);border-color:var(--acc);color:#fff}
-
-  .ico{width:42px;height:42px;flex:0 0 auto;border-radius:11px;background:#22262E;
-    object-fit:contain;padding:0}
-
+  .ico{width:42px;height:42px;flex:0 0 auto;border-radius:11px;background:#22262E;object-fit:contain}
   .info{flex:1;min-width:0}
-  .name{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    letter-spacing:.1px}
+  .name{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pkg{font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     margin-top:2px;font-family:ui-monospace,"Roboto Mono",monospace}
-
-  .badge{flex:0 0 auto;font-size:10.5px;font-weight:500;padding:4px 8px;border-radius:8px;
-    letter-spacing:.2px}
+  .badge{flex:0 0 auto;font-size:10.5px;font-weight:500;padding:4px 8px;border-radius:8px}
   .badge.f{background:var(--dangerbg);color:#FF8E99}
   .badge.e{background:var(--okbg);color:#57DE9C}
+  .badge.lock{background:var(--lockbg);color:var(--lockfg)}
 
-  /* 骨架屏 */
   .sk{display:flex;align-items:center;gap:11px;background:var(--card);
     border:1px solid var(--line);border-radius:14px;padding:10px 12px}
   .sk .b{background:linear-gradient(90deg,#1C2028 25%,#252A34 50%,#1C2028 75%);
@@ -121,12 +86,9 @@
   .sk .b2{width:58%;height:12px}
   .sk .b3{width:38%;height:10px;margin-top:6px}
   @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
   .empty{text-align:center;padding:56px 20px;color:var(--mute)}
   .empty .big{font-size:34px;opacity:.5;margin-bottom:10px}
-  .empty .t{font-size:13px}
 
-  /* ============ 底部操作栏 ============ */
   .actionbar{position:fixed;left:0;right:0;bottom:0;background:rgba(19,22,29,.97);
     backdrop-filter:blur(12px);border-top:1px solid var(--line);
     padding:10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -137,14 +99,12 @@
   .actionbar .cnt b{color:var(--acc);font-size:15px;font-weight:650}
   .abtns{display:flex;gap:8px}
   .abtn{flex:1;border:1px solid var(--line);background:var(--card2);color:var(--txt);
-    border-radius:12px;padding:13px 4px;font-size:13.5px;font-weight:500;text-align:center;
-    transition:.12s}
+    border-radius:12px;padding:13px 4px;font-size:13.5px;font-weight:500;text-align:center;transition:.12s}
   .abtn:active{transform:scale(.96)}
   .abtn.red{color:#FF9AA5;border-color:var(--dangerline);background:var(--dangerbg)}
   .abtn.green{color:#63E3A3;border-color:var(--okline);background:var(--okbg)}
   .abtn.ghost{flex:0 0 82px;color:var(--dim);background:transparent}
 
-  /* ============ 弹层 ============ */
   .mask{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(2px);
     display:none;z-index:9}
   .mask.on{display:block}
@@ -154,24 +114,23 @@
     max-height:84%;overflow-y:auto;border-top:1px solid #2C313B}
   .sheet.on{transform:translateY(0)}
   .sheet h3{margin:0 0 3px;font-size:16px;font-weight:600}
-  .sheet .hint{font-size:11.5px;color:var(--dim);margin-bottom:12px;word-break:break-all;
-    font-family:ui-monospace,monospace}
-  .sheet textarea{width:100%;height:160px;background:#0A0C10;color:var(--txt);
+  .sheet .hint{font-size:11.5px;color:var(--dim);margin-bottom:12px;word-break:break-all}
+  .sheet textarea{width:100%;height:150px;background:#0A0C10;color:var(--txt);
     border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;
-    font-family:ui-monospace,monospace;resize:none;outline:none;margin-top:8px}
-  .sheet .row2{display:flex;gap:8px;margin-top:14px}
-
+    font-family:ui-monospace,monospace;resize:none;outline:none;margin-top:6px}
+  .sheet .row2{display:flex;gap:8px;margin-top:10px}
   .dhead{display:flex;gap:12px;align-items:center;margin-bottom:13px}
   .aico{width:48px;height:48px;border-radius:13px;flex:0 0 auto;
     background:linear-gradient(135deg,#2A3550,#1B2130);display:flex;align-items:center;
     justify-content:center;font-size:22px}
   .dico{width:48px;height:48px;border-radius:13px;background:#22262E;flex:0 0 auto}
+
   .kv{display:flex;flex-direction:column;gap:1px;background:var(--line);
     border-radius:12px;overflow:hidden}
   .kv .kvrow{display:flex;background:#191D24;padding:10px 12px;font-size:12.5px;gap:12px}
   .kv .k{color:var(--dim);flex:0 0 58px}
-  .kv .v{flex:1;word-break:break-all;text-align:right;font-family:ui-monospace,monospace;
-    font-size:12px}
+  .kv .v{flex:1;word-break:break-all;text-align:right;
+    font-family:ui-monospace,monospace;font-size:12px}
   .kv .v.ok{color:#57DE9C;font-family:inherit}
   .kv .v.no{color:#FF8E99;font-family:inherit}
 
@@ -181,13 +140,13 @@
     text-align:center;border:1px solid #333B47;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:20}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
   .toast.ok{background:#12301F;border-color:#27573C;color:#7BF0B4}
-  .toast.err{background:#321A1E;border-color:#63303A;color:#FFAEb6}
+  .toast.err{background:#321A1E;border-color:#63303A;color:#FFAEB6}
+  .toast.warn{background:#2E2A14;border-color:#5C5222;color:#E8C451}
   .toast.up{bottom:206px}
 </style>
 </head>
 <body>
 <div class="app">
-
   <div class="hdr">
     <div class="titlerow">
       <h1>魅族冻结助手</h1>
@@ -204,6 +163,7 @@
       <div class="chip on" data-f="all">全部</div>
       <div class="chip" data-f="frozen">已冻结</div>
       <div class="chip" data-f="enabled">已启用</div>
+      <div class="chip" data-f="prot">已加锁</div>
       <div class="chip" data-f="third">第三方</div>
       <div class="chip" data-f="system">系统</div>
     </div>
@@ -216,7 +176,7 @@
       <div class="tool" id="exportBtn">导出</div>
       <div class="tool" id="refreshBtn">刷新</div>
       <div class="tool" id="autoBtn">自动</div>
-      <div class="tool" id="secBtn">安全</div>
+      <div class="tool" id="lockBtn">加锁</div>
     </div>
   </div>
 
@@ -283,52 +243,29 @@
   <div class="row2">
     <div class="abtn" id="autoRunNow">立即执行一次</div>
   </div>
-  <div class="hint" style="margin-top:12px">仅在屏幕熄灭时执行；正在前台使用的应用会跳过，不会被冻掉。<br>若锁屏后没有生效，请到系统「权限管理 / 后台运行」里允许本应用后台运行。</div>
+  <div class="hint" style="margin-top:12px">仅在屏幕熄灭时执行；前台应用会跳过。若锁屏后没生效，请到系统「权限管理 / 后台运行」允许本应用后台运行。</div>
 </div>
 
-<!-- 应用锁 -->
-<div class="lock" id="lock">
-  <div class="lico">🔒</div>
-  <h2>应用已锁定</h2>
-  <div class="lh" id="lockHint">输入 PIN 继续</div>
-  <div class="dots" id="lockDots"><i></i><i></i><i></i><i></i></div>
-  <div class="keypad" id="lockPad">
-    <div class="k" data-k="1">1</div><div class="k" data-k="2">2</div><div class="k" data-k="3">3</div>
-    <div class="k" data-k="4">4</div><div class="k" data-k="5">5</div><div class="k" data-k="6">6</div>
-    <div class="k" data-k="7">7</div><div class="k" data-k="8">8</div><div class="k" data-k="9">9</div>
-    <div class="k small" data-k="clear">清空</div><div class="k" data-k="0">0</div><div class="k small" data-k="back">⌫</div>
-  </div>
-</div>
-
-<!-- 安全设置 -->
-<div class="sheet" id="security">
+<div class="sheet" id="lockSheet">
   <div class="dhead">
-    <div class="aico">🔐</div>
+    <div class="aico">🔒</div>
     <div style="min-width:0">
-      <h3>安全锁</h3>
-      <div class="hint" style="margin-bottom:0">PIN 保护与核心应用上锁</div>
+      <h3>核心应用加锁</h3>
+      <div class="hint" style="margin-bottom:0">加锁的应用在冻结 / 解冻前会二次确认</div>
     </div>
   </div>
-  <div class="kv" id="secInfo"></div>
+  <div class="kv" id="lockInfo"></div>
   <div class="row2">
-    <div class="abtn" id="secSetPin">设置 / 修改 PIN</div>
-    <div class="abtn red" id="secClearPin">关闭锁</div>
+    <div class="abtn" id="lockAddSel">给选中应用加锁</div>
+    <div class="abtn" id="lockRemoveSel">给选中解锁</div>
   </div>
   <div class="row2">
-    <div class="abtn" id="secAddProt">把选中设为受保护</div>
-    <div class="abtn ghost" id="secClearProt">清空清单</div>
+    <div class="abtn" id="lockReset">恢复默认</div>
+    <div class="abtn red" id="lockClear">清空全部</div>
   </div>
-  <div class="hint" style="margin-top:12px">受保护的应用在冻结 / 解冻前需要 PIN；开启锁后每次打开 App 也需要 PIN 解锁。</div>
-</div>
-
-<!-- PIN 输入 -->
-<div class="sheet" id="pinSheet">
-  <h3 id="pinTitle">输入 PIN</h3>
-  <div class="hint" id="pinSub">用于验证受保护应用的冻结 / 解冻</div>
-  <input class="pininput" id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••">
-  <div class="row2">
-    <div class="abtn ghost" id="pinCancel">取消</div>
-    <div class="abtn" id="pinOk">确定</div>
+  <div class="hint" style="margin-top:12px">
+    「恢复默认」只重置系统应用部分（系统界面 / 桌面 / 输入法 / 电话 / 短信 / 设置等），
+    你自己给第三方应用加的锁会保留。
   </div>
 </div>
 
@@ -338,13 +275,14 @@
 var ALL = [], FILTER = 'all', Q = '', SEL = {}, BUSY = false;
 var SORT = 'name', SORTS = ['name','size','time'], SORTNAME = {name:'名称',size:'大小',time:'时间'};
 var DETAIL_PKG = null, ICON_CACHE = {}, AUTO = {enabled:false, targets:[]};
-var LOCK = {pinSet:false, locked:false, protected:[]}, PIN_BUF = '', PIN_CB = null;
+var PROT = {list:[], defaults:[]};
 
 function toast(m, kind){
   var t = document.getElementById('toast');
   t.className = 'toast';
   if (kind === 'ok') t.classList.add('ok');
   else if (kind === 'err') t.classList.add('err');
+  else if (kind === 'warn') t.classList.add('warn');
   if (document.getElementById('actionbar').classList.contains('on')) t.classList.add('up');
   t.textContent = m;
   void t.offsetWidth;
@@ -367,8 +305,8 @@ function fmtTime(ms){
   function p(n){ return n < 10 ? '0'+n : ''+n; }
   return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
 }
+function isProt(p){ return (PROT.list || []).indexOf(p) >= 0; }
 
-/* 骨架屏 */
 function skeleton(n){
   var h = '';
   for (var i=0;i<n;i++){
@@ -376,6 +314,13 @@ function skeleton(n){
       +  '<div style="flex:1"><div class="b b2"></div><div class="b b3"></div></div></div>';
   }
   document.getElementById('list').innerHTML = h;
+}
+
+function loadProtect(){
+  try { PROT = JSON.parse(Native.protectStatus()); }
+  catch(e){ PROT = {list:[], defaults:[]}; }
+  PROT.list = PROT.list || [];
+  PROT.defaults = PROT.defaults || [];
 }
 
 function load(){
@@ -396,6 +341,7 @@ function filtered(){
     if (Q && a.l.toLowerCase().indexOf(Q) < 0 && a.p.toLowerCase().indexOf(Q) < 0) return false;
     if (FILTER === 'frozen') return a.f;
     if (FILTER === 'enabled') return !a.f;
+    if (FILTER === 'prot') return isProt(a.p);
     if (FILTER === 'third') return !a.s;
     if (FILTER === 'system') return a.s;
     return true;
@@ -409,7 +355,8 @@ function render(){
   var out = filtered();
   var frozen = ALL.filter(function(a){ return a.f; }).length;
   document.getElementById('stats').innerHTML =
-    '共 <b>' + ALL.length + '</b> 个应用　已冻结 <i>' + frozen + '</i> 个';
+    '共 <b>' + ALL.length + '</b> 个应用　已冻结 <i>' + frozen + '</i> 个　已加锁 <b>'
+    + (PROT.list||[]).length + '</b> 个';
 
   if (!out.length){
     document.getElementById('list').innerHTML =
@@ -438,7 +385,6 @@ function render(){
   loadIcons();
 }
 
-/* 图标分批加载，避免卡顿 */
 function loadIcons(){
   var imgs = document.querySelectorAll('#list img.ico:not([src])');
   var i = 0;
@@ -456,11 +402,9 @@ function loadIcons(){
   step();
 }
 
-/* 短按=选中，长按=详情 */
 function bindRow(row){
   var pkg = row.getAttribute('data-p');
   var timer = null, longPressed = false;
-
   function start(){
     longPressed = false;
     timer = setTimeout(function(){
@@ -470,12 +414,10 @@ function bindRow(row){
     }, 460);
   }
   function cancel(){ if (timer){ clearTimeout(timer); timer = null; } }
-
   row.addEventListener('touchstart', start);
   row.addEventListener('touchend', cancel);
   row.addEventListener('touchmove', cancel);
   row.addEventListener('touchcancel', cancel);
-
   row.addEventListener('click', function(){
     if (longPressed){ longPressed = false; return; }
     var nm = this.querySelector('.name').textContent;
@@ -499,20 +441,28 @@ function updateBar(){
   document.getElementById('selCount').textContent = n;
   var hint = document.getElementById('selHint');
   if (n){
-    var f = 0, e = 0;
+    var f = 0, e = 0, lk = 0;
     for (var p in SEL) if (SEL.hasOwnProperty(p)){
+      if (isProt(p)) lk++;
       for (var i=0;i<ALL.length;i++) if (ALL[i].p === p){ if (ALL[i].f) f++; else e++; break; }
     }
-    hint.textContent = '冻结 ' + f + ' · 启用 ' + e;
+    hint.textContent = '冻结 ' + f + ' · 启用 ' + e + (lk ? ' · 🔒 ' + lk : '');
   } else hint.textContent = '';
   var bar = document.getElementById('actionbar');
   if (n > 0) bar.classList.add('on'); else bar.classList.remove('on');
 }
 
-function isProt(p){ return (LOCK.protected || []).indexOf(p) >= 0; }
-
 function markFrozen(pkgs, freeze){
   for (var i=0;i<ALL.length;i++) if (pkgs.indexOf(ALL[i].p) >= 0) ALL[i].f = freeze;
+}
+
+function confirmLocked(pkgs, what, next){
+  var locked = pkgs.filter(isProt);
+  if (!locked.length){ next(); return; }
+  var names = locked.slice(0, 3).join('\n');
+  if (!confirm('⚠️ 其中 ' + locked.length + ' 个是加锁的核心应用：\n' + names
+      + (locked.length > 3 ? '\n…' : '') + '\n\n确定要' + what + '吗？')) return;
+  next();
 }
 
 function runBatch(freeze){
@@ -520,29 +470,18 @@ function runBatch(freeze){
   var pkgs = selList();
   if (!pkgs.length){ toast('先选应用', 'err'); return; }
   var what = freeze ? '冻结' : '解冻';
-  var hasProt = false;
-  for (var i=0;i<pkgs.length;i++) if (isProt(pkgs[i])) { hasProt = true; break; }
-
-  if (hasProt && !LOCK.pinSet){
-    toast('选中包含受保护应用，请先到「安全」里设置 PIN', 'err');
-    return;
-  }
-  if (!confirm(what + '选中的 ' + pkgs.length + ' 个应用？' + (hasProt ? '\n（含受保护应用，需要 PIN）' : ''))) return;
-
-  if (hasProt){
-    askPin('验证 PIN', '受保护应用需要验证', function(pin){ doBatch(pkgs, freeze, pin); });
-  } else {
-    doBatch(pkgs, freeze, '');
-  }
+  confirmLocked(pkgs, what, function(){
+    if (!confirm(what + '选中的 ' + pkgs.length + ' 个应用？')) return;
+    doBatch(pkgs, freeze);
+  });
 }
 
-function doBatch(pkgs, freeze, pin){
+function doBatch(pkgs, freeze){
   var what = freeze ? '冻结' : '解冻';
   BUSY = true;
   toast('正在' + what + ' ' + pkgs.length + ' 个…');
-  var n = parseInt(Native.batch(JSON.stringify(pkgs), freeze, pin || ''), 10);
+  var n = parseInt(Native.batch(JSON.stringify(pkgs), freeze), 10) || 0;
   BUSY = false;
-  if (n < 0){ toast('PIN 错误，未执行', 'err'); return; }
   markFrozen(pkgs, freeze);
   SEL = {};
   render();
@@ -551,14 +490,12 @@ function doBatch(pkgs, freeze, pin){
   else toast('部分' + what + '：成功 ' + n + ' / ' + pkgs.length, 'err');
 }
 
-/* ===== 应用详情 ===== */
 function openDetail(pkg){
   var d;
   try { d = JSON.parse(Native.appDetail(pkg)); }
   catch(e){ toast('读取详情失败', 'err'); return; }
   if (!d || !d.pkg){ toast('读取详情失败', 'err'); return; }
   DETAIL_PKG = pkg;
-
   document.getElementById('dName').textContent = d.label;
   document.getElementById('dPkg').textContent = d.pkg;
   try {
@@ -571,6 +508,7 @@ function openDetail(pkg){
   }
   var html = '';
   html += row('状态', d.frozen ? '已冻结' : '启用中', d.frozen ? 'no' : 'ok');
+  html += row('加锁', isProt(pkg) ? '🔒 已加锁' : '未加锁');
   html += row('运行', d.running ? ('运行中 pid ' + d.pid) : '未运行', d.running ? 'ok' : '');
   html += row('类型', d.sys ? '系统应用' : '第三方应用');
   html += row('版本', d.ver + ' (' + d.vcode + ')');
@@ -585,134 +523,34 @@ function openDetail(pkg){
 
   document.getElementById('dLaunch').style.display = (d.launch === '可启动') ? '' : 'none';
   document.getElementById('dFreeze').style.display = d.frozen ? 'none' : '';
-  document.getElementById('dUnfreeze').style.display = d.frozen ? '' : 'none';
+  document.getElementById('dUnfreeze').style.display = d.frozen ? '' : '';
 
   document.getElementById('mask').classList.add('on');
   document.getElementById('detail').classList.add('on');
 }
-
 function closeDetail(){
   document.getElementById('detail').classList.remove('on');
-  if (!document.getElementById('sheet').classList.contains('on'))
+  if (!document.getElementById('auto').classList.contains('on')
+   && !document.getElementById('lockSheet').classList.contains('on')
+   && !document.getElementById('sheet').classList.contains('on'))
     document.getElementById('mask').classList.remove('on');
   DETAIL_PKG = null;
 }
-
 function detailAction(freeze){
   var pkg = DETAIL_PKG;
   if (!pkg) return;
-  if (isProt(pkg) && !LOCK.pinSet){
-    toast('该应用受保护，请先到「安全」里设置 PIN', 'err');
-    return;
-  }
-  if (isProt(pkg)){
-    closeDetail();
-    askPin('验证 PIN', '受保护应用需要验证', function(pin){ doDetail(pkg, freeze, pin); });
-  } else {
-    doDetail(pkg, freeze, '');
-  }
-}
-
-function doDetail(pkg, freeze, pin){
-  var n = parseInt(Native.batch(JSON.stringify([pkg]), freeze, pin || ''), 10);
-  if (n < 0){ toast('PIN 错误，未执行', 'err'); closeDetail(); return; }
-  if (n > 0){
-    markFrozen([pkg], freeze);
-    render();
-    toast('已' + (freeze ? '冻结 ' : '解冻 ') + pkg, 'ok');
-  } else {
-    toast((freeze ? '冻结' : '解冻') + '失败', 'err');
-  }
+  var what = freeze ? '冻结' : '解冻';
   closeDetail();
+  confirmLocked([pkg], what, function(){
+    var n = parseInt(Native.batch(JSON.stringify([pkg]), freeze), 10) || 0;
+    if (n > 0){
+      markFrozen([pkg], freeze);
+      render();
+      toast('已' + what + ' ' + pkg, 'ok');
+    } else toast(what + '失败', 'err');
+  });
 }
 
-/* ===== 安全锁 ===== */
-function loadLock(){
-  try { LOCK = JSON.parse(Native.lockStatus()); }
-  catch(e){ LOCK = {pinSet:false, locked:false, protected:[]}; }
-  if (LOCK.locked) showLock();
-  renderSecIfOpen();
-}
-function showLock(){
-  PIN_BUF = '';
-  drawDots();
-  document.getElementById('lock').classList.add('on');
-}
-function hideLock(){ document.getElementById('lock').classList.remove('on'); }
-function drawDots(){
-  var dots = document.querySelectorAll('#lockDots i');
-  for (var i=0;i<dots.length;i++) dots[i].className = (i < PIN_BUF.length) ? 'on' : '';
-}
-function lockKey(k){
-  if (k === 'clear'){ PIN_BUF = ''; }
-  else if (k === 'back'){ PIN_BUF = PIN_BUF.slice(0, -1); }
-  else if (PIN_BUF.length < 4){ PIN_BUF += k; }
-  drawDots();
-  if (PIN_BUF.length === 4){
-    setTimeout(function(){
-      if (Native.verifyPin(PIN_BUF) === '1'){
-        LOCK.locked = false;
-        hideLock();
-        toast('已解锁', 'ok');
-      } else {
-        var box = document.getElementById('lock');
-        box.classList.add('shake');
-        setTimeout(function(){ box.classList.remove('shake'); }, 340);
-        document.getElementById('lockHint').textContent = 'PIN 错误，请重试';
-        PIN_BUF = ''; drawDots();
-      }
-    }, 90);
-  }
-}
-
-function openSec(){
-  var st;
-  try { st = JSON.parse(Native.lockStatus()); } catch(e){ st = {pinSet:false, protected:[]}; }
-  LOCK.pinSet = st.pinSet; LOCK.protected = st.protected || [];
-  renderSec();
-  document.getElementById('mask').classList.add('on');
-  document.getElementById('security').classList.add('on');
-}
-function renderSecIfOpen(){
-  if (document.getElementById('security').classList.contains('on')) renderSec();
-}
-function renderSec(){
-  var html = ''
-    + '<div class="kvrow"><div class="k">应用锁</div><div class="v ' + (LOCK.pinSet?'ok':'') + '">'
-    + (LOCK.pinSet ? '已开启' : '未设置') + '</div></div>'
-    + '<div class="kvrow"><div class="k">受保护</div><div class="v">' + (LOCK.protected||[]).length + ' 个应用</div></div>';
-  document.getElementById('secInfo').innerHTML = html;
-}
-function closeSec(){
-  document.getElementById('security').classList.remove('on');
-  if (!document.getElementById('detail').classList.contains('on')
-   && !document.getElementById('auto').classList.contains('on')
-   && !document.getElementById('sheet').classList.contains('on'))
-    document.getElementById('mask').classList.remove('on');
-}
-
-/* 通用 PIN 输入框 */
-function askPin(title, sub, cb){
-  PIN_CB = cb;
-  document.getElementById('pinTitle').textContent = title;
-  document.getElementById('pinSub').textContent = sub || '';
-  var inp = document.getElementById('pinInput');
-  inp.value = '';
-  document.getElementById('mask').classList.add('on');
-  document.getElementById('pinSheet').classList.add('on');
-  setTimeout(function(){ inp.focus(); }, 120);
-}
-function closePin(){
-  document.getElementById('pinSheet').classList.remove('on');
-  if (!document.getElementById('detail').classList.contains('on')
-   && !document.getElementById('security').classList.contains('on')
-   && !document.getElementById('auto').classList.contains('on')
-   && !document.getElementById('sheet').classList.contains('on'))
-    document.getElementById('mask').classList.remove('on');
-  PIN_CB = null;
-}
-
-/* ===== 自动冻结 ===== */
 function openAuto(){
   try { AUTO = JSON.parse(Native.autoStatus()); } catch(e){ AUTO = {enabled:false, targets:[]}; }
   renderAuto();
@@ -722,23 +560,43 @@ function openAuto(){
 function closeAuto(){
   document.getElementById('auto').classList.remove('on');
   if (!document.getElementById('detail').classList.contains('on')
+   && !document.getElementById('lockSheet').classList.contains('on')
    && !document.getElementById('sheet').classList.contains('on'))
     document.getElementById('mask').classList.remove('on');
 }
 function renderAuto(){
   var n = (AUTO.targets || []).length;
   var last = AUTO.last ? fmtTime(AUTO.last) + '（' + (AUTO.lastCount||0) + ' 个）' : '还没执行过';
-  var html = ''
+  document.getElementById('autoInfo').innerHTML = ''
     + '<div class="kvrow"><div class="k">状态</div><div class="v ' + (AUTO.enabled?'ok':'') + '">'
     + (AUTO.enabled ? '运行中' : '已关闭') + '</div></div>'
     + '<div class="kvrow"><div class="k">清单</div><div class="v">' + n + ' 个应用</div></div>'
     + '<div class="kvrow"><div class="k">上次</div><div class="v" style="font-family:inherit">' + last + '</div></div>';
-  document.getElementById('autoInfo').innerHTML = html;
   document.getElementById('autoToggle').textContent = AUTO.enabled ? '关闭自动冻结' : '开启自动冻结';
   document.getElementById('autoToggle').className = AUTO.enabled ? 'abtn red' : 'abtn green';
 }
 
-/* ===== 事件 ===== */
+function openLock(){
+  loadProtect();
+  renderLock();
+  document.getElementById('mask').classList.add('on');
+  document.getElementById('lockSheet').classList.add('on');
+}
+function closeLock(){
+  document.getElementById('lockSheet').classList.remove('on');
+  if (!document.getElementById('detail').classList.contains('on')
+   && !document.getElementById('auto').classList.contains('on')
+   && !document.getElementById('sheet').classList.contains('on'))
+    document.getElementById('mask').classList.remove('on');
+}
+function renderLock(){
+  var mine = (PROT.list||[]).filter(function(p){ return (PROT.defaults||[]).indexOf(p) < 0; });
+  document.getElementById('lockInfo').innerHTML = ''
+    + '<div class="kvrow"><div class="k">已加锁</div><div class="v">' + (PROT.list||[]).length + ' 个应用</div></div>'
+    + '<div class="kvrow"><div class="k">默认</div><div class="v">' + (PROT.defaults||[]).length + ' 个系统应用</div></div>'
+    + '<div class="kvrow"><div class="k">自定义</div><div class="v">' + mine.length + ' 个</div></div>';
+}
+
 var q = document.getElementById('q');
 q.addEventListener('input', function(){
   Q = q.value.trim().toLowerCase();
@@ -753,10 +611,7 @@ q.addEventListener('input', function(){
   }, 400);
 });
 document.getElementById('qclr').onclick = function(){
-  q.value = ''; Q = '';
-  this.classList.remove('on');
-  render();
-  toast('已清除搜索');
+  q.value = ''; Q = ''; this.classList.remove('on'); render(); toast('已清除搜索');
 };
 
 document.getElementById('chips').addEventListener('click', function(e){
@@ -768,7 +623,7 @@ document.getElementById('chips').addEventListener('click', function(e){
   document.getElementById('listwrap').scrollTop = 0;
   render();
   var names = {all:'全部应用', frozen:'只看已冻结', enabled:'只看已启用',
-               third:'只看第三方', system:'只看系统'};
+               prot:'只看已加锁', third:'只看第三方', system:'只看系统'};
   toast(names[FILTER] + '：' + filtered().length + ' 个');
 });
 
@@ -797,23 +652,27 @@ document.getElementById('refreshBtn').onclick = load;
 document.getElementById('unfreezeAll').onclick = function(){
   var pkgs = ALL.filter(function(a){ return a.f; }).map(function(a){ return a.p; });
   if (!pkgs.length){ toast('当前没有已冻结的应用', 'err'); return; }
-  if (!confirm('解冻全部 ' + pkgs.length + ' 个已冻结应用？')) return;
-  toast('正在解冻 ' + pkgs.length + ' 个…');
-  var n = parseInt(Native.batch(JSON.stringify(pkgs), false), 10) || 0;
-  markFrozen(pkgs, false);
-  render();
-  toast(n >= pkgs.length ? '已全部解冻 ' + n + ' 个' : '部分解冻：成功 ' + n + ' / ' + pkgs.length,
-        n >= pkgs.length ? 'ok' : 'err');
+  confirmLocked(pkgs, '解冻全部', function(){
+    if (!confirm('解冻全部 ' + pkgs.length + ' 个已冻结应用？')) return;
+    toast('正在解冻 ' + pkgs.length + ' 个…');
+    var n = parseInt(Native.batch(JSON.stringify(pkgs), false), 10) || 0;
+    markFrozen(pkgs, false);
+    render();
+    toast(n >= pkgs.length ? '已全部解冻 ' + n + ' 个' : '部分解冻：成功 ' + n + ' / ' + pkgs.length,
+          n >= pkgs.length ? 'ok' : 'err');
+  });
 };
 
 document.getElementById('doFreeze').onclick = function(){ runBatch(true); };
 document.getElementById('doUnfreeze').onclick = function(){ runBatch(false); };
 document.getElementById('doClear').onclick = function(){ SEL = {}; render(); toast('已取消选择'); };
 
-document.getElementById('mask').onclick = function(){ closeSheet(); closeDetail(); closeAuto(); closeSec(); closePin(); };
+document.getElementById('mask').onclick = function(){ closeSheet(); closeDetail(); closeAuto(); closeLock(); };
 function closeSheet(){
   document.getElementById('sheet').classList.remove('on');
-  if (!document.getElementById('detail').classList.contains('on'))
+  if (!document.getElementById('detail').classList.contains('on')
+   && !document.getElementById('auto').classList.contains('on')
+   && !document.getElementById('lockSheet').classList.contains('on'))
     document.getElementById('mask').classList.remove('on');
 }
 
@@ -822,7 +681,7 @@ document.getElementById('importBtn').onclick = function(){
   document.getElementById('sheet').classList.add('on');
   toast('每行一个包名，粘贴后点「冻结这些应用」');
 };
-document.getElementById('cancelImport').onclick = function(){ closeSheet(); };
+document.getElementById('cancelImport').onclick = closeSheet;
 document.getElementById('doImport').onclick = function(){
   var text = document.getElementById('ta').value || '';
   if (!text.trim()){ toast('先粘贴包名列表', 'err'); return; }
@@ -835,69 +694,11 @@ document.getElementById('doImport').onclick = function(){
   else toast('没有可冻结的应用（跳过 ' + r.skip + ' 个）', 'err');
   load();
 };
-
 document.getElementById('exportBtn').onclick = function(){
   var p;
   try { p = Native.exportFrozen(); } catch(e){ toast('导出失败', 'err'); return; }
   if (p.indexOf('ERR:') === 0){ toast('导出失败：' + p.substring(4), 'err'); return; }
   toast('已导出到 ' + p.substring(p.lastIndexOf('/')+1) + '（应用目录下）', 'ok');
-};
-
-document.getElementById('secBtn').onclick = openSec;
-document.getElementById('secClearProt').onclick = function(){
-  var n = (LOCK.protected||[]).length;
-  if (!n){ toast('保护清单是空的', 'err'); return; }
-  if (!confirm('清空保护清单（' + n + ' 个）？')) return;
-  Native.setProtected('[]');
-  LOCK.protected = [];
-  renderSec(); render();
-  toast('保护清单已清空', 'ok');
-};
-
-document.getElementById('lockPad').addEventListener('click', function(e){
-  var k = e.target.getAttribute('data-k');
-  if (k) lockKey(k);
-});
-
-document.getElementById('pinCancel').onclick = closePin;
-document.getElementById('pinOk').onclick = function(){
-  var v = document.getElementById('pinInput').value.trim();
-  if (!v){ toast('请输入 PIN', 'err'); return; }
-  var cb = PIN_CB;
-  closePin();
-  if (cb) cb(v);
-};
-
-document.getElementById('secSetPin').onclick = function(){
-  askPin('设置 PIN', '4~8 位数字，用于解锁和受保护应用', function(pin){
-    if (!/^\d{4,8}$/.test(pin)){ toast('PIN 需要 4~8 位数字', 'err'); return; }
-    if (Native.setPin(pin) === '1'){
-      LOCK.pinSet = true;
-      renderSec();
-      toast('PIN 已设置', 'ok');
-    } else toast('设置失败', 'err');
-  });
-};
-document.getElementById('secClearPin').onclick = function(){
-  if (!LOCK.pinSet){ toast('还没有设置 PIN', 'err'); return; }
-  askPin('关闭应用锁', '输入当前 PIN 以确认', function(pin){
-    if (Native.clearPin(pin) === '1'){
-      LOCK.pinSet = false;
-      renderSec();
-      toast('应用锁已关闭', 'ok');
-    } else toast('PIN 错误', 'err');
-  });
-};
-document.getElementById('secAddProt').onclick = function(){
-  var sel = selList();
-  if (!sel.length){ toast('先在列表里勾选应用', 'err'); return; }
-  var cur = (LOCK.protected||[]).slice();
-  var added = 0;
-  for (var i=0;i<sel.length;i++) if (cur.indexOf(sel[i]) < 0){ cur.push(sel[i]); added++; }
-  Native.setProtected(JSON.stringify(cur));
-  LOCK.protected = cur;
-  renderSec(); render();
-  toast('已加入 ' + added + ' 个，共保护 ' + cur.length + ' 个', 'ok');
 };
 
 document.getElementById('autoBtn').onclick = openAuto;
@@ -916,9 +717,16 @@ document.getElementById('autoAddSel').onclick = function(){
   var added = 0;
   for (var i=0;i<sel.length;i++) if (cur.indexOf(sel[i]) < 0){ cur.push(sel[i]); added++; }
   Native.autoSetTargets(JSON.stringify(cur));
-  AUTO.targets = cur;
-  renderAuto();
+  AUTO.targets = cur; renderAuto();
   toast('已加入 ' + added + ' 个，清单共 ' + cur.length + ' 个', 'ok');
+};
+document.getElementById('autoClear').onclick = function(){
+  var n = (AUTO.targets||[]).length;
+  if (!n){ toast('清单已经是空的', 'err'); return; }
+  if (!confirm('清空自动冻结清单（' + n + ' 个）？')) return;
+  Native.autoSetTargets('[]');
+  AUTO.targets = []; renderAuto();
+  toast('清单已清空', 'ok');
 };
 document.getElementById('autoRunNow').onclick = function(){
   if (!(AUTO.targets||[]).length){ toast('清单是空的', 'err'); return; }
@@ -926,14 +734,44 @@ document.getElementById('autoRunNow').onclick = function(){
   toast('已触发，稍后刷新查看结果');
   setTimeout(function(){ openAuto(); load(); }, 2500);
 };
-document.getElementById('autoClear').onclick = function(){
-  var n = (AUTO.targets||[]).length;
-  if (!n){ toast('清单已经是空的', 'err'); return; }
-  if (!confirm('清空自动冻结清单（' + n + ' 个）？')) return;
-  Native.autoSetTargets('[]');
-  AUTO.targets = [];
-  renderAuto();
-  toast('清单已清空', 'ok');
+
+document.getElementById('lockBtn').onclick = openLock;
+document.getElementById('lockAddSel').onclick = function(){
+  var sel = selList();
+  if (!sel.length){ toast('先在列表里勾选应用', 'err'); return; }
+  var cur = (PROT.list||[]).slice();
+  var added = 0;
+  for (var i=0;i<sel.length;i++) if (cur.indexOf(sel[i]) < 0){ cur.push(sel[i]); added++; }
+  Native.setProtected(JSON.stringify(cur));
+  PROT.list = cur; renderLock(); render();
+  toast('已加锁 ' + added + ' 个，共 ' + cur.length + ' 个', 'ok');
+};
+document.getElementById('lockRemoveSel').onclick = function(){
+  var sel = selList();
+  if (!sel.length){ toast('先在列表里勾选应用', 'err'); return; }
+  var cur = (PROT.list||[]).filter(function(p){ return sel.indexOf(p) < 0; });
+  var removed = (PROT.list||[]).length - cur.length;
+  if (!removed){ toast('选中的应用本来就没加锁', 'err'); return; }
+  Native.setProtected(JSON.stringify(cur));
+  PROT.list = cur; renderLock(); render();
+  toast('已解锁 ' + removed + ' 个', 'ok');
+};
+document.getElementById('lockReset').onclick = function(){
+  if (!confirm('恢复默认加锁清单？\n只会重置系统应用部分，你给第三方应用加的锁会保留。')) return;
+  var out;
+  try { out = JSON.parse(Native.resetProtected()); } catch(e){ out = []; }
+  loadProtect();
+  renderLock(); render();
+  toast('已恢复默认（自定义保留 ' + (PROT.list||[]).filter(function(p){
+    return (PROT.defaults||[]).indexOf(p) < 0; }).length + ' 个）', 'ok');
+};
+document.getElementById('lockClear').onclick = function(){
+  var n = (PROT.list||[]).length;
+  if (!n){ toast('加锁清单是空的', 'err'); return; }
+  if (!confirm('清空全部加锁（' + n + ' 个）？核心应用将不再受保护。')) return;
+  Native.setProtected('[]');
+  PROT.list = []; renderLock(); render();
+  toast('已清空加锁清单', 'warn');
 };
 
 document.getElementById('dClose').onclick = closeDetail;
@@ -947,7 +785,7 @@ document.getElementById('dLaunch').onclick = function(){
 };
 
 skeleton(7);
-loadLock();
+loadProtect();
 load();
 </script>
 </body>

@@ -51,6 +51,28 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private android.content.SharedPreferences prefs;
+
+    /** 默认核心系统应用：首次运行注入保护清单；
+     *  「恢复默认」只重置这部分，用户自己加的第三方应用不受影响 */
+    private static final String[] DEFAULT_PROTECTED = {
+            "com.android.systemui",
+            "com.meizu.flyme.launcher",
+            "com.sohu.inputmethod.sogou.meizu",
+            "com.android.settings",
+            "com.android.phone",
+            "com.android.providers.telephony",
+            "com.android.dialer",
+            "com.android.mms",
+            "com.android.server.telecom",
+            "com.android.permissioncontroller",
+            "com.android.webview",
+            "com.google.android.webview",
+            "com.android.bluetooth",
+            "com.android.nfc",
+            "com.android.networkstack",
+            "com.android.providers.settings",
+            "com.android.shell"
+    };
     private boolean unlockedThisSession = false;
 
     private static String sha256(String s) {
@@ -63,10 +85,14 @@ public class MainActivity extends Activity {
         } catch (Exception e) { return ""; }
     }
 
-    private boolean checkPin(String pin) {
-        String stored = prefs.getString("pin_hash", "");
-        if (stored.isEmpty()) return false;
-        return stored.equals(sha256(pin == null ? "" : pin));
+
+
+    private void ensureDefaultProtected() {
+        if (!prefs.contains("protected")) {
+            JSONArray a = new JSONArray();
+            for (String p : DEFAULT_PROTECTED) a.put(p);
+            prefs.edit().putString("protected", a.toString()).apply();
+        }
     }
 
     private boolean isProtectedPkg(String pkg) {
@@ -124,6 +150,7 @@ public class MainActivity extends Activity {
             }
         });
         prefs = getSharedPreferences(AutoFreezeService.PREF, MODE_PRIVATE);
+        ensureDefaultProtected();
         try {
             if (prefs.getBoolean("auto_enabled", false)) {
                 startForegroundService(new android.content.Intent(this, AutoFreezeService.class));
@@ -202,9 +229,8 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String setFrozen(String pkg, boolean freeze, String pin) {
+        public String setFrozen(String pkg, boolean freeze) {
             if (pkg == null || pkg.isEmpty() || SAFE.contains(pkg)) return "0";
-            if (isProtectedPkg(pkg) && !checkPin(pin)) return "-1";
             String out = su(freeze
                     ? "pm disable-user --user 0 " + pkg
                     : "pm enable " + pkg);
@@ -213,14 +239,9 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String batch(String pkgsJson, boolean freeze, String pin) {
+        public String batch(String pkgsJson, boolean freeze) {
             try {
                 JSONArray arr = new JSONArray(pkgsJson);
-                boolean needPin = false;
-                for (int i = 0; i < arr.length(); i++) {
-                    if (isProtectedPkg(arr.optString(i))) { needPin = true; break; }
-                }
-                if (needPin && !checkPin(pin)) return "-1";
                 StringBuilder sb = new StringBuilder();
                 int n = 0;
                 for (int i = 0; i < arr.length(); i++) {
@@ -366,41 +387,46 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String lockStatus() {
+        public String protectStatus() {
             try {
-                android.util.Log.i("FreezerUI", "lockStatus called");
-                boolean pinSet = !prefs.getString("pin_hash", "").isEmpty();
+                android.util.Log.i("FreezerUI", "protectStatus called");
                 JSONObject o = new JSONObject();
-                o.put("pinSet", pinSet);
-                o.put("locked", pinSet && !unlockedThisSession);
                 o.put("protected", new JSONArray(prefs.getString("protected", "[]")));
+                JSONArray def = new JSONArray();
+                for (String p : DEFAULT_PROTECTED) def.put(p);
+                o.put("defaults", def);
                 return o.toString();
             } catch (Exception e) {
-                return "{\"pinSet\":false,\"locked\":false,\"protected\":[]}";
+                return "{\"protected\":[],\"defaults\":[]}";
             }
         }
 
+        /** 恢复默认：只重置系统应用部分，用户自己加的第三方保护保留 */
         @JavascriptInterface
-        public String setPin(String pin) {
-            if (pin == null || pin.length() < 4 || pin.length() > 8) return "0";
-            prefs.edit().putString("pin_hash", sha256(pin)).apply();
-            unlockedThisSession = true;
-            return "1";
-        }
-
-        @JavascriptInterface
-        public String verifyPin(String pin) {
-            boolean ok = checkPin(pin);
-            if (ok) unlockedThisSession = true;
-            return ok ? "1" : "0";
-        }
-
-        @JavascriptInterface
-        public String clearPin(String pin) {
-            if (!checkPin(pin)) return "0";
-            prefs.edit().remove("pin_hash").apply();
-            unlockedThisSession = true;
-            return "1";
+        public String resetProtected() {
+            try {
+                JSONArray old = new JSONArray(prefs.getString("protected", "[]"));
+                JSONArray out = new JSONArray();
+                HashSet<String> seen = new HashSet<>();
+                // 1) 保留用户添加的非系统应用
+                PackageManager pm = getPackageManager();
+                for (int i = 0; i < old.length(); i++) {
+                    String p = old.optString(i);
+                    if (p.isEmpty() || seen.contains(p)) continue;
+                    boolean sys = true;
+                    try { sys = (pm.getApplicationInfo(p, 0).flags
+                            & ApplicationInfo.FLAG_SYSTEM) != 0; } catch (Throwable ignored) {}
+                    if (!sys) { out.put(p); seen.add(p); }
+                }
+                // 2) 并入默认系统清单
+                for (String p : DEFAULT_PROTECTED) {
+                    if (!seen.contains(p)) { out.put(p); seen.add(p); }
+                }
+                prefs.edit().putString("protected", out.toString()).apply();
+                return out.toString();
+            } catch (Exception e) {
+                return "[]";
+            }
         }
 
         @JavascriptInterface

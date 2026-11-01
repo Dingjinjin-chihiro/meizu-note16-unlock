@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：7.2　·　2026-11-01
+> 版本：8.0　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-7.2.apk`（25 KB）
+> APK：`app/release/meizu-freezer-8.0.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -384,3 +384,59 @@ setFrozen(pkg, freeze, pin)   → "1"/"0"/"-1"
 - 编译通过、安装运行、列表 317 / 冻结 124 正常
 - 受保护校验为 Java 端强制，逻辑上无法绕过（测试期间设备处于安全锁屏，
   截图被系统挡成黑屏，UI 交互测试留给用户在手机上确认）
+---
+
+## 十二、加锁模型（v8.0，取代 v7 的 PIN 方案）
+
+按新要求：**不加密码，只加一道锁**。
+
+### 规则
+
+| 项 | 说明 |
+|---|---|
+| 加锁 | 给应用打一个「核心应用」标记，列表显示 🔒 |
+| 一道锁 | 冻结 / 解冻加锁应用时，**多弹一次确认框**，列出具体应用名，确认后才执行 |
+| 无密码 | 不需要 PIN，不锁 App，不影响日常打开速度 |
+| 默认清单 | 首次运行自动注入 17 个系统核心应用（见下） |
+| 恢复默认 | **只重置系统应用部分**，用户给第三方应用加的锁保留 |
+| 清空全部 | 全部清空（含自定义） |
+
+### 默认加锁清单
+
+```
+com.android.systemui                系统界面
+com.meizu.flyme.launcher            桌面
+com.sohu.inputmethod.sogou.meizu    输入法
+com.android.settings                设置
+com.android.phone                   电话
+com.android.providers.telephony     电话数据
+com.android.dialer                  拨号
+com.android.mms                     短信
+com.android.server.telecom          通话服务
+com.android.permissioncontroller    权限弹窗
+com.android.webview / com.google.android.webview   WebView
+com.android.bluetooth               蓝牙
+com.android.nfc                     NFC
+com.android.networkstack            网络栈
+com.android.providers.settings      设置数据
+com.android.shell                   shell
+```
+
+### 接口
+
+```
+protectStatus()   → {protected:[...], defaults:[...]}
+setProtected(json)→ "1"
+resetProtected()  → 新清单 JSON（保留非系统应用 + 并入默认系统清单）
+batch(json, freeze)          → 数量
+setFrozen(pkg, freeze)       → "1"/"0"
+```
+
+`resetProtected` 的实现：先过滤出现有清单里的**非系统应用**并保留，
+再并入 `DEFAULT_PROTECTED`，所以「恢复默认」不会误删你自定义的锁。
+
+### 实测
+
+- 首次启动自动写入 17 项默认清单（`/data/data/.../shared_prefs/freezer.xml` 已确认）
+- JS 正常（logcat：`protectStatus called` / `listApps called`）
+- 冻结数保持 124，未影响现有状态
