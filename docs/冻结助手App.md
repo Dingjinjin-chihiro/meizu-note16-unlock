@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：9.2　·　2026-11-01
+> 版本：9.4　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-9.2.apk`（25 KB）
+> APK：`app/release/meizu-freezer-9.4.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -488,3 +488,56 @@ setFrozen(pkg, freeze)       → "1"/"0"
 核心包抽查（18 个）：全部 ✅启用（含锁屏 ibimuyu.lockscreen、打印、TalkBack、紧急广播、SIM 工具包）
 prefs 加锁条目：64
 ```
+---
+
+## 十四、锁屏问题排查（v9.4）
+
+### 现象
+
+用户反馈：手机频繁自动锁屏。
+
+### 根因
+
+**息屏超时被改成了 30 秒。**
+
+测试自动冻结时为了让屏幕保持唤醒，曾执行：
+
+```
+settings put system screen_off_timeout 600000   # 10 分钟
+svc power stayon true                           # 保持常亮
+```
+
+测试结束恢复时误用了 30 秒（Android 默认值），导致手机 30 秒就自动锁屏。
+
+修复：
+
+```
+settings put system screen_off_timeout 120000   # 2 分钟
+```
+
+### 同时解冻的功能组件
+
+| 包 | 作用 | 处理 |
+|---|---|---|
+| com.meizu.ems | 系统智能引擎（带相机 / GPU 权限） | 解冻 + 加锁 |
+| com.meizu.customizecenter | 个性化 / 锁屏样式 | 解冻 + 加锁 |
+| com.meizu.wallpapersetting | 壁纸 / 锁屏壁纸设置 | 解冻 + 加锁 |
+| com.meizu.earphone | 耳机 / 蓝牙音频服务 | 解冻 + 加锁 |
+| com.sprd.powersavemodelauncher | 省电模式桌面（低电量时影响桌面显示） | 解冻 + 加锁 |
+| com.ibimuyu.lockscreen | 锁屏 | 解冻 + 加锁（v9.2 已处理） |
+| com.android.printspooler / bips | 打印 | 解冻 + 加锁（v9.2） |
+| com.google.android.marvin.talkback | 无障碍读屏 | 解冻 + 加锁（v9.2） |
+| cellbroadcast × 3 / stk / simappdialog | 紧急广播 / SIM 工具包 | 解冻 + 加锁（v9.2） |
+
+### 当前状态
+
+```
+已冻结 73 个（魅族/谷歌/展锐定制与冗余）
+已加锁 71 个（核心系统 + 锁屏/安全/打印/无障碍/虚拟化/支付）
+冻结清单关键词审计（lock/unlock/keyguard/biometric/finger/auth/screen/power…）：无残留
+```
+
+### 若仍异常，下一个怀疑对象
+
+`com.meizu.mcare`（手机管家，负责清理/省电/后台管理）仍处于冻结状态。
+如仍出现异常耗电、后台被杀、通知延迟，可将其解冻并加锁。

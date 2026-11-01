@@ -32,11 +32,8 @@ com.meizu.alphame
 com.meizu.assistant
 com.meizu.cloud
 com.meizu.commdiagnostic
-com.meizu.customizecenter
 com.meizu.datamigration
 com.meizu.dataservice
-com.meizu.earphone
-com.meizu.ems
 com.meizu.feedback
 com.meizu.flyme.agentstore
 com.meizu.flyme.directservice
@@ -65,12 +62,10 @@ com.meizu.remotecooperation
 com.meizu.smarthome
 com.meizu.suggestion
 com.meizu.voiceassistant
-com.meizu.wallpapersetting
 com.sprd.camta
 com.sprd.engineermode
 com.sprd.linkturbo
 com.sprd.logmanager
-com.sprd.powersavemodelauncher
 com.sprd.uasetting
 com.sprd.validationtools
 com.unisoc.silent.reboot
