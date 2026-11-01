@@ -1125,9 +1125,10 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
   <p class="lead">2.3 节只看到「80 个字节被改成 NOP」。这一节回答三个问题：<b>这 5 处长在哪、它们调用谁、被废掉的到底是什么逻辑</b>。</p>
 
   <div class="note">
-    <b>方法说明：</b>反汇编由自研的 AArch64 子集解码器完成（<code class="inl">a64dis2.py</code>），内置 10 条已知编码的自检
-    （<code class="inl">bl / cbz / movz / movk / nop / ret / mov / tst / cset / stp</code>），全部通过后才输出结果。
-    每条结论旁都列出<b>原始机器码</b>，可独立复核；未覆盖的编码一律输出 <code class="inl">dw 0x…</code>，不做猜测。
+    <b>方法说明：</b>反汇编由 <b>Capstone 5.0.7</b>（ARM64 后端）生成，脚本 <code class="inl">capstone_dis.py</code> 可复现。
+    同时保留了一份自研的 AArch64 子集解码器（<code class="inl">a64dis2.py</code>）做交叉校验 —— 它曾把我的一处极性判断写反，
+    正是 Capstone 的对齐结果发现了这个错误（见 13.3 末尾的更正记录）。
+    每条结论旁都列出<b>原始机器码</b>，可独立复核。
   </div>
 
   <h3>13.1 五处补丁点全貌</h3>
@@ -1169,7 +1170,7 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
   <h4>这 4 条指令的语义</h4>
   <div class="asmdl">
     <div class="k">bl 0x4000b9c8</div><div class="v"><em>调用校验</em> —— 返回值 w0 表示结果</div>
-    <div class="k">cbz w0, +0x10</div><div class="v"><em>w0 == 0 就跳过错误分支</em> —— 即返回 0 视为「通过」</div>
+    <div class="k">cbz w0, +0xC</div><div class="v"><em>w0 == 0 则跳过报告块</em> —— 只有<b>非零</b>才会执行「设错误码 + 上报」</div>
     <div class="k">movz w0, #0x1E</div><div class="v"><em>把错误码写进 w0</em> —— 每个调用点有各自的码（30/18/27/28）</div>
     <div class="k">bl 0x40001bd0</div><div class="v"><em>调用统一的错误上报</em> —— 打印并挂起</div>
   </div>
@@ -1203,8 +1204,8 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
 0x00CD4C   910103a0   add  x0, x29, #0x40          <span class="c">; 摘要</span>
 0x00CD50   2a0303e2   mov  w2, w3                  <span class="c">; 长度</span>
 0x00CD54   97ffffbc   bl   0x4000cc44            <span class="c">; <b>verify(摘要, 签名, 长度)</b></span>
-0x00CD58   6b1f001f   subs wzr, w0, w0
-0x00CD5C   1a9f17e0   cset w0, ne                  <span class="c">; 返回 (结果 != 0)</span></pre>
+0x00CD58   6b1f001f   cmp  w0, wzr               <span class="c">; 比较验签结果与 0</span>
+0x00CD5C   1a9f17e0   cset w0, eq                  <span class="c">; 返回 (结果 == 0 ? 1 : 0)</span></pre>
 
   <p>把这段翻译成 C，大致是：</p>
 <pre><span class="pp">int</span> verify_image(<span class="pp">void</span> *data, <span class="pp">void</span> *sig, <span class="pp">size_t</span> sig_len, <span class="pp">int</span> mode)
@@ -1215,11 +1216,23 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
     memset(digest, 0, 32);
     hash(data, digest);                    <span class="c">// 0x0CCB0</span>
     memset(tmp, 0, 16);
-    <span class="pp">return</span> rsa_verify(digest, sig, sig_len) != 0;   <span class="c">// 0x0CC44</span>
+    <span class="pp">return</span> rsa_verify(digest, sig, sig_len) == 0;   <span class="c">// 0x0CC44；返回 1 = 失败</span>
 }</pre>
   <div class="note good">
     <b>结论：</b>这是一段标准的「<b>计算摘要 → 用公钥验证签名</b>」逻辑。32 字节正是 SHA-256 的输出长度，
     0x0CC44 是验签例程。三个参数 <code class="inl">(数据, 签名, 长度)</code> 与展锐镜像的 <code class="inl">DHTB</code> 签名头（含 28 字节摘要域）完全吻合。
+    <br><br>
+    <b>返回值极性（容易看反）：</b><code class="inl">cmp w0, wzr</code> + <code class="inl">cset w0, eq</code> 的含义是
+    「<b>底层返回 0 → 本函数返回 1</b>」。而调用点的 <code class="inl">cbz</code> 是「返回 0 就跳过报告块」，
+    所以最终语义是：<b>本函数返回 1 表示校验不通过，返回 0 表示通过</b>。
+    底层 0x0CC44 遵循的是「0 = 验签失败」这一非典型约定。
+  </div>
+
+  <div class="note bad">
+    <b>更正记录（v3.1）：</b>本页 v3 初版把这两行写成 <code class="inl">subs wzr, w0, w0</code> + <code class="inl">cset w0, ne</code>
+    （即「非零为通过」），与 Capstone 的对齐结果不符。用 Capstone 5.0.7 复核后确认正确形式是
+    <code class="inl">cmp w0, wzr</code> + <code class="inl">cset w0, eq</code>，极性相反。
+    代码本身的意思是「必须调用它、并检查返回值」，NOP 掉之后这段判断整体消失 —— <b>13.5 的结论不受影响</b>。
   </div>
 
   <h3>13.4 错误上报：0x1BD0 与消息表</h3>
@@ -1244,20 +1257,36 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
     这是最小改动、最大效果的典型二进制补丁。
   </div>
 
-  <h3>13.6 关于验证手段</h3>
-  <p>本机装有 <b>IDA Professional 9.4</b>，也接入了 REA 的 MCP 桥接，但交叉验证未能完成：</p>
-<pre><span class="c"># REA 打开裸 ARM64 时各 provider 的拒绝原因</span>
+  <h3>13.6 验证手段与复现</h3>
+  <p>本节最终的反汇编来自 <b>Capstone 5.0.7</b>（ARM64 后端）。它同时被 radare2 / rizin / Ghidra 等工具用作反汇编引擎，
+  因此可以作为基准。获取过程有点绕，记录如下便于复现：</p>
+<pre><span class="c"># ① 环境里的 pip 被沙箱临时目录卡住 —— 但 TLS 本身是通的（Python 用 OpenSSL，不是 schannel）</span>
+python -c "import urllib.request as u; print(len(u.urlopen('https://pypi.org/pypi/capstone/json', timeout=20).read()))"
+<span class="o">20000+</span>
+
+<span class="c"># ② 于是绕过 pip，直接下载 wheel 并解包</span>
+python -c "import urllib.request as u, zipfile, io; \
+  z = zipfile.ZipFile(io.BytesIO(u.urlopen(WHEEL_URL, timeout=120).read())); \
+  z.extractall(r'...\_pylibs')"
+
+<span class="c"># ③ sys.path.insert 之后即可 import（cp37-abi3 轮子在 3.12 上可用）</span>
+import capstone; print(capstone.__version__)   <span class="o"># 5.0.7</span></pre>
+
+  <p>IDA Professional 9.4 本机也有，但两条路都没走通，一并记录：</p>
+<pre><span class="c"># REA 打开裸 ARM64 时，各 provider 的拒绝原因</span>
 ghidra → Windows 版 Ghidra P0 只接受 PE 与 raw 6502
 hopper → 不支持 win32
 ida    → 不接受 headerless raw binary
 kuna   → 未配置
 
-<span class="c"># 包成 ELF 后 IDA 可以打开，但 MCP 桥接本身报错：</span>
+<span class="c"># 把 SPL 包成 ELF 后 IDA 能打开，但 REA 的 IDA 桥接缺插件，且客户端 mcp 版本过新</span>
 ModuleNotFoundError: No module named 'mcp.server.fastmcp'.
 This is mcp 2.x, where FastMCP was renamed to MCPServer …
-<span class="c"># → ida_pro_mcp 需要 mcp&lt;2，系统 Python 3.14 里装的是 mcp 2.x</span></pre>
-  <p class="count">若要复现权威反汇编：把 <code class="inl">splloader.bin</code> 以 base <code class="inl">0x40000000</code>、ARM64 Little-Endian 载入 IDA，
-    跳转 <code class="inl">0x4000CD00</code> 即可。本节所有偏移与该载入方式一致。</p>
+<span class="c"># → ida_pro_mcp 需要 mcp&lt;2；系统 Python 3.14 里装的是 mcp 2.x</span></pre>
+
+  <p class="count">结论：<b>不需要 IDA 也能拿到权威反汇编</b>。若要人工复核，把 <code class="inl">splloader.bin</code>
+    以 base <code class="inl">0x40000000</code>、ARM64 Little-Endian 载入任意反汇编器，跳转 <code class="inl">0x4000CD00</code> 即可；
+    本节所有偏移与该载入方式一致。复现脚本：<code class="inl">scripts/capstone_dis.py</code>。</p>
 </section>
 
 <!-- 14 -->
