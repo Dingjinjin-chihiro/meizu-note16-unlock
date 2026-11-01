@@ -116,8 +116,10 @@ public class MainActivity extends Activity {
     }
 
     private boolean isFrozen(String pkg) {
-        return getPackageManager().getApplicationEnabledSetting(pkg)
-                == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+        int st = getPackageManager().getApplicationEnabledSetting(pkg);
+        return st == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || st == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
+                || st == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
     }
 
     public class Bridge {
@@ -216,6 +218,31 @@ public class MainActivity extends Activity {
                 return r.toString();
             } catch (Exception e) {
                 return "{\"ok\":0,\"skip\":0}";
+            }
+        }
+
+        private final java.util.HashMap<String, String> iconCache = new java.util.HashMap<>();
+
+        @JavascriptInterface
+        public String iconFor(String pkg) {
+            try {
+                String cached = iconCache.get(pkg);
+                if (cached != null) return cached;
+                android.graphics.drawable.Drawable d = getPackageManager().getApplicationIcon(pkg);
+                int size = (int) (getResources().getDisplayMetrics().density * 44);
+                android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(
+                        size, size, android.graphics.Bitmap.Config.ARGB_8888);
+                android.graphics.Canvas c = new android.graphics.Canvas(bmp);
+                d.setBounds(0, 0, size, size);
+                d.draw(c);
+                java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 88, bos);
+                String uri = "data:image/png;base64," + android.util.Base64.encodeToString(
+                        bos.toByteArray(), android.util.Base64.NO_WRAP);
+                iconCache.put(pkg, uri);
+                return uri;
+            } catch (Throwable t) {
+                return "";
             }
         }
 

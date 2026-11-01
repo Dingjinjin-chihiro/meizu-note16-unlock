@@ -6,97 +6,158 @@
 <title>魅族冻结助手</title>
 <style>
   :root{
-    --bg:#0f1115; --card:#171a21; --card2:#1d2129; --line:#262b35;
-    --txt:#e8eaed; --dim:#8b93a1; --acc:#4f8cff; --ok:#33c47a; --warn:#ff5c5c;
+    --bg:#0B0D10; --card:#15181F; --card2:#1B1F27; --line:#23272F;
+    --txt:#E9ECF1; --dim:#8791A1; --mute:#5C6675;
+    --acc:#4C8DFF; --acc2:#6FA8FF; --ok:#3DD68C; --err:#FF5C5C;
+    --dangerbg:#2A161A; --dangerline:#4A2830;
+    --okbg:#10261B; --okline:#1E4A33;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);color:var(--txt);
-    font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;}
+    font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
 
   .app{height:100%;display:flex;flex-direction:column}
 
-  /* ===== 固定头部 ===== */
-  .hdr{flex:0 0 auto;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 12px 8px}
-  .titlerow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  h1{font-size:19px;margin:0;letter-spacing:.5px}
-  .hdrright{display:flex;align-items:center;gap:8px}
-  .sub{font-size:11px;color:var(--dim)}
-  .sub b{color:var(--ok)}
-  .linkbtn{font-size:11px;color:#ff7b7b;border:1px solid #4a2830;background:#241a1d;
-    padding:4px 9px;border-radius:999px}
-  .linkbtn:active{background:#33222a}
-  input[type=text]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);
-    border-radius:10px;padding:9px 12px;font-size:14px;outline:none;margin-bottom:8px}
-  input[type=text]:focus{border-color:var(--acc)}
-  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+  /* ============ 头部 ============ */
+  .hdr{flex:0 0 auto;background:linear-gradient(180deg,#101318 0%,var(--bg) 100%);
+       border-bottom:1px solid var(--line);padding:14px 14px 10px}
+
+  .titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  h1{font-size:19px;font-weight:650;margin:0;letter-spacing:.3px;
+     background:linear-gradient(92deg,#fff 0%,#A9C4F5 100%);
+     -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stats{font-size:11.5px;color:var(--dim);margin:3px 0 10px;letter-spacing:.2px}
+  .stats b{color:var(--txt);font-weight:600}
+  .stats i{color:var(--err);font-style:normal;font-weight:600}
+
+  .pill{flex:0 0 auto;font-size:11.5px;font-weight:500;color:#FF9AA5;
+    border:1px solid var(--dangerline);background:var(--dangerbg);
+    padding:6px 11px;border-radius:999px;transition:.15s}
+  .pill:active{transform:scale(.95);background:#331A20}
+
+  .searchbox{position:relative;margin-bottom:9px}
+  .searchbox input{width:100%;background:var(--card);border:1px solid var(--line);color:var(--txt);
+    border-radius:12px;padding:11px 38px 11px 13px;font-size:14px;outline:none;transition:.15s}
+  .searchbox input:focus{border-color:var(--acc);background:var(--card2);
+    box-shadow:0 0 0 3px rgba(76,141,255,.12)}
+  .searchbox input::placeholder{color:var(--mute)}
+  .clr{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;border-radius:50%;background:#2B313B;color:#B9C2CF;
+    display:none;align-items:center;justify-content:center;font-size:13px;line-height:1}
+  .clr.on{display:flex}
+
+  .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:9px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
-  .chip{flex:0 0 auto;background:var(--card2);color:var(--dim);border:1px solid var(--line);
-    padding:5px 12px;border-radius:999px;font-size:12px}
-  .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
-  .tools{display:flex;gap:6px}
-  .tool{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);
-    border-radius:9px;padding:8px 2px;font-size:12px;text-align:center}
-  .tool:active{background:#2a3140}
+  .chip{flex:0 0 auto;background:var(--card);color:var(--dim);border:1px solid var(--line);
+    padding:6px 13px;border-radius:999px;font-size:12px;transition:.15s}
+  .chip:active{transform:scale(.96)}
+  .chip.on{background:linear-gradient(135deg,var(--acc) 0%,#3E7BEA 100%);
+    border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(76,141,255,.32)}
 
-  /* ===== 列表 ===== */
-  .listwrap{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 130px}
-  .list{display:flex;flex-direction:column;gap:6px}
-  .row{display:flex;align-items:center;gap:10px;background:var(--card);
-    border:1px solid var(--line);border-radius:12px;padding:11px 12px;transition:.12s}
-  .row.sel{border-color:var(--acc);background:#16213a}
-  .box{width:22px;height:22px;flex:0 0 auto;border:2px solid #4a5262;border-radius:6px;
-    display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent}
+  .tools{display:flex;gap:7px}
+  .tool{flex:1;background:var(--card);border:1px solid var(--line);color:#C7CFDB;
+    border-radius:10px;padding:9px 2px;font-size:12px;text-align:center;transition:.12s}
+  .tool:active{transform:scale(.96);background:var(--card2);color:#fff}
+
+  /* ============ 列表 ============ */
+  .listwrap{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px 12px 132px}
+  .list{display:flex;flex-direction:column;gap:7px}
+
+  .row{display:flex;align-items:center;gap:11px;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:10px 12px;transition:.13s;
+    animation:pop .22s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .row:active{transform:scale(.992);background:var(--card2)}
+  .row.sel{border-color:var(--acc);background:#141C2E;
+    box-shadow:0 0 0 1px rgba(76,141,255,.45),0 4px 14px rgba(76,141,255,.12)}
+
+  .box{width:21px;height:21px;flex:0 0 auto;border:2px solid #3E4653;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:.13s}
   .row.sel .box{background:var(--acc);border-color:var(--acc);color:#fff}
-  .info{flex:1;min-width:0}
-  .name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pkg{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .badge{flex:0 0 auto;font-size:11px;padding:3px 8px;border-radius:999px}
-  .badge.f{background:#3a1f26;color:#ff7b7b}
-  .badge.e{background:#16311f;color:#4ad98a}
-  .empty,.spinner{text-align:center;color:var(--dim);font-size:13px;padding:36px 0}
 
-  /* ===== 底部操作栏 ===== */
-  .actionbar{position:fixed;left:0;right:0;bottom:0;background:#151922;
-    border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-    transform:translateY(110%);transition:.2s;z-index:5}
+  .ico{width:42px;height:42px;flex:0 0 auto;border-radius:11px;background:#22262E;
+    object-fit:contain;padding:0}
+
+  .info{flex:1;min-width:0}
+  .name{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    letter-spacing:.1px}
+  .pkg{font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    margin-top:2px;font-family:ui-monospace,"Roboto Mono",monospace}
+
+  .badge{flex:0 0 auto;font-size:10.5px;font-weight:500;padding:4px 8px;border-radius:8px;
+    letter-spacing:.2px}
+  .badge.f{background:var(--dangerbg);color:#FF8E99}
+  .badge.e{background:var(--okbg);color:#57DE9C}
+
+  /* 骨架屏 */
+  .sk{display:flex;align-items:center;gap:11px;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .sk .b{background:linear-gradient(90deg,#1C2028 25%,#252A34 50%,#1C2028 75%);
+    background-size:200% 100%;animation:sh 1.2s infinite;border-radius:8px}
+  .sk .b1{width:42px;height:42px;border-radius:11px}
+  .sk .b2{width:58%;height:12px}
+  .sk .b3{width:38%;height:10px;margin-top:6px}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  .empty{text-align:center;padding:56px 20px;color:var(--mute)}
+  .empty .big{font-size:34px;opacity:.5;margin-bottom:10px}
+  .empty .t{font-size:13px}
+
+  /* ============ 底部操作栏 ============ */
+  .actionbar{position:fixed;left:0;right:0;bottom:0;background:rgba(19,22,29,.97);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    transform:translateY(115%);transition:.22s cubic-bezier(.4,0,.2,1);z-index:5}
   .actionbar.on{transform:translateY(0)}
-  .actionbar .cnt{font-size:12px;color:var(--dim);margin-bottom:8px}
-  .actionbar .cnt b{color:var(--acc);font-size:14px}
+  .actionbar .cnt{font-size:12px;color:var(--dim);margin-bottom:9px;display:flex;
+    align-items:center;justify-content:space-between}
+  .actionbar .cnt b{color:var(--acc);font-size:15px;font-weight:650}
   .abtns{display:flex;gap:8px}
   .abtn{flex:1;border:1px solid var(--line);background:var(--card2);color:var(--txt);
-    border-radius:10px;padding:12px 4px;font-size:13px;text-align:center}
-  .abtn.red{color:#ff7b7b;border-color:#4a2830;background:#2a1a1f}
-  .abtn.green{color:#4ad98a;border-color:#22452f;background:#132a1e}
-  .abtn.ghost{flex:0 0 84px;color:var(--dim)}
+    border-radius:12px;padding:13px 4px;font-size:13.5px;font-weight:500;text-align:center;
+    transition:.12s}
+  .abtn:active{transform:scale(.96)}
+  .abtn.red{color:#FF9AA5;border-color:var(--dangerline);background:var(--dangerbg)}
+  .abtn.green{color:#63E3A3;border-color:var(--okline);background:var(--okbg)}
+  .abtn.ghost{flex:0 0 82px;color:var(--dim);background:transparent}
 
-  /* ===== 弹层 ===== */
-  .mask{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:9}
+  /* ============ 弹层 ============ */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(2px);
+    display:none;z-index:9}
   .mask.on{display:block}
-  .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:16px 16px 0 0;
-    padding:16px;z-index:10;transform:translateY(110%);transition:.22s;max-height:82%;overflow-y:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);
+    border-radius:20px 20px 0 0;padding:18px;z-index:10;
+    transform:translateY(115%);transition:.24s cubic-bezier(.4,0,.2,1);
+    max-height:84%;overflow-y:auto;border-top:1px solid #2C313B}
   .sheet.on{transform:translateY(0)}
-  .sheet h3{margin:0 0 4px;font-size:15px}
-  .sheet .hint{font-size:12px;color:var(--dim);margin-bottom:10px;word-break:break-all}
-  .sheet textarea{width:100%;height:160px;background:#0b0d11;color:var(--txt);
-    border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px;
-    font-family:ui-monospace,monospace;resize:none;outline:none}
-  .sheet .row2{display:flex;gap:8px;margin-top:12px}
+  .sheet h3{margin:0 0 3px;font-size:16px;font-weight:600}
+  .sheet .hint{font-size:11.5px;color:var(--dim);margin-bottom:12px;word-break:break-all;
+    font-family:ui-monospace,monospace}
+  .sheet textarea{width:100%;height:160px;background:#0A0C10;color:var(--txt);
+    border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;
+    font-family:ui-monospace,monospace;resize:none;outline:none;margin-top:8px}
+  .sheet .row2{display:flex;gap:8px;margin-top:14px}
 
-  .kv{display:flex;flex-direction:column;gap:1px;background:var(--line);border-radius:10px;overflow:hidden}
-  .kv .kvrow{display:flex;background:var(--card2);padding:9px 11px;font-size:12px;gap:10px}
-  .kv .k{color:var(--dim);flex:0 0 60px}
-  .kv .v{flex:1;word-break:break-all;text-align:right}
-  .kv .v.ok{color:#4ad98a}
-  .kv .v.no{color:#ff7b7b}
+  .dhead{display:flex;gap:12px;align-items:center;margin-bottom:13px}
+  .dico{width:48px;height:48px;border-radius:13px;background:#22262E;flex:0 0 auto}
+  .kv{display:flex;flex-direction:column;gap:1px;background:var(--line);
+    border-radius:12px;overflow:hidden}
+  .kv .kvrow{display:flex;background:#191D24;padding:10px 12px;font-size:12.5px;gap:12px}
+  .kv .k{color:var(--dim);flex:0 0 58px}
+  .kv .v{flex:1;word-break:break-all;text-align:right;font-family:ui-monospace,monospace;
+    font-size:12px}
+  .kv .v.ok{color:#57DE9C;font-family:inherit}
+  .kv .v.no{color:#FF8E99;font-family:inherit}
 
-  .toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
-    background:#2a3140;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;
-    opacity:0;transition:.18s;pointer-events:none;max-width:84%;text-align:center;
-    border:1px solid #333c4d;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:20}
-  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-  .toast.ok{background:#15301f;border-color:#2c6b45;color:#7ff0b0}
-  .toast.err{background:#33191e;border-color:#6b2c34;color:#ff9aa5}
-  .toast.up{bottom:200px}
+  .toast{position:fixed;left:50%;bottom:122px;transform:translateX(-50%) translateY(16px) scale(.96);
+    background:#242A34;color:#fff;padding:11px 17px;border-radius:14px;font-size:13px;
+    opacity:0;transition:.2s cubic-bezier(.4,0,.2,1);pointer-events:none;max-width:86%;
+    text-align:center;border:1px solid #333B47;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:20}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  .toast.ok{background:#12301F;border-color:#27573C;color:#7BF0B4}
+  .toast.err{background:#321A1E;border-color:#63303A;color:#FFAEb6}
+  .toast.up{bottom:206px}
 </style>
 </head>
 <body>
@@ -105,12 +166,15 @@
   <div class="hdr">
     <div class="titlerow">
       <h1>魅族冻结助手</h1>
-      <div class="hdrright">
-        <div class="sub" id="sub">读取中…</div>
-        <div class="linkbtn" id="unfreezeAll">解冻全部</div>
-      </div>
+      <div class="pill" id="unfreezeAll">解冻全部</div>
     </div>
-    <input type="text" id="q" placeholder="按应用名或包名搜索" autocomplete="off">
+    <div class="stats" id="stats">读取中…</div>
+
+    <div class="searchbox">
+      <input type="text" id="q" placeholder="搜索应用名或包名" autocomplete="off">
+      <div class="clr" id="qclr">✕</div>
+    </div>
+
     <div class="chips" id="chips">
       <div class="chip on" data-f="all">全部</div>
       <div class="chip" data-f="frozen">已冻结</div>
@@ -118,10 +182,11 @@
       <div class="chip" data-f="third">第三方</div>
       <div class="chip" data-f="system">系统</div>
     </div>
+
     <div class="tools">
       <div class="tool" id="selAll">全选</div>
       <div class="tool" id="selNone">取消</div>
-      <div class="tool" id="sortBtn">排序:名称</div>
+      <div class="tool" id="sortBtn">排序</div>
       <div class="tool" id="importBtn">导入</div>
       <div class="tool" id="exportBtn">导出</div>
       <div class="tool" id="refreshBtn">刷新</div>
@@ -129,12 +194,12 @@
   </div>
 
   <div class="listwrap" id="listwrap">
-    <div class="list" id="list"><div class="spinner">加载中…</div></div>
+    <div class="list" id="list"></div>
   </div>
 </div>
 
 <div class="actionbar" id="actionbar">
-  <div class="cnt">已选择 <b id="selCount">0</b> 个应用</div>
+  <div class="cnt"><span>已选择 <b id="selCount">0</b> 个应用</span><span id="selHint"></span></div>
   <div class="abtns">
     <div class="abtn red" id="doFreeze">冻结</div>
     <div class="abtn green" id="doUnfreeze">解冻</div>
@@ -146,7 +211,7 @@
 
 <div class="sheet" id="sheet">
   <h3>导入包名列表</h3>
-  <div class="hint">每行一个包名，支持 # 注释；也可以整段粘贴。</div>
+  <div class="hint">每行一个包名，支持 # 注释</div>
   <textarea id="ta" placeholder="com.meizu.flyme.weather&#10;com.meizu.media.music&#10;# 注释会被忽略"></textarea>
   <div class="row2">
     <div class="abtn ghost" id="cancelImport">取消</div>
@@ -155,8 +220,13 @@
 </div>
 
 <div class="sheet" id="detail">
-  <h3 id="dName">应用详情</h3>
-  <div class="hint" id="dPkg"></div>
+  <div class="dhead">
+    <img class="dico" id="dIcon">
+    <div style="min-width:0">
+      <h3 id="dName">应用详情</h3>
+      <div class="hint" id="dPkg" style="margin-bottom:0"></div>
+    </div>
+  </div>
   <div class="kv" id="dBody"></div>
   <div class="row2">
     <div class="abtn" id="dLaunch">打开</div>
@@ -171,7 +241,7 @@
 <script>
 var ALL = [], FILTER = 'all', Q = '', SEL = {}, BUSY = false;
 var SORT = 'name', SORTS = ['name','size','time'], SORTNAME = {name:'名称',size:'大小',time:'时间'};
-var DETAIL_PKG = null;
+var DETAIL_PKG = null, ICON_CACHE = {};
 
 function toast(m, kind){
   var t = document.getElementById('toast');
@@ -201,14 +271,27 @@ function fmtTime(ms){
   return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
 }
 
+/* 骨架屏 */
+function skeleton(n){
+  var h = '';
+  for (var i=0;i<n;i++){
+    h += '<div class="sk"><div class="b b1"></div>'
+      +  '<div style="flex:1"><div class="b b2"></div><div class="b b3"></div></div></div>';
+  }
+  document.getElementById('list').innerHTML = h;
+}
+
 function load(){
-  document.getElementById('list').innerHTML = '<div class="spinner">加载中…</div>';
-  try { ALL = JSON.parse(Native.listApps()); }
-  catch(e){ document.getElementById('sub').textContent = '读取失败'; return; }
-  SEL = {};
-  render();
-  var frozen = ALL.filter(function(a){ return a.f; }).length;
-  toast('已刷新：共 ' + ALL.length + ' 个应用，冻结 ' + frozen + ' 个');
+  skeleton(7);
+  document.getElementById('stats').textContent = '读取中…';
+  setTimeout(function(){
+    try { ALL = JSON.parse(Native.listApps()); }
+    catch(e){ document.getElementById('stats').textContent = '读取失败'; return; }
+    SEL = {};
+    render();
+    var frozen = ALL.filter(function(a){ return a.f; }).length;
+    toast('已刷新：共 ' + ALL.length + ' 个，冻结 ' + frozen + ' 个');
+  }, 30);
 }
 
 function filtered(){
@@ -228,18 +311,22 @@ function filtered(){
 function render(){
   var out = filtered();
   var frozen = ALL.filter(function(a){ return a.f; }).length;
-  document.getElementById('sub').innerHTML = '共 <b>' + ALL.length + '</b> / 冻结 <b>' + frozen + '</b>';
+  document.getElementById('stats').innerHTML =
+    '共 <b>' + ALL.length + '</b> 个应用　已冻结 <i>' + frozen + '</i> 个';
 
   if (!out.length){
-    document.getElementById('list').innerHTML = '<div class="empty">没有匹配的应用</div>';
+    document.getElementById('list').innerHTML =
+      '<div class="empty"><div class="big">🔍</div><div class="t">没有匹配的应用</div></div>';
     updateBar(); return;
   }
 
   var html = '';
   for (var i=0;i<out.length;i++){
     var a = out[i], on = !!SEL[a.p];
+    var icon = ICON_CACHE[a.p] ? 'src="' + ICON_CACHE[a.p] + '"' : '';
     html += '<div class="row' + (on?' sel':'') + '" data-p="' + esc(a.p) + '">'
          +  '<div class="box">✓</div>'
+         +  '<img class="ico" ' + icon + ' data-p="' + esc(a.p) + '">'
          +  '<div class="info"><div class="name">' + esc(a.l) + '</div>'
          +  '<div class="pkg">' + esc(a.p) + '</div></div>'
          +  '<div class="badge ' + (a.f?'f':'e') + '">' + (a.f?'已冻结':'启用中') + '</div>'
@@ -250,6 +337,25 @@ function render(){
   var rows = document.querySelectorAll('#list .row');
   for (var k=0;k<rows.length;k++) bindRow(rows[k]);
   updateBar();
+  loadIcons();
+}
+
+/* 图标分批加载，避免卡顿 */
+function loadIcons(){
+  var imgs = document.querySelectorAll('#list img.ico:not([src])');
+  var i = 0;
+  function step(){
+    var end = Math.min(i + 14, imgs.length);
+    for (; i<end; i++){
+      var p = imgs[i].getAttribute('data-p');
+      try {
+        var u = ICON_CACHE[p] || Native.iconFor(p);
+        if (u){ ICON_CACHE[p] = u; imgs[i].src = u; }
+      } catch(e){}
+    }
+    if (i < imgs.length) setTimeout(step, 12);
+  }
+  step();
 }
 
 /* 短按=选中，长按=详情 */
@@ -261,9 +367,9 @@ function bindRow(row){
     longPressed = false;
     timer = setTimeout(function(){
       longPressed = true;
-      if (navigator.vibrate) navigator.vibrate(12);
+      if (navigator.vibrate) navigator.vibrate(14);
       openDetail(pkg);
-    }, 480);
+    }, 460);
   }
   function cancel(){ if (timer){ clearTimeout(timer); timer = null; } }
 
@@ -293,6 +399,14 @@ function selList(){
 function updateBar(){
   var n = selList().length;
   document.getElementById('selCount').textContent = n;
+  var hint = document.getElementById('selHint');
+  if (n){
+    var f = 0, e = 0;
+    for (var p in SEL) if (SEL.hasOwnProperty(p)){
+      for (var i=0;i<ALL.length;i++) if (ALL[i].p === p){ if (ALL[i].f) f++; else e++; break; }
+    }
+    hint.textContent = '冻结 ' + f + ' · 启用 ' + e;
+  } else hint.textContent = '';
   var bar = document.getElementById('actionbar');
   if (n > 0) bar.classList.add('on'); else bar.classList.remove('on');
 }
@@ -329,6 +443,10 @@ function openDetail(pkg){
 
   document.getElementById('dName').textContent = d.label;
   document.getElementById('dPkg').textContent = d.pkg;
+  try {
+    var iu = ICON_CACHE[pkg] || Native.iconFor(pkg);
+    if (iu){ ICON_CACHE[pkg] = iu; document.getElementById('dIcon').src = iu; }
+  } catch(e){}
 
   function row(k, v, cls){
     return '<div class="kvrow"><div class="k">' + k + '</div><div class="v ' + (cls||'') + '">' + v + '</div></div>';
@@ -341,7 +459,7 @@ function openDetail(pkg){
   html += row('UID', d.uid);
   html += row('SDK', 'min ' + d.min + ' / target ' + d.target);
   html += row('APK', fmtSize(d.apkSize));
-  html += row('数据', d.dataKb >= 0 ? fmtSize(d.dataKb * 1024) : '未知');
+  html += row('数据', d.dataKb >= 0 ? fmtSize(d.dataKb * 1024) : '无数据目录');
   html += row('安装', fmtTime(d.install));
   html += row('更新', fmtTime(d.update));
   html += '<div class="kvrow"><div class="k">路径</div><div class="v" style="font-size:10px;text-align:left">' + esc(d.apk) + '</div></div>';
@@ -377,8 +495,10 @@ function detailAction(freeze){
 }
 
 /* ===== 事件 ===== */
-document.getElementById('q').addEventListener('input', function(e){
-  Q = e.target.value.trim().toLowerCase();
+var q = document.getElementById('q');
+q.addEventListener('input', function(){
+  Q = q.value.trim().toLowerCase();
+  document.getElementById('qclr').classList.toggle('on', !!Q);
   render();
   clearTimeout(window._st);
   window._st = setTimeout(function(){
@@ -388,6 +508,12 @@ document.getElementById('q').addEventListener('input', function(e){
     else toast('没有匹配「' + Q + '」的应用', 'err');
   }, 400);
 });
+document.getElementById('qclr').onclick = function(){
+  q.value = ''; Q = '';
+  this.classList.remove('on');
+  render();
+  toast('已清除搜索');
+};
 
 document.getElementById('chips').addEventListener('click', function(e){
   if (!e.target.classList.contains('chip')) return;
@@ -483,6 +609,7 @@ document.getElementById('dLaunch').onclick = function(){
   else toast('这个应用没有可启动的界面', 'err');
 };
 
+skeleton(7);
 load();
 </script>
 </body>

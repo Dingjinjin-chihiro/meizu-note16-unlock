@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：4.1　·　2026-11-01
+> 版本：5.1　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-4.1.apk`（25 KB）
+> APK：`app/release/meizu-freezer-5.1.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -268,3 +268,21 @@ d8 --lib android.jar --min-api 29 --output build\dex <classes>
 - **排序**：名称 → 大小 → 时间，循环切换
 - **解冻全部**：标题栏右侧红色按钮，确认后一次性解冻
 - 数据大小在 Java 侧解析 `du` 输出（`cut` 在这台机器上不可靠）
+## 九、v5.0 / v5.1 界面打磨
+
+**视觉**
+- 深色主题重做：`#0B0D10` 背景 + 分层卡片，渐变标题文字
+- **列表显示真实应用图标**（`PackageManager.getApplicationIcon` → PNG → base64，Java 侧 HashMap 缓存，JS 分批 14 个/轮加载避免卡顿）
+- 骨架屏加载（shimmer），空状态插图
+- 卡片行：图标 + 名称 + 等宽包名 + 状态胶囊，选中态带蓝色描边与光晕
+- 筛选 chip 选中态渐变 + 投影；按钮按压缩放反馈
+- 底部操作栏毛玻璃（`backdrop-filter: blur`），显示「冻结 N · 启用 M」统计
+- 弹层圆角 20px、底部抽屉动画、遮罩模糊
+- 详情面板头部显示应用图标
+
+**逻辑**
+- 修正冻结判定：原来只认 `DISABLED_USER(3)`，漏掉了 `DISABLED(2)`
+  （本机 `com.sprd.powersavemodelauncher`、`com.android.devicelockcontroller`）
+  现在 2/3/4 都算已冻结，App 计数与 `pm list packages -d` 完全一致（124 = 124）
+- 搜索框加清除按钮
+- 排序按钮文案简化为「排序」，当前方式在 toast 里提示
