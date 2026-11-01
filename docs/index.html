@@ -204,6 +204,8 @@ kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;bor
   <div class="grp">深 度 分 析</div>
   <a href="#disasm">13 · 补丁点反汇编</a>
   <a href="#protocol">14 · BROM 协议逐帧解析</a>
+  <div class="grp">后 续</div>
+  <a href="#debloat">15 · 系统精简</a>
 </nav>
 
 <main>
@@ -1390,6 +1392,61 @@ ch, typ = body[0], body[1]
 size = body[2] | (body[3] &lt;&lt; 8)</pre>
 
   <p class="count">完整脚本：<code class="inl">scripts/parse_brom.py</code>；输出 JSON：<code class="inl">scripts/brom_proto.json</code>。</p>
+</section>
+
+<!-- 15 -->
+<section id="debloat">
+  <h2 class="sec"><span class="num">15</span>系统精简</h2>
+  <p class="lead">解锁与 Root 之后，对 Flyme 做的一次可控去膨胀。完整清单与逐包说明见
+    <a href="https://github.com/Dingjinjin-chihiro/meizu-note16-unlock/blob/main/docs/%E5%8E%BB%E8%86%A8%E8%83%80%E8%AE%B0%E5%BD%95.md">去膨胀记录.md</a>。</p>
+
+  <div class="grid g4">
+    <div class="card"><div class="k">冻结系统应用</div><div class="v green">103</div><div class="d">pm disable-user（可逆）</div></div>
+    <div class="card"><div class="k">卸载第三方</div><div class="v amber">7</div><div class="d">uninstall --user 0（可恢复）</div></div>
+    <div class="card"><div class="k">重启验证</div><div class="v blue">通过</div><div class="d">boot_completed=1 · FATAL 0</div></div>
+    <div class="card"><div class="k">保护名单拦截</div><div class="v">0</div><div class="d">启动器/电话/WebView 等未触碰</div></div>
+  </div>
+
+  <h3>15.1 三条原则</h3>
+  <table class="tbl">
+    <tr><th style="width:150px">原则</th><th>说明</th></tr>
+    <tr><td>只冻结不卸载</td><td>系统应用用 <code class="inl">pm disable-user</code>，一条 <code class="inl">pm enable</code> 即可还原</td></tr>
+    <tr><td>第三方才卸载</td><td><code class="inl">pm uninstall --user 0</code>，<code class="inl">cmd package install-existing</code> 可恢复</td></tr>
+    <tr><td>不写 system</td><td>dm-verity 仍 enforcing，任何系统级改动只走 systemless</td></tr>
+  </table>
+
+  <h3>15.2 砍掉了什么</h3>
+  <table class="tbl">
+    <tr><th style="width:180px">类别</th><th style="width:80px">数量</th><th>典型项</th></tr>
+    <tr><td>商店 / 更新 / 账号 / 云</td><td class="mono">16</td><td>mstore、flyme.update、account、cloud、pps、mznfcpay</td></tr>
+    <tr><td>内容 / 社区 / 智能体</td><td class="mono">32</td><td>游戏中心、视频、音乐、天气、Aicy 智能体、壁纸</td></tr>
+    <tr><td>AOSP 冗余</td><td class="mono">37</td><td>彩蛋、屏保、打印、SIM 工具包、小区广播、健康连接</td></tr>
+    <tr><td>展锐工厂 / 调试</td><td class="mono">10</td><td>工程模式、日志管理、相机测试、工厂验证</td></tr>
+    <tr><td>厂商 / 第三方服务</td><td class="mono">8</td><td>星纪启动器、星闪互联、银联 TSM、TalkBack</td></tr>
+    <tr><td>第三方预装（卸载）</td><td class="mono">7</td><td>百度、扫描全能王、今日头条、抖音、小红书、WPS×2</td></tr>
+  </table>
+
+  <h3>15.3 保留了什么</h3>
+  <p>启动器、SystemUI、电话、短信、联系人、设置、WebView、相机、图库、文件管理、输入法、
+    蓝牙/NFC、网络栈、TEE/IFAA 生物识别 —— <b>一个都没动</b>。微博与 B 站也有意保留。</p>
+
+  <h3>15.4 恢复</h3>
+<pre><span class="c"># 一键恢复（110 条命令，冻结 + 卸载都在内）</span>
+C:\Users\DINGJINJIN\Downloads\Compressed\_dump\恢复全部冻结.ps1
+
+<span class="c"># 单条</span>
+adb shell pm enable com.meizu.mstore
+adb shell cmd package install-existing com.ss.android.ugc.aweme</pre>
+
+  <div class="note warn">
+    <b>已知副作用：</b>设置里的「账号与同步」「系统更新」「应用商店」入口会消失或点击无响应；
+    NFC 刷卡、魅族支付、云同步、查找手机不可用；OTA 提示不再出现。
+  </div>
+
+  <div class="note">
+    <b>未采用的方案：</b>曾尝试用 Private DNS（AdGuard DoT）做系统级去广告，但实测
+    <code class="inl">dns.adguard-dns.com</code> 在当前网络下 ICMP 100% 丢包，强行启用有整机断网风险，遂放弃。
+  </div>
 </section>
 
 </main>
