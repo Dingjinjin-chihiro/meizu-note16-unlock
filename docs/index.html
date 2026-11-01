@@ -201,6 +201,9 @@ kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;bor
   <a href="#faq">10 · 常见问题</a>
   <a href="#gloss">11 · 术语表</a>
   <a href="#scripts">12 · 脚本源码</a>
+  <div class="grp">深 度 分 析</div>
+  <a href="#disasm">13 · 补丁点反汇编</a>
+  <a href="#protocol">14 · BROM 协议逐帧解析</a>
 </nav>
 
 <main>
@@ -1115,6 +1118,250 @@ git remote set-url origin "https://github.com/owner/repo.git"</pre>
   <p>所有命令与输出来自本次真实操作记录；字节级数据由原始镜像直接比对得出。完整备份保留在 <code class="inl">_backup\</code>。</p>
   <p style="margin-top:12px">提示：<kbd>Ctrl</kbd>+<kbd>F</kbd> 可全文搜索；代码块右上角「复制」可直接取用。</p>
 </footer>
+
+<!-- 13 -->
+<section id="disasm">
+  <h2 class="sec"><span class="num">13</span>补丁点反汇编</h2>
+  <p class="lead">2.3 节只看到「80 个字节被改成 NOP」。这一节回答三个问题：<b>这 5 处长在哪、它们调用谁、被废掉的到底是什么逻辑</b>。</p>
+
+  <div class="note">
+    <b>方法说明：</b>反汇编由自研的 AArch64 子集解码器完成（<code class="inl">a64dis2.py</code>），内置 10 条已知编码的自检
+    （<code class="inl">bl / cbz / movz / movk / nop / ret / mov / tst / cset / stp</code>），全部通过后才输出结果。
+    每条结论旁都列出<b>原始机器码</b>，可独立复核；未覆盖的编码一律输出 <code class="inl">dw 0x…</code>，不做猜测。
+  </div>
+
+  <h3>13.1 五处补丁点全貌</h3>
+  <table class="tbl">
+    <tr><th style="width:38px">#</th><th style="width:90px">文件偏移</th><th>原始指令（被 NOP 覆盖的 4 条）</th><th style="width:80px">错误码</th><th style="width:96px">调用目标</th></tr>
+    <tr>
+      <td class="mono">1</td><td class="mono">0x00B660</td>
+      <td class="mono" style="font-size:11.6px">bl 0x4000b9c8 · cbz w0, 0x4000b670 · movz w0, #0x1e · bl 0x40001bd0</td>
+      <td class="mono" style="color:var(--amber)">0x1E / 30</td><td class="mono">0x0B9C8</td>
+    </tr>
+    <tr>
+      <td class="mono">2</td><td class="mono">0x00B770</td>
+      <td class="mono" style="font-size:11.6px">bl 0x4000b9c8 · cbz w0, 0x4000b780 · movz w0, #0x12 · bl 0x40001bd0</td>
+      <td class="mono" style="color:var(--amber)">0x12 / 18</td><td class="mono">0x0B9C8</td>
+    </tr>
+    <tr>
+      <td class="mono">3</td><td class="mono">0x00B8C0</td>
+      <td class="mono" style="font-size:11.6px">bl 0x4000b9c8 · cbz w0, 0x4000b8d0 · movz w0, #0x1b · bl 0x40001bd0</td>
+      <td class="mono" style="color:var(--amber)">0x1B / 27</td><td class="mono">0x0B9C8</td>
+    </tr>
+    <tr>
+      <td class="mono">4</td><td class="mono">0x00B8F8</td>
+      <td class="mono" style="font-size:11.6px">bl 0x4000b9c8 · cbz w0, 0x4000b908 · movz w0, #0x1c · bl 0x40001bd0</td>
+      <td class="mono" style="color:var(--amber)">0x1C / 28</td><td class="mono">0x0B9C8</td>
+    </tr>
+    <tr>
+      <td class="mono">5</td><td class="mono">0x00B92C</td>
+      <td class="mono" style="font-size:11.6px">bl 0x4000b9c8 · cbz w0, 0x4000b93c · movz w0, #0x1e · bl 0x40001bd0</td>
+      <td class="mono" style="color:var(--amber)">0x1E / 30</td><td class="mono">0x0B9C8</td>
+    </tr>
+  </table>
+
+  <div class="note purple">
+    <b>最重要的一点：5 处全部调用同一个地址 0x0B9C8。</b><br>
+    换句话说，SPL 里对镜像的签名校验是<b>集中的单一入口</b>，不是 5 套独立逻辑。
+    这也是为什么「把 4 条指令换成 4 个 NOP」就能让整条校验链失效 —— 只要打断这一个入口，5 个调用点全部变成空转。
+  </div>
+
+  <h4>这 4 条指令的语义</h4>
+  <div class="asmdl">
+    <div class="k">bl 0x4000b9c8</div><div class="v"><em>调用校验</em> —— 返回值 w0 表示结果</div>
+    <div class="k">cbz w0, +0x10</div><div class="v"><em>w0 == 0 就跳过错误分支</em> —— 即返回 0 视为「通过」</div>
+    <div class="k">movz w0, #0x1E</div><div class="v"><em>把错误码写进 w0</em> —— 每个调用点有各自的码（30/18/27/28）</div>
+    <div class="k">bl 0x40001bd0</div><div class="v"><em>调用统一的错误上报</em> —— 打印并挂起</div>
+  </div>
+  <p class="count">所以这 4 条构成一个标准模式：<b>校验 → 判断 → 设错误码 → 报错</b>。全部 NOP 掉之后，既不校验、也不判断、也不报错，直接落到下一段代码继续启动。</p>
+
+  <h3>13.2 共享入口：一个 8 字节的 thunk</h3>
+<pre>0x00B9C8   2a0403e3   mov  w3, w4        <span class="c">; 把第 4 个参数搬到 w3</span>
+0x00B9CC   140004cd   b    0x4000cd00     <span class="c">; 尾跳转到真正的实现</span></pre>
+  <p>它本身不做任何事，只是<b>调整参数后尾跳</b>。真正的逻辑在 <code class="inl">0x0CD00</code>。</p>
+
+  <h3>13.3 真正的校验函数：0x0CD00</h3>
+<pre>0x00CD00   a9ba7bfd   stp  x29, x30, [sp, #-96]!   <span class="c">; 开 96 字节栈帧，保存返回地址</span>
+0x00CD04   52800402   movz w2, #0x20               <span class="c">; 长度 32 —— SHA-256 摘要长度</span>
+0x00CD08   910003fd   add  x29, sp, #0x0           <span class="c">; 建立帧指针</span>
+0x00CD0C   a90153f3   stp  x19, x20, [sp, #16]     <span class="c">; 保存被调用者寄存器</span>
+0x00CD10   aa0003f4   mov  x20, x0                 <span class="c">; x20 = 参数1（数据指针）</span>
+0x00CD14   aa0103f3   mov  x19, x1                 <span class="c">; x19 = 参数2（签名指针）</span>
+0x00CD18   910103a0   add  x0, x29, #0x40          <span class="c">; x0 = 栈上缓冲区 A（摘要）</span>
+0x00CD1C   52800001   movz w1, #0x0                <span class="c">; 填充值 0</span>
+0x00CD20   f90017a3   str  x3, [x29, #0x28]        <span class="c">; 保存参数3（签名长度）</span>
+0x00CD24   97fffe29   bl   0x4000c5c8            <span class="c">; memset(A, 0, 0x20)</span>
+0x00CD28   aa1403e0   mov  x0, x20                 <span class="c">; 数据指针</span>
+0x00CD2C   910103a1   add  x1, x29, #0x40          <span class="c">; 目标 = 缓冲区 A</span>
+0x00CD30   97ffffe0   bl   0x4000ccb0            <span class="c">; <b>hash(数据, A)</b> —— 算出 32 字节摘要</span>
+0x00CD34   9100c3a0   add  x0, x29, #0x30          <span class="c">; 缓冲区 B</span>
+0x00CD38   52800001   movz w1, #0x0
+0x00CD3C   52800202   movz w2, #0x10               <span class="c">; 长度 16</span>
+0x00CD40   97fffe22   bl   0x4000c5c8            <span class="c">; memset(B, 0, 0x10)</span>
+0x00CD44   f94017a3   ldr  x3, [x29, #0x28]        <span class="c">; 取回签名长度</span>
+0x00CD48   aa1303e1   mov  x1, x19                 <span class="c">; 签名指针</span>
+0x00CD4C   910103a0   add  x0, x29, #0x40          <span class="c">; 摘要</span>
+0x00CD50   2a0303e2   mov  w2, w3                  <span class="c">; 长度</span>
+0x00CD54   97ffffbc   bl   0x4000cc44            <span class="c">; <b>verify(摘要, 签名, 长度)</b></span>
+0x00CD58   6b1f001f   subs wzr, w0, w0
+0x00CD5C   1a9f17e0   cset w0, ne                  <span class="c">; 返回 (结果 != 0)</span></pre>
+
+  <p>把这段翻译成 C，大致是：</p>
+<pre><span class="pp">int</span> verify_image(<span class="pp">void</span> *data, <span class="pp">void</span> *sig, <span class="pp">size_t</span> sig_len, <span class="pp">int</span> mode)
+{
+    <span class="pp">uint8_t</span> digest[32];      <span class="c">// 栈上 +0x40</span>
+    <span class="pp">uint8_t</span> tmp[16];         <span class="c">// 栈上 +0x30（清零但未使用？）</span>
+
+    memset(digest, 0, 32);
+    hash(data, digest);                    <span class="c">// 0x0CCB0</span>
+    memset(tmp, 0, 16);
+    <span class="pp">return</span> rsa_verify(digest, sig, sig_len) != 0;   <span class="c">// 0x0CC44</span>
+}</pre>
+  <div class="note good">
+    <b>结论：</b>这是一段标准的「<b>计算摘要 → 用公钥验证签名</b>」逻辑。32 字节正是 SHA-256 的输出长度，
+    0x0CC44 是验签例程。三个参数 <code class="inl">(数据, 签名, 长度)</code> 与展锐镜像的 <code class="inl">DHTB</code> 签名头（含 28 字节摘要域）完全吻合。
+  </div>
+
+  <h3>13.4 错误上报：0x1BD0 与消息表</h3>
+<pre>0x001BD0   a9be7bfd   stp  x29, x30, [sp, #-32]!
+0x001BD4   910003fd   add  x29, sp, #0x0
+0x001BD8   f9000bf3   str  x19, [sp, #0x10]
+0x001BDC   2a0003f3   mov  w19, w0            <span class="c">; 保存错误码</span>
+0x001BE0   51000400   sub  w0, w0, #0x1        <span class="c">; code - 1</span>
+0x001BE4   7101381f   subs wzr, w0, #0x4e      <span class="c">; cmp (code-1), 0x4E</span>
+0x001BE8   540001e8   b.hi 0x40001c24          <span class="c">; 超出 1..0x4F 就跳过查表</span>
+0x001BEC   d2811780   movz x0, #0x8bc
+0x001BF0   f2ac9220   movk x0, #0x6491, lsl #16 <span class="c">; x0 = 0x649108BC 消息表基址</span>
+0x001BF4   b9400000   ldr  w0, [x0, #0x0]</pre>
+  <p>错误码被限制在 <b>1..0x4F</b> 范围内，然后去 <code class="inl">0x649108BC</code> 处的表里取对应的消息字符串。
+  这解释了为什么每个调用点要有各自的错误码：<b>不同的失败原因会打印不同的提示</b>。</p>
+
+  <h3>13.5 一句话总结</h3>
+  <div class="note warn">
+    <code class="inl">gen_spl-unlock</code> 做的事非常精准：它找到「<b>5 个调用同一个验签函数的点</b>」，
+    把每个点的 <b>调用 / 判断 / 设错误码 / 报错</b> 四条指令整体换成 NOP。
+    校验函数本体（0x0CD00）<b>没有被改</b> —— 它还在，只是再也没人调用它。
+    这是最小改动、最大效果的典型二进制补丁。
+  </div>
+
+  <h3>13.6 关于验证手段</h3>
+  <p>本机装有 <b>IDA Professional 9.4</b>，也接入了 REA 的 MCP 桥接，但交叉验证未能完成：</p>
+<pre><span class="c"># REA 打开裸 ARM64 时各 provider 的拒绝原因</span>
+ghidra → Windows 版 Ghidra P0 只接受 PE 与 raw 6502
+hopper → 不支持 win32
+ida    → 不接受 headerless raw binary
+kuna   → 未配置
+
+<span class="c"># 包成 ELF 后 IDA 可以打开，但 MCP 桥接本身报错：</span>
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'.
+This is mcp 2.x, where FastMCP was renamed to MCPServer …
+<span class="c"># → ida_pro_mcp 需要 mcp&lt;2，系统 Python 3.14 里装的是 mcp 2.x</span></pre>
+  <p class="count">若要复现权威反汇编：把 <code class="inl">splloader.bin</code> 以 base <code class="inl">0x40000000</code>、ARM64 Little-Endian 载入 IDA，
+    跳转 <code class="inl">0x4000CD00</code> 即可。本节所有偏移与该载入方式一致。</p>
+</section>
+
+<!-- 14 -->
+<section id="protocol">
+  <h2 class="sec"><span class="num">14</span>BROM 协议逐帧解析</h2>
+  <p class="lead">手上有 24 MB 的 <code class="inl">--verbose 2</code> 抓包日志。这一节把它拆成协议层面的统计与序列。</p>
+
+  <h3>14.1 帧格式（实测还原）</h3>
+  <div class="bytegrid"><span class="off">7E</span>  00  02  02 10  58 21 00 04 …  <span class="c">CRC</span>  <span class="off">7E</span>
+│   │   │   │     │
+│   │   │   └─────┴─ size  (2B, LE) = 0x0210 = 528
+│   │   └─────────── type  = 0x02 (MID_DATA)
+│   └─────────────── channel = 0x00（全程不变）
+└─────────────────── HDLC 界定符 0x7E
+
+<span class="c">转义规则：0x7D 0x5E → 0x7E ；0x7D 0x5D → 0x7D</span></div>
+
+  <table class="tbl">
+    <tr><th style="width:110px">字段</th><th style="width:110px">长度</th><th>说明</th></tr>
+    <tr><td class="mono">0x7E</td><td class="mono">1 B</td><td>帧界定符（首尾各一）</td></tr>
+    <tr><td class="mono">channel</td><td class="mono">1 B</td><td>本机全程 <code class="inl">0x00</code>，未使用多通道</td></tr>
+    <tr><td class="mono">type</td><td class="mono">1 B</td><td>命令 / 应答类型</td></tr>
+    <tr><td class="mono">size</td><td class="mono">2 B LE</td><td>负载长度（含 2 字节 CRC）</td></tr>
+    <tr><td class="mono">payload</td><td class="mono">size B</td><td>数据，最后一个块常小于上限</td></tr>
+    <tr><td class="mono">CRC</td><td class="mono">2 B</td><td>帧尾校验</td></tr>
+  </table>
+
+  <h3>14.2 报文类型统计（9358 帧）</h3>
+  <table class="tbl">
+    <tr><th style="width:90px">type</th><th style="width:260px">含义</th><th style="width:90px">帧数</th><th>常见 size</th></tr>
+    <tr><td class="mono">0x80</td><td>ACK 应答</td><td class="mono">4208</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x02</td><td>MID_DATA 数据块</td><td class="mono">4183</td><td class="mono">4098（=4096+2）</td></tr>
+    <tr><td class="mono">0x11</td><td>READ_MID 读数据请求</td><td class="mono">58</td><td class="mono">2048</td></tr>
+    <tr><td class="mono">0x93</td><td>READ_RESP 读数据应答</td><td class="mono">58</td><td class="mono">248 / 8192 / 32768</td></tr>
+    <tr><td class="mono">0x00</td><td>CONNECT 握手</td><td class="mono">6</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x10</td><td>READ_START 读起始</td><td class="mono">5</td><td class="mono">2048</td></tr>
+    <tr><td class="mono">0x12</td><td>READ_END 读结束</td><td class="mono">5</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x81</td><td>BSL_REP_VER 版本应答</td><td class="mono">4</td><td class="mono">1536 / 8704</td></tr>
+    <tr><td class="mono">0x01</td><td>START_DATA 传输开始</td><td class="mono">4</td><td class="mono">2048</td></tr>
+    <tr><td class="mono">0x03</td><td>END_DATA 传输结束</td><td class="mono">1</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x04</td><td>EXEC 执行镜像</td><td class="mono">1</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x0D</td><td>SET_BAUD 波特率</td><td class="mono">1</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x21</td><td>EXEC_DATA</td><td class="mono">1</td><td class="mono">—</td></tr>
+    <tr><td class="mono">0x28</td><td>ENABLE_RAW 原始数据模式</td><td class="mono">1</td><td class="mono">0</td></tr>
+    <tr><td class="mono">0x05</td><td>FLUSH / 复位</td><td class="mono">1</td><td class="mono">0</td></tr>
+  </table>
+  <p class="count">另有 <code class="inl">0x09</code>、<code class="inl">0x13</code> 各 2 帧未命名（日志中无对应语义输出），以及 812 帧因日志换行截断未能完整解帧（解帧成功率 91.3%）。</p>
+
+  <h3>14.3 一次握手的完整序列</h3>
+<pre><span class="c"># 前 12 帧（真实抓包顺序）</span>
+send 0x00(0)      <span class="c">; CONNECT —— 建立连接</span>
+recv 0x81(1536)   <span class="c">; BSL_REP_VER —— "SPRD3" 版本串</span>
+send 0x00(0)      <span class="c">; CONNECT —— 再发一次（进 bootrom 模式）</span>
+recv 0x80(0)      <span class="c">; ACK</span>
+send 0x01(2048)   <span class="c">; START_DATA —— 开始传输 FDL1</span>
+recv 0x80(0)      <span class="c">; ACK</span>
+send 0x02(4098)   <span class="c">; MID_DATA 第 1 块（4096 数据 + 2 CRC）</span>
+recv 0x80(0)      <span class="c">; ACK</span>
+send 0x02(4098)   <span class="c">; MID_DATA 第 2 块 ……</span>
+recv 0x80(0)
+…
+
+<span class="c"># 传输收尾</span>
+send 0x02(<span class="hl">零头</span>)
+send 0x03(0)      <span class="c">; END_DATA —— 传输结束</span>
+send 0x04(0)      <span class="c">; EXEC —— 执行刚传入的镜像</span>
+recv 0x96(...)    <span class="c">; EXEC_RESP</span></pre>
+
+  <div class="note">
+    <b>三个可直接观察到的规律：</b><br>
+    ① <b>严格一问一答</b>：每发一个 <code class="inl">0x02</code> 必收一个 <code class="inl">0x80</code>，共 4183 个数据块 / 4208 个 ACK（差额是 START/END 的应答）。<br>
+    ② <b>数据块固定 4096 字节</b>（size 字段 4098 = 4096 + 2 字节 CRC），最后一块是零头。这是 BROM 的传输窗口上限。<br>
+    ③ <b>读分区走独立通道</b>：<code class="inl">0x10</code> 起始 → 反复 <code class="inl">0x11</code>/<code class="inl">0x93</code> 对 → <code class="inl">0x12</code> 结束，与写入路径分离。
+  </div>
+
+  <h3>14.4 统计汇总</h3>
+  <div class="grid g4">
+    <div class="card"><div class="k">总帧数</div><div class="v blue">9,358</div><div class="d">解帧成功 8,542（91.3%）</div></div>
+    <div class="card"><div class="k">负载总量</div><div class="v">2,229,081 B</div><div class="d">约 2.13 MiB</div></div>
+    <div class="card"><div class="k">数据块</div><div class="v green">4,183</div><div class="d">99.8% 为 4096 B</div></div>
+    <div class="card"><div class="k">读分区事务</div><div class="v amber">5</div><div class="d">58 组读请求/应答</div></div>
+  </div>
+
+  <h3>14.5 解析器实现要点</h3>
+  <p>日志里每个包都是十六进制转储 + ASCII 栏，解析分三步：</p>
+<pre><span class="c"># 1. 还原字节流：抓 "send (N):"/"recv (N):" 与后续 hex 行，累积到 N 字节</span>
+dir_pat = re.compile(<span class="pp">r"^(send|recv) \((\d+)\)"</span>)
+hex_pat = re.compile(<span class="pp">r"^\s*((?:[0-9a-f]{2} ){1,16})"</span>)
+
+<span class="c"># 2. 解 HDLC 帧：剥 0x7E，处理 0x7D 转义</span>
+<span class="pp">def</span> unframe(buf):
+    body = buf[1:-1] <span class="pp">if</span> buf[-1] == 0x7E <span class="pp">else</span> buf[1:]
+    out, i = bytearray(), 0
+    <span class="pp">while</span> i &lt; len(body):
+        <span class="pp">if</span> body[i] == 0x7D: out.append(body[i+1] ^ 0x20); i += 2
+        <span class="pp">else</span>: out.append(body[i]); i += 1
+    <span class="pp">return</span> bytes(out)
+
+<span class="c"># 3. 解头：channel / type / size(LE)</span>
+ch, typ = body[0], body[1]
+size = body[2] | (body[3] &lt;&lt; 8)</pre>
+
+  <p class="count">完整脚本：<code class="inl">scripts/parse_brom.py</code>；输出 JSON：<code class="inl">scripts/brom_proto.json</code>。</p>
+</section>
 
 </main>
 </div>

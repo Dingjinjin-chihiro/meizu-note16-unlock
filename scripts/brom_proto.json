@@ -1,0 +1,299 @@
+{
+  "total_frames": 9358,
+  "by_dir": {
+    "send": 4275,
+    "recv": 5083
+  },
+  "channel_hist": {
+    "0x00": 8542
+  },
+  "type_hist": [
+    {
+      "type": "0x80",
+      "name": "ACK / 应答",
+      "count": 4208
+    },
+    {
+      "type": "0x02",
+      "name": "MID_DATA / 数据块",
+      "count": 4183
+    },
+    {
+      "type": "0x11",
+      "name": "READ_MID / 读分区数据",
+      "count": 58
+    },
+    {
+      "type": "0x93",
+      "name": "READ_RESP / 读数据应答",
+      "count": 58
+    },
+    {
+      "type": "0x00",
+      "name": "CONNECT / 连接握手",
+      "count": 6
+    },
+    {
+      "type": "0x10",
+      "name": "READ_START / 读分区起始",
+      "count": 5
+    },
+    {
+      "type": "0x12",
+      "name": "READ_END / 读分区结束",
+      "count": 5
+    },
+    {
+      "type": "0x81",
+      "name": "BSL_REP_VER / 版本应答",
+      "count": 4
+    },
+    {
+      "type": "0x01",
+      "name": "START_DATA / 开始传输",
+      "count": 4
+    },
+    {
+      "type": "0x09",
+      "name": "（未命名）",
+      "count": 2
+    },
+    {
+      "type": "0x13",
+      "name": "（未命名）",
+      "count": 2
+    },
+    {
+      "type": "0x03",
+      "name": "END_DATA / 结束传输",
+      "count": 1
+    },
+    {
+      "type": "0x04",
+      "name": "EXEC / 执行已发送镜像",
+      "count": 1
+    },
+    {
+      "type": "0x96",
+      "name": "EXEC_RESP / 执行应答",
+      "count": 1
+    },
+    {
+      "type": "0x0d",
+      "name": "SET_BAUD / 设置波特率",
+      "count": 1
+    },
+    {
+      "type": "0x21",
+      "name": "EXEC_DATA / 执行数据段",
+      "count": 1
+    },
+    {
+      "type": "0x28",
+      "name": "ENABLE_RAW / 开启原始数据模式",
+      "count": 1
+    },
+    {
+      "type": "0x05",
+      "name": "FLUSH / 复位",
+      "count": 1
+    }
+  ],
+  "payload_bytes": 2229081,
+  "bad_frames": {
+    "short": 4,
+    "unframed": 812
+  },
+  "first_60_frames": [
+    "send 0x00(0)",
+    "recv 0x81(1536)",
+    "send 0x00(0)",
+    "recv 0x80(0)",
+    "send 0x01(2048)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)",
+    "send 0x02(4098)",
+    "recv 0x80(0)"
+  ],
+  "size_by_type": {
+    "0x00": [
+      {
+        "size": 0,
+        "count": 6
+      }
+    ],
+    "0x81": [
+      {
+        "size": 1536,
+        "count": 2
+      },
+      {
+        "size": 8704,
+        "count": 2
+      }
+    ],
+    "0x80": [
+      {
+        "size": 0,
+        "count": 4208
+      }
+    ],
+    "0x01": [
+      {
+        "size": 2048,
+        "count": 4
+      }
+    ],
+    "0x02": [
+      {
+        "size": 4098,
+        "count": 4176
+      },
+      {
+        "size": 34817,
+        "count": 2
+      },
+      {
+        "size": 12288,
+        "count": 2
+      }
+    ],
+    "0x09": [
+      {
+        "size": 1024,
+        "count": 2
+      }
+    ],
+    "0x13": [
+      {
+        "size": 0,
+        "count": 2
+      }
+    ],
+    "0x03": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ],
+    "0x04": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ],
+    "0x96": [
+      {
+        "size": 14848,
+        "count": 1
+      }
+    ],
+    "0x0d": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ],
+    "0x21": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ],
+    "0x10": [
+      {
+        "size": 19456,
+        "count": 5
+      }
+    ],
+    "0x11": [
+      {
+        "size": 2048,
+        "count": 58
+      }
+    ],
+    "0x93": [
+      {
+        "size": 248,
+        "count": 53
+      },
+      {
+        "size": 8192,
+        "count": 1
+      },
+      {
+        "size": 32768,
+        "count": 1
+      }
+    ],
+    "0x12": [
+      {
+        "size": 0,
+        "count": 5
+      }
+    ],
+    "0x28": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ],
+    "0x05": [
+      {
+        "size": 0,
+        "count": 1
+      }
+    ]
+  }
+}
