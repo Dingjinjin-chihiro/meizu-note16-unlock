@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
     ));
 
     private WebView web;
+    private android.content.SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +98,19 @@ public class MainActivity extends Activity {
                 web.setPadding(0, top, 0, bottom);
             }
         });
+        prefs = getSharedPreferences(AutoFreezeService.PREF, MODE_PRIVATE);
+        try {
+            if (prefs.getBoolean("auto_enabled", false)) {
+                startForegroundService(new android.content.Intent(this, AutoFreezeService.class));
+                android.util.Log.i("AutoFreeze", "autostart requested");
+            }
+        } catch (Throwable t) {
+            android.util.Log.e("AutoFreeze", "autostart failed: " + t);
+        }
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            try { requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 99); }
+            catch (Throwable ignored) {}
+        }
         web.loadUrl("file:///android_asset/index.html");
     }
 
@@ -315,6 +329,57 @@ public class MainActivity extends Activity {
                 startActivity(it);
                 return "1";
             } catch (Exception e) {
+                return "0";
+            }
+        }
+
+        @JavascriptInterface
+        public String autoStatus() {
+            try {
+                boolean en = prefs.getBoolean("auto_enabled", false);
+                String targets = prefs.getString("auto_targets", "[]");
+                JSONObject o = new JSONObject();
+                o.put("enabled", en);
+                o.put("targets", new JSONArray(targets));
+                o.put("last", prefs.getLong("auto_last", 0));
+                o.put("lastCount", prefs.getInt("auto_last_count", 0));
+                return o.toString();
+            } catch (Exception e) {
+                return "{\"enabled\":false,\"targets\":[]}";
+            }
+        }
+
+        @JavascriptInterface
+        public String autoEnable(boolean on) {
+            try {
+                prefs.edit().putBoolean("auto_enabled", on).apply();
+                android.content.Intent it = new android.content.Intent(
+                        MainActivity.this, AutoFreezeService.class);
+                if (on) startForegroundService(it);
+                else stopService(it);
+                return "1";
+            } catch (Throwable t) {
+                return "0";
+            }
+        }
+
+        @JavascriptInterface
+        public String autoRunNow() {
+            try {
+                AutoFreezeService.runNow(MainActivity.this);
+                return "1";
+            } catch (Throwable t) {
+                return "0";
+            }
+        }
+
+        @JavascriptInterface
+        public String autoSetTargets(String json) {
+            try {
+                new JSONArray(json);
+                prefs.edit().putString("auto_targets", json).apply();
+                return "1";
+            } catch (Throwable t) {
                 return "0";
             }
         }

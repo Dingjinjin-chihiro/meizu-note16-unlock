@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：5.1　·　2026-11-01
+> 版本：6.8　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-5.1.apk`（25 KB）
+> APK：`app/release/meizu-freezer-6.8.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -286,3 +286,59 @@ d8 --lib android.jar --min-api 29 --output build\dex <classes>
   现在 2/3/4 都算已冻结，App 计数与 `pm list packages -d` 完全一致（124 = 124）
 - 搜索框加清除按钮
 - 排序按钮文案简化为「排序」，当前方式在 toast 里提示
+---
+
+## 十、自动冻结（v6.x）
+
+### 功能
+
+锁屏后自动冻结「自动冻结清单」里的应用。
+
+- 只冻结清单内的应用，清单为空时什么都不做
+- 正在前台/可见的应用跳过，不会把用户正在用的冻掉
+- 60 秒节流，避免重复执行
+- 常驻前台通知，可随时关闭
+
+UI：顶栏「自动」→ 面板里的开关 / 清单数量 / 上次执行时间 / 把选中加入清单 / 清空 / 立即执行一次。
+
+### 实现
+
+```
+AutoFreezeService（前台服务，specialUse 类型）
+  ├─ BroadcastReceiver(ACTION_SCREEN_OFF)   ← 常规路径
+  ├─ PowerManager.isInteractive 轮询        ← 2 秒一次
+  ├─ AlarmManager.setAndAllowWhileIdle(60s) ← 心跳兜底
+  └─ SharedPreferences 存开关与清单
+```
+
+### 踩到的坑：锁屏后进程被系统冻结
+
+第一次测试完全没反应。查日志发现：
+
+```
+ps -A → io.github.dingjinjin.meizufreezer  do_freezer_trap
+```
+
+**Flyme 在锁屏后把我们的进程直接冻结了**（cgroup freezer），
+所以 `ACTION_SCREEN_OFF` 广播收不到、2 秒轮询也不跑。
+
+解决：加 **AlarmManager 心跳**（60 秒一次，`setAndAllowWhileIdle`），
+闹钟到点会唤醒进程跑一次 `isInteractive()` 检查，检测到熄屏就执行冻结。
+
+实测日志：
+
+```
+I AutoFreeze: heartbeat
+I AutoFreeze: checkScreen interactive=false last=true
+I AutoFreeze: runFreeze enabled=true force=false
+I AutoFreeze: targets=1 toFreeze=1 fg=[io.github.dingjinjin.meizufreezer]
+I AutoFreeze: su result: Package org.adaway new state: disabled-user
+```
+
+冻结点：锁屏后 **约 60~75 秒内**生效（取决于闹钟调度）。
+
+### 限制
+
+- 首次「立即执行一次」可立即验证配置是否正确
+- 若长时间不生效，需要到系统「权限管理 / 后台运行」里允许本应用后台运行
+  （Flyme 会清后台，即使前台服务也可能被杀）

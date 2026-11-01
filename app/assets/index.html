@@ -140,6 +140,9 @@
   .sheet .row2{display:flex;gap:8px;margin-top:14px}
 
   .dhead{display:flex;gap:12px;align-items:center;margin-bottom:13px}
+  .aico{width:48px;height:48px;border-radius:13px;flex:0 0 auto;
+    background:linear-gradient(135deg,#2A3550,#1B2130);display:flex;align-items:center;
+    justify-content:center;font-size:22px}
   .dico{width:48px;height:48px;border-radius:13px;background:#22262E;flex:0 0 auto}
   .kv{display:flex;flex-direction:column;gap:1px;background:var(--line);
     border-radius:12px;overflow:hidden}
@@ -190,6 +193,7 @@
       <div class="tool" id="importBtn">导入</div>
       <div class="tool" id="exportBtn">导出</div>
       <div class="tool" id="refreshBtn">刷新</div>
+      <div class="tool" id="autoBtn">自动</div>
     </div>
   </div>
 
@@ -236,12 +240,35 @@
   </div>
 </div>
 
+<div class="sheet" id="auto">
+  <div class="dhead">
+    <div class="aico">⚡</div>
+    <div style="min-width:0">
+      <h3>自动冻结</h3>
+      <div class="hint" style="margin-bottom:0">锁屏后冻结清单内的应用</div>
+    </div>
+  </div>
+  <div class="kv" id="autoInfo"></div>
+  <div class="row2">
+    <div class="abtn" id="autoToggle">开启</div>
+    <div class="abtn ghost" id="autoClose">关闭</div>
+  </div>
+  <div class="row2">
+    <div class="abtn" id="autoAddSel">把选中加入清单</div>
+    <div class="abtn red" id="autoClear">清空清单</div>
+  </div>
+  <div class="row2">
+    <div class="abtn" id="autoRunNow">立即执行一次</div>
+  </div>
+  <div class="hint" style="margin-top:12px">仅在屏幕熄灭时执行；正在前台使用的应用会跳过，不会被冻掉。<br>若锁屏后没有生效，请到系统「权限管理 / 后台运行」里允许本应用后台运行。</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 var ALL = [], FILTER = 'all', Q = '', SEL = {}, BUSY = false;
 var SORT = 'name', SORTS = ['name','size','time'], SORTNAME = {name:'名称',size:'大小',time:'时间'};
-var DETAIL_PKG = null, ICON_CACHE = {};
+var DETAIL_PKG = null, ICON_CACHE = {}, AUTO = {enabled:false, targets:[]};
 
 function toast(m, kind){
   var t = document.getElementById('toast');
@@ -494,6 +521,32 @@ function detailAction(freeze){
   closeDetail();
 }
 
+/* ===== 自动冻结 ===== */
+function openAuto(){
+  try { AUTO = JSON.parse(Native.autoStatus()); } catch(e){ AUTO = {enabled:false, targets:[]}; }
+  renderAuto();
+  document.getElementById('mask').classList.add('on');
+  document.getElementById('auto').classList.add('on');
+}
+function closeAuto(){
+  document.getElementById('auto').classList.remove('on');
+  if (!document.getElementById('detail').classList.contains('on')
+   && !document.getElementById('sheet').classList.contains('on'))
+    document.getElementById('mask').classList.remove('on');
+}
+function renderAuto(){
+  var n = (AUTO.targets || []).length;
+  var last = AUTO.last ? fmtTime(AUTO.last) + '（' + (AUTO.lastCount||0) + ' 个）' : '还没执行过';
+  var html = ''
+    + '<div class="kvrow"><div class="k">状态</div><div class="v ' + (AUTO.enabled?'ok':'') + '">'
+    + (AUTO.enabled ? '运行中' : '已关闭') + '</div></div>'
+    + '<div class="kvrow"><div class="k">清单</div><div class="v">' + n + ' 个应用</div></div>'
+    + '<div class="kvrow"><div class="k">上次</div><div class="v" style="font-family:inherit">' + last + '</div></div>';
+  document.getElementById('autoInfo').innerHTML = html;
+  document.getElementById('autoToggle').textContent = AUTO.enabled ? '关闭自动冻结' : '开启自动冻结';
+  document.getElementById('autoToggle').className = AUTO.enabled ? 'abtn red' : 'abtn green';
+}
+
 /* ===== 事件 ===== */
 var q = document.getElementById('q');
 q.addEventListener('input', function(){
@@ -566,7 +619,7 @@ document.getElementById('doFreeze').onclick = function(){ runBatch(true); };
 document.getElementById('doUnfreeze').onclick = function(){ runBatch(false); };
 document.getElementById('doClear').onclick = function(){ SEL = {}; render(); toast('已取消选择'); };
 
-document.getElementById('mask').onclick = function(){ closeSheet(); closeDetail(); };
+document.getElementById('mask').onclick = function(){ closeSheet(); closeDetail(); closeAuto(); };
 function closeSheet(){
   document.getElementById('sheet').classList.remove('on');
   if (!document.getElementById('detail').classList.contains('on'))
@@ -597,6 +650,42 @@ document.getElementById('exportBtn').onclick = function(){
   try { p = Native.exportFrozen(); } catch(e){ toast('导出失败', 'err'); return; }
   if (p.indexOf('ERR:') === 0){ toast('导出失败：' + p.substring(4), 'err'); return; }
   toast('已导出到 ' + p.substring(p.lastIndexOf('/')+1) + '（应用目录下）', 'ok');
+};
+
+document.getElementById('autoBtn').onclick = openAuto;
+document.getElementById('autoClose').onclick = closeAuto;
+document.getElementById('autoToggle').onclick = function(){
+  var on = !AUTO.enabled;
+  Native.autoEnable(on);
+  AUTO.enabled = on;
+  renderAuto();
+  toast(on ? '自动冻结已开启，锁屏后生效' : '已关闭自动冻结', on ? 'ok' : null);
+};
+document.getElementById('autoAddSel').onclick = function(){
+  var sel = selList();
+  if (!sel.length){ toast('先在列表里勾选应用', 'err'); return; }
+  var cur = (AUTO.targets || []).slice();
+  var added = 0;
+  for (var i=0;i<sel.length;i++) if (cur.indexOf(sel[i]) < 0){ cur.push(sel[i]); added++; }
+  Native.autoSetTargets(JSON.stringify(cur));
+  AUTO.targets = cur;
+  renderAuto();
+  toast('已加入 ' + added + ' 个，清单共 ' + cur.length + ' 个', 'ok');
+};
+document.getElementById('autoRunNow').onclick = function(){
+  if (!(AUTO.targets||[]).length){ toast('清单是空的', 'err'); return; }
+  Native.autoRunNow();
+  toast('已触发，稍后刷新查看结果');
+  setTimeout(function(){ openAuto(); load(); }, 2500);
+};
+document.getElementById('autoClear').onclick = function(){
+  var n = (AUTO.targets||[]).length;
+  if (!n){ toast('清单已经是空的', 'err'); return; }
+  if (!confirm('清空自动冻结清单（' + n + ' 个）？')) return;
+  Native.autoSetTargets('[]');
+  AUTO.targets = [];
+  renderAuto();
+  toast('清单已清空', 'ok');
 };
 
 document.getElementById('dClose').onclick = closeDetail;
