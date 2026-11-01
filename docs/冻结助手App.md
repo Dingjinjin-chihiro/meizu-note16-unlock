@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：3.1　·　2026-11-01
+> 版本：3.2　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-3.1.apk`（25 KB）
+> APK：`app/release/meizu-freezer-3.2.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -191,3 +191,20 @@ d8 --lib android.jar --min-api 29 --output build\dex <classes>
 - 用 `html,body{height:100%;overflow:hidden}` + `.app{display:flex}` + `.listwrap{flex:1;overflow-y:auto}` 实现
 - 切换筛选/搜索时列表回到顶部
 - 底部操作栏同样是 fixed，始终贴在底部
+### v3.2 交互提示（toast）
+
+| 场景 | 提示 |
+|---|---|
+| 选中 / 取消选中 | `已选中 Aicy 助手　共 3 个` |
+| 全选 | `已全选 317 个应用` |
+| 取消选择 | `已取消 5 个选择` / `当前没有选中项` |
+| 切换筛选 | `只看已冻结：122 个` |
+| 搜索 | `搜索「qq」：3 个匹配` / `没有匹配「xx」的应用` |
+| 刷新 | `已刷新：共 317 个应用，冻结 124 个` |
+| 批量执行 | `正在冻结 5 个…` → `已冻结 5 个` |
+| 部分失败 | `部分冻结：成功 3 / 5` |
+| root 失败 | `冻结失败，请检查 root 授权` |
+| 导入 | `已冻结 12 个，跳过 3 个` / `先粘贴包名列表` |
+| 导出 | `已导出到 frozen-xxx.txt（应用目录下）` |
+
+样式区分：成功绿色、失败红色、普通灰色；操作栏出现时 toast 自动上移避免遮挡。

@@ -79,9 +79,13 @@
     font-family:ui-monospace,monospace;resize:none;outline:none}
   .sheet .row2{display:flex;gap:8px;margin-top:10px}
   .toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
-    background:#2a3140;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;
-    opacity:0;transition:.2s;pointer-events:none;max-width:80%;text-align:center}
+    background:#2a3140;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;
+    opacity:0;transition:.18s;pointer-events:none;max-width:84%;text-align:center;
+    border:1px solid #333c4d;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:20}
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.ok{background:#15301f;border-color:#2c6b45;color:#7ff0b0}
+  .toast.err{background:#33191e;border-color:#6b2c34;color:#ff9aa5}
+  .toast.up{bottom:200px}
 </style>
 </head>
 <body>
@@ -142,10 +146,17 @@
 <script>
 var ALL = [], FILTER = 'all', Q = '', SEL = {}, BUSY = false;
 
-function toast(m){
+function toast(m, kind){
   var t = document.getElementById('toast');
-  t.textContent = m; t.classList.add('on');
-  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove('on'); }, 1800);
+  t.className = 'toast';
+  if (kind === 'ok') t.classList.add('ok');
+  else if (kind === 'err') t.classList.add('err');
+  if (document.getElementById('actionbar').classList.contains('on')) t.classList.add('up');
+  t.textContent = m;
+  void t.offsetWidth;
+  t.classList.add('on');
+  clearTimeout(t._h);
+  t._h = setTimeout(function(){ t.classList.remove('on'); }, 1900);
 }
 function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -156,6 +167,8 @@ function load(){
   catch(e){ document.getElementById('sub').textContent = '读取失败'; return; }
   SEL = {};
   render();
+  var frozen = ALL.filter(function(a){ return a.f; }).length;
+  toast('已刷新：共 ' + ALL.length + ' 个应用，冻结 ' + frozen + ' 个');
 }
 
 function filtered(){
@@ -196,9 +209,13 @@ function render(){
   for (var k=0;k<rows.length;k++){
     rows[k].addEventListener('click', function(){
       var p = this.getAttribute('data-p');
-      if (SEL[p]) delete SEL[p]; else SEL[p] = 1;
+      var nm = this.querySelector('.name').textContent;
+      var on;
+      if (SEL[p]) { delete SEL[p]; on = false; } else { SEL[p] = 1; on = true; }
       this.classList.toggle('sel');
       updateBar();
+      var n = selList().length;
+      toast((on ? '已选中 ' : '已取消 ') + nm + (n ? '　共 ' + n + ' 个' : ''), on ? 'ok' : null);
     });
   }
   updateBar();
@@ -224,16 +241,28 @@ function runBatch(freeze){
   var what = freeze ? '冻结' : '解冻';
   if (!confirm(what + '选中的 ' + pkgs.length + ' 个应用？')) return;
   BUSY = true;
+  toast('正在' + what + ' ' + pkgs.length + ' 个…');
   var n = parseInt(Native.batch(JSON.stringify(pkgs), freeze), 10) || 0;
   BUSY = false;
   for (var i=0;i<ALL.length;i++) if (SEL[ALL[i].p]) ALL[i].f = freeze;
   SEL = {};
   render();
-  toast('已' + what + ' ' + n + ' 个');
+  if (n >= pkgs.length) toast('已' + what + ' ' + n + ' 个', 'ok');
+  else if (n === 0) toast(what + '失败，请检查 root 授权', 'err');
+  else toast('部分' + what + '：成功 ' + n + ' / ' + pkgs.length, 'err');
 }
 
+var searchTimer = null;
 document.getElementById('q').addEventListener('input', function(e){
-  Q = e.target.value.trim().toLowerCase(); render();
+  Q = e.target.value.trim().toLowerCase();
+  render();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function(){
+    if (!Q) { toast('已清除搜索'); return; }
+    var n = filtered().length;
+    if (n) toast('搜索「' + Q + '」：' + n + ' 个匹配');
+    else toast('没有匹配「' + Q + '」的应用', 'err');
+  }, 400);
 });
 document.getElementById('chips').addEventListener('click', function(e){
   if (!e.target.classList.contains('chip')) return;
@@ -243,13 +272,22 @@ document.getElementById('chips').addEventListener('click', function(e){
   FILTER = e.target.getAttribute('data-f');
   document.getElementById('listwrap').scrollTop = 0;
   render();
+  var names = {all:'全部应用', frozen:'只看已冻结', enabled:'只看已启用',
+               third:'只看第三方', system:'只看系统'};
+  toast(names[FILTER] + '：' + filtered().length + ' 个');
 });
 document.getElementById('selAll').onclick = function(){
   var out = filtered();
+  if (!out.length){ toast('当前列表是空的', 'err'); return; }
   for (var i=0;i<out.length;i++) SEL[out[i].p] = 1;
   render();
+  toast('已全选 ' + out.length + ' 个应用', 'ok');
 };
-document.getElementById('selNone').onclick = function(){ SEL = {}; render(); };
+document.getElementById('selNone').onclick = function(){
+  var n = selList().length;
+  SEL = {}; render();
+  toast(n ? '已取消 ' + n + ' 个选择' : '当前没有选中项');
+};
 document.getElementById('refreshBtn').onclick = load;
 document.getElementById('doFreeze').onclick = function(){ runBatch(true); };
 document.getElementById('doUnfreeze').onclick = function(){ runBatch(false); };
@@ -258,6 +296,7 @@ document.getElementById('doClear').onclick = function(){ SEL = {}; render(); };
 document.getElementById('importBtn').onclick = function(){
   document.getElementById('mask').classList.add('on');
   document.getElementById('sheet').classList.add('on');
+  toast('每行一个包名，粘贴后点「冻结这些应用」');
 };
 function closeSheet(){
   document.getElementById('mask').classList.remove('on');
@@ -267,18 +306,22 @@ document.getElementById('mask').onclick = closeSheet;
 document.getElementById('cancelImport').onclick = closeSheet;
 document.getElementById('doImport').onclick = function(){
   var text = document.getElementById('ta').value || '';
+  if (!text.trim()){ toast('先粘贴包名列表', 'err'); return; }
   var r;
   try { r = JSON.parse(Native.applyList(text)); }
-  catch(e){ toast('导入失败'); return; }
+  catch(e){ toast('导入失败：格式有误', 'err'); return; }
   closeSheet();
   document.getElementById('ta').value = '';
-  toast('已冻结 ' + r.ok + ' 个（跳过 ' + r.skip + '）');
+  if (r.ok > 0) toast('已冻结 ' + r.ok + ' 个' + (r.skip ? '，跳过 ' + r.skip + ' 个' : ''), 'ok');
+  else toast('没有可冻结的应用（跳过 ' + r.skip + ' 个）', 'err');
   load();
 };
 document.getElementById('exportBtn').onclick = function(){
   var p;
-  try { p = Native.exportFrozen(); } catch(e){ toast('导出失败'); return; }
-  toast('已导出到 ' + p);
+  try { p = Native.exportFrozen(); } catch(e){ toast('导出失败', 'err'); return; }
+  if (p.indexOf('ERR:') === 0){ toast('导出失败：' + p.substring(4), 'err'); return; }
+  var name = p.substring(p.lastIndexOf('/') + 1);
+  toast('已导出到 ' + name + '（应用目录下）', 'ok');
 };
 
 load();
