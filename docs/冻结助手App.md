@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：6.8　·　2026-11-01
+> 版本：7.2　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-6.8.apk`（25 KB）
+> APK：`app/release/meizu-freezer-7.2.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -342,3 +342,45 @@ I AutoFreeze: su result: Package org.adaway new state: disabled-user
 - 首次「立即执行一次」可立即验证配置是否正确
 - 若长时间不生效，需要到系统「权限管理 / 后台运行」里允许本应用后台运行
   （Flyme 会清后台，即使前台服务也可能被杀）
+---
+
+## 十一、安全锁（v7.x）
+
+### 功能
+
+| 能力 | 说明 |
+|---|---|
+| **应用锁** | 4~8 位数字 PIN（SHA-256 加盐存储），开启后每次打开 App 都要输入 |
+| **核心应用上锁** | 选中的包被标记为「受保护」，冻结 / 解冻前必须输入 PIN |
+| 锁定标记 | 列表里受保护应用显示 🔒 徽标 |
+| 会话解锁 | 一次 PIN 验证在本次进程内有效，App 被杀后重新要求 |
+
+PIN 超过 5 次错误不会锁死设备——失败只是抖动 + 提示重试。
+
+### 接口（JS 桥）
+
+```
+lockStatus()        → {pinSet, locked, protected:[...]}
+setPin(pin)         → "1"
+verifyPin(pin)      → "1"/"0"（成功后本次会话解锁）
+clearPin(pin)       → "1"/"0"
+setProtected(json)  → "1"
+batch(json, freeze, pin)      → 数量 / "-1"(PIN 错)
+setFrozen(pkg, freeze, pin)   → "1"/"0"/"-1"
+```
+
+**校验在 Java 侧做**：受保护应用即使有人在 JS 控制台里直接调 `Native.batch`，
+没有正确 PIN 也会返回 `-1` 并且不执行。
+
+### UI
+
+- 顶栏工具区改为两行 8 个按钮：全选 / 取消 / 排序 / 导入 / 导出 / 刷新 / 自动 / 安全
+- 「安全」面板：应用锁状态、受保护数量、设置/修改 PIN、关闭锁、把选中设为受保护、清空
+- 锁屏页：全屏数字键盘 + 圆点指示 + 错误抖动动画
+
+### 实测
+
+- JS 加载与桥接调用正常（logcat：`FreezerUI: lockStatus called` / `listApps called`）
+- 编译通过、安装运行、列表 317 / 冻结 124 正常
+- 受保护校验为 Java 端强制，逻辑上无法绕过（测试期间设备处于安全锁屏，
+  截图被系统挡成黑屏，UI 交互测试留给用户在手机上确认）

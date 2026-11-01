@@ -51,6 +51,31 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private android.content.SharedPreferences prefs;
+    private boolean unlockedThisSession = false;
+
+    private static String sha256(String s) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] d = md.digest(("mzf::" + s).getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : d) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) { return ""; }
+    }
+
+    private boolean checkPin(String pin) {
+        String stored = prefs.getString("pin_hash", "");
+        if (stored.isEmpty()) return false;
+        return stored.equals(sha256(pin == null ? "" : pin));
+    }
+
+    private boolean isProtectedPkg(String pkg) {
+        try {
+            JSONArray a = new JSONArray(prefs.getString("protected", "[]"));
+            for (int i = 0; i < a.length(); i++) if (pkg.equals(a.optString(i))) return true;
+        } catch (Throwable ignored) {}
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +166,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String listApps() {
             try {
+                android.util.Log.i("FreezerUI", "listApps called");
                 PackageManager pm = getPackageManager();
                 JSONArray arr = new JSONArray();
                 List<Object[]> tmp = new ArrayList<>();
@@ -176,8 +202,9 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String setFrozen(String pkg, boolean freeze) {
+        public String setFrozen(String pkg, boolean freeze, String pin) {
             if (pkg == null || pkg.isEmpty() || SAFE.contains(pkg)) return "0";
+            if (isProtectedPkg(pkg) && !checkPin(pin)) return "-1";
             String out = su(freeze
                     ? "pm disable-user --user 0 " + pkg
                     : "pm enable " + pkg);
@@ -186,9 +213,14 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String batch(String pkgsJson, boolean freeze) {
+        public String batch(String pkgsJson, boolean freeze, String pin) {
             try {
                 JSONArray arr = new JSONArray(pkgsJson);
+                boolean needPin = false;
+                for (int i = 0; i < arr.length(); i++) {
+                    if (isProtectedPkg(arr.optString(i))) { needPin = true; break; }
+                }
+                if (needPin && !checkPin(pin)) return "-1";
                 StringBuilder sb = new StringBuilder();
                 int n = 0;
                 for (int i = 0; i < arr.length(); i++) {
@@ -331,6 +363,53 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "0";
             }
+        }
+
+        @JavascriptInterface
+        public String lockStatus() {
+            try {
+                android.util.Log.i("FreezerUI", "lockStatus called");
+                boolean pinSet = !prefs.getString("pin_hash", "").isEmpty();
+                JSONObject o = new JSONObject();
+                o.put("pinSet", pinSet);
+                o.put("locked", pinSet && !unlockedThisSession);
+                o.put("protected", new JSONArray(prefs.getString("protected", "[]")));
+                return o.toString();
+            } catch (Exception e) {
+                return "{\"pinSet\":false,\"locked\":false,\"protected\":[]}";
+            }
+        }
+
+        @JavascriptInterface
+        public String setPin(String pin) {
+            if (pin == null || pin.length() < 4 || pin.length() > 8) return "0";
+            prefs.edit().putString("pin_hash", sha256(pin)).apply();
+            unlockedThisSession = true;
+            return "1";
+        }
+
+        @JavascriptInterface
+        public String verifyPin(String pin) {
+            boolean ok = checkPin(pin);
+            if (ok) unlockedThisSession = true;
+            return ok ? "1" : "0";
+        }
+
+        @JavascriptInterface
+        public String clearPin(String pin) {
+            if (!checkPin(pin)) return "0";
+            prefs.edit().remove("pin_hash").apply();
+            unlockedThisSession = true;
+            return "1";
+        }
+
+        @JavascriptInterface
+        public String setProtected(String json) {
+            try {
+                new JSONArray(json);
+                prefs.edit().putString("protected", json).apply();
+                return "1";
+            } catch (Throwable t) { return "0"; }
         }
 
         @JavascriptInterface
