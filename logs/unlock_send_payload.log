@@ -1,0 +1,15 @@
+branch:main, sha1:d24c21a0c93a545c0130668caa1826d59ceebe48
+Waiting for dl_diag connection (20s)
+CurTime: 0.0, CurPort: 0
+CurTime: 0.5, CurPort: 0
+CurTime: 1.0, CurPort: 4
+send: type = 0x00, size = 0
+Successfully connected to port: 4
+recv: type = 0x81, size = 6
+CHECK_BAUD bootrom
+BSL_REP_VER: "SPRD3\0"
+send: type = 0x00, size = 0
+recv: type = 0x80, size = 0
+CMD_CONNECT bootrom
+current exec_addr is 0x65017f08
+File does not exist.

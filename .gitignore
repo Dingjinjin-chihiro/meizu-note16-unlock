@@ -1,0 +1,14 @@
+# 固件与镜像：体积过大 / 含设备私有数据，不入库
+_backup/
+*.img
+*.zip
+
+# 原始抓包日志（session4.log 等 24MB 级）
+*.log
+!logs/*.log
+
+# 系统垃圾
+Thumbs.db
+desktop.ini
+.DS_Store
+*.tmp
