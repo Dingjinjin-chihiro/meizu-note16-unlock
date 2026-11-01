@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：3.0　·　2026-11-01
+> 版本：3.1　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-3.0.apk`（25 KB）
+> APK：`app/release/meizu-freezer-3.1.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -185,3 +185,9 @@ d8 --lib android.jar --min-api 29 --output build\dex <classes>
 
 实测：选中 AdAway → 底部栏出现 → 点冻结 → 原生确认框 → 确定 →
 `pm list packages -d` 出现 `org.adaway`（124→125），解冻后回到 124。
+### v3.1 布局调整
+
+- 头部（标题/搜索/筛选/工具栏）**固定不动**，只有应用列表滚动
+- 用 `html,body{height:100%;overflow:hidden}` + `.app{display:flex}` + `.listwrap{flex:1;overflow-y:auto}` 实现
+- 切换筛选/搜索时列表回到顶部
+- 底部操作栏同样是 fixed，始终贴在底部
