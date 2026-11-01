@@ -135,7 +135,9 @@ public class MainActivity extends Activity {
                     catch (Exception e) { label = ai.packageName; }
                     boolean system = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
                     boolean frozen = isFrozen(ai.packageName);
-                    tmp.add(new Object[]{label, ai.packageName, system, frozen});
+                    long apkSize = 0;
+                    try { apkSize = new java.io.File(ai.sourceDir).length(); } catch (Throwable ignored) {}
+                    tmp.add(new Object[]{label, ai.packageName, system, frozen, apkSize});
                 }
                 Collections.sort(tmp, new Comparator<Object[]>() {
                     public int compare(Object[] a, Object[] b) {
@@ -148,6 +150,7 @@ public class MainActivity extends Activity {
                     jo.put("p", o[1]);
                     jo.put("s", o[2]);
                     jo.put("f", o[3]);
+                    jo.put("z", o[4]);
                     arr.put(jo);
                 }
                 return arr.toString();
@@ -213,6 +216,79 @@ public class MainActivity extends Activity {
                 return r.toString();
             } catch (Exception e) {
                 return "{\"ok\":0,\"skip\":0}";
+            }
+        }
+
+        @JavascriptInterface
+        public String appDetail(String pkg) {
+            try {
+                PackageManager pm = getPackageManager();
+                ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+                android.content.pm.PackageInfo pi = pm.getPackageInfo(pkg, 0);
+                JSONObject o = new JSONObject();
+                o.put("pkg", pkg);
+                o.put("label", pm.getApplicationLabel(ai).toString());
+                o.put("uid", ai.uid);
+                o.put("ver", pi.versionName == null ? "?" : pi.versionName);
+                o.put("vcode", pi.getLongVersionCode());
+                o.put("target", ai.targetSdkVersion);
+                o.put("min", ai.minSdkVersion);
+                o.put("apk", ai.sourceDir);
+                long apkSize = 0;
+                try { apkSize = new java.io.File(ai.sourceDir).length(); } catch (Throwable ignored) {}
+                o.put("apkSize", apkSize);
+                o.put("sys", (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+                o.put("frozen", isFrozen(pkg));
+                try { o.put("install", pi.firstInstallTime); } catch (Throwable t) {}
+                try { o.put("update", pi.lastUpdateTime); } catch (Throwable t) {}
+
+                boolean running = false;
+                try {
+                    android.app.ActivityManager am = (android.app.ActivityManager)
+                            getSystemService(ACTIVITY_SERVICE);
+                    for (android.app.ActivityManager.RunningAppProcessInfo rp : am.getRunningAppProcesses()) {
+                        if (rp.processName.equals(pkg) || rp.processName.startsWith(pkg + ":")) {
+                            running = true;
+                            o.put("pid", rp.pid);
+                            break;
+                        }
+                    }
+                } catch (Throwable ignored) {}
+                o.put("running", running);
+
+                // 数据目录大小（root du，详情页才取）
+                long dataKb = -1;
+                try {
+                    String out = su("du -sk " + ai.dataDir + " 2>/dev/null").trim();
+                    if (!out.isEmpty()) {
+                        String tok = out.split("\\s+")[0];
+                        if (tok.matches("\\d+")) dataKb = Long.parseLong(tok);
+                    }
+                } catch (Throwable ignored) {}
+                o.put("dataKb", dataKb);
+
+                String launcher = "?"; 
+                try {
+                    android.content.Intent it = pm.getLaunchIntentForPackage(pkg);
+                    launcher = it == null ? "无启动界面" : "可启动";
+                } catch (Throwable ignored) {}
+                o.put("launch", launcher);
+                return o.toString();
+            } catch (Exception e) {
+                return "{}";
+            }
+        }
+
+        @JavascriptInterface
+        public String launchApp(String pkg) {
+            try {
+                android.content.Intent it = getPackageManager().getLaunchIntentForPackage(pkg);
+                if (it == null) return "0";
+                it.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(it);
+                return "1";
+            } catch (Exception e) {
+                return "0";
             }
         }
 

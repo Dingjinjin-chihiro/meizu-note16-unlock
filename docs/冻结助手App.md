@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：3.2　·　2026-11-01
+> 版本：4.1　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-3.2.apk`（25 KB）
+> APK：`app/release/meizu-freezer-4.1.apk`（25 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---
@@ -208,3 +208,63 @@ d8 --lib android.jar --min-api 29 --output build\dex <classes>
 | 导出 | `已导出到 frozen-xxx.txt（应用目录下）` |
 
 样式区分：成功绿色、失败红色、普通灰色；操作栏出现时 toast 自动上移避免遮挡。
+---
+
+## 七、小黑屋完整功能盘点（反编译清单）
+
+### 组件
+
+| 类型 | 组件 | 作用 |
+|---|---|---|
+| Activity | `MainActivity` / `AppListActivity` | 主界面 / 应用选择 |
+| Activity | `AppInfoActivity` | **应用详情页** |
+| Activity | `SettingsActivity` / `StorageSetting` | 设置 / 存储 |
+| Activity | `ShortcutActivity` / `ActionStartActivity` | **快捷方式**（点图标即冻结/解冻） |
+| Activity | `TaskerEditActivity` | Tasker 集成 |
+| Activity | `IntroActivity` / `EnableSystemAppActivity` | 引导 / 激活预装应用 |
+| Service | `QuickSettingService` | 通知栏快捷磁贴 |
+| Service | `NotificationCollectorService` | 通知监听（有通知不自动冻结） |
+| Service | `AutoDisableService` | **自动冻结**（锁屏 / Home 后） |
+| Service | `AdminService` + `AdminReceiver` | 设备管理员模式 |
+| Receiver | `RecentTaskReceiver` | 监听最近任务，配合自动冻结 |
+| Native | `libfreeze.so` + `app_process/FastDisable` | 常驻 daemon 加速批量冻结 |
+
+### 能力
+
+- 冻结 / 解冻 / 全部冻结 / 全部解冻 / 一键冻结 / 一键解冻
+- **工作模式**：Root、Shizuku、设备管理员、冰箱托管、预装激活
+- **自动冻结**：锁屏后、Home 后；例外：有通知的 App、后台服务
+- **冻结并锁屏**
+- **快捷方式**：为应用建桌面图标，点击直接冻结/解冻
+- **通知栏磁贴**
+- **Tasker** 插件
+- 应用详情页、排序方式、显示系统应用、图标缓存
+- 指纹/面部验证保护
+- 把应用加入/移出「小黑屋清单」
+
+### 本 App 对照
+
+| 功能 | 小黑屋 | 本 App |
+|---|---|---|
+| 冻结/解冻/批量 | ✅ | ✅ |
+| 导入包名列表 | ❌ | ✅ |
+| 导出冻结清单 | 部分 | ✅ |
+| 搜索/筛选/排序 | ✅ | ✅（名称/大小/时间） |
+| **应用详情（UID/版本/大小/路径/运行状态）** | ✅ | ✅ 长按打开 |
+| **从详情页打开应用** | ✅ | ✅ |
+| 一键解冻全部 | ✅ | ✅ |
+| 自动冻结（锁屏/Home 后） | ✅ | ❌ 待做 |
+| 快捷方式 / 通知磁贴 | ✅ | ❌ 待做 |
+| Tasker | ✅ | ❌ |
+| 指纹锁 | ✅ | ❌ |
+| Shizuku / 设备管理员免 root | ✅ | ❌（仅 root） |
+| 常驻 daemon 加速 | ✅ | ❌（每次 exec su，300 个约 10 秒） |
+
+## 八、v4.0 / v4.1 更新
+
+- **长按应用行 → 详情面板**：状态、运行状态（pid）、类型、版本、UID、SDK、
+  APK 大小、数据大小（`du -sk`）、安装/更新时间、APK 路径
+- 详情里可直接 **打开应用 / 冻结 / 解冻**
+- **排序**：名称 → 大小 → 时间，循环切换
+- **解冻全部**：标题栏右侧红色按钮，确认后一次性解冻
+- 数据大小在 Java 侧解析 `du` 输出（`cut` 在这台机器上不可靠）
