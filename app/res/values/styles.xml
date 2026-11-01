@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <!-- Android 15 对 targetSdk 35 强制 edge-to-edge，这里退出该行为 -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+        <item name="android:windowBackground">#0f1115</item>
+        <item name="android:statusBarColor">#0f1115</item>
+        <item name="android:navigationBarColor">#0f1115</item>
+    </style>
+</resources>

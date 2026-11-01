@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="魅族冻结助手"
+        android:textColor="#111111"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="检查 root…"
+        android:textColor="#333333"
+        android:textSize="12sp"
+        android:paddingTop="2dp"
+        android:paddingBottom="6dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnAll"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="全部"
+            android:textColor="#111111"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnFrozen"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="已冻结"
+            android:textColor="#B00020"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnEnabled"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="启用中"
+            android:textColor="#0B6E2E"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="搜索"
+            android:textColor="#111111"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnImport"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="导入列表"
+            android:textColor="#111111"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnExport"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="导出冻结"
+            android:textColor="#111111"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnFreezeAll"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="全部冻结"
+            android:textColor="#B00020"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/btnUnfreezeAll"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="全部解冻"
+            android:textColor="#0B6E2E"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:fastScrollEnabled="true" />
+</LinearLayout>
