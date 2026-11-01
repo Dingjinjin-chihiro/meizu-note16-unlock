@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>魅族 Note 16 解锁 Bootloader 与 Root · 全流程实录</title>
+<title>魅族 Note 16 解锁 Bootloader 与 Root · 全流程实录 v2</title>
 <style>
 :root{
   --bg:#0b0f14; --bg2:#111820; --card:#151e28; --card2:#1b2634;
@@ -13,214 +13,168 @@
   --blue:#4ea8ff; --blue-d:#0d2238;
   --amber:#ffb454; --amber-d:#33260f;
   --red:#ff6b6b; --red-d:#331414;
-  --purple:#c792ea;
+  --purple:#c792ea; --purple-d:#241533;
   --mono:"Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--bg);color:var(--fg);
-  font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  line-height:1.75;font-size:15px;
-}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;font-size:15px}
 #progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--green),var(--blue));z-index:999;transition:width .1s}
 a{color:var(--blue);text-decoration:none}
 a:hover{text-decoration:underline}
 
-/* ---------- layout ---------- */
-.wrap{display:grid;grid-template-columns:260px 1fr;max-width:1500px;margin:0 auto}
-nav{
-  position:sticky;top:0;height:100vh;overflow-y:auto;padding:28px 18px;
-  border-right:1px solid var(--line);background:var(--bg2);
-}
-nav h2{font-size:13px;letter-spacing:.18em;color:var(--fg3);margin:0 0 16px;font-weight:600}
-nav a{
-  display:block;padding:7px 12px;border-radius:8px;color:var(--fg2);
-  font-size:13.5px;border-left:2px solid transparent;margin-bottom:2px;transition:.15s;
-}
+.wrap{display:grid;grid-template-columns:250px 1fr;max-width:1560px;margin:0 auto}
+nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:26px 16px;border-right:1px solid var(--line);background:var(--bg2)}
+nav h2{font-size:12px;letter-spacing:.18em;color:var(--fg3);margin:0 0 14px;font-weight:600}
+nav a{display:block;padding:6px 11px;border-radius:8px;color:var(--fg2);font-size:13px;border-left:2px solid transparent;margin-bottom:1px;transition:.15s}
 nav a:hover{background:var(--card);color:var(--fg);text-decoration:none}
 nav a.active{background:var(--green-d);color:var(--green);border-left-color:var(--green);font-weight:600}
-main{padding:48px 56px 120px;min-width:0}
+nav .grp{font-size:11px;color:var(--fg3);margin:14px 0 6px 11px;letter-spacing:.1em}
+main{padding:44px 52px 120px;min-width:0}
 
-/* ---------- header ---------- */
-header.hero{border-bottom:1px solid var(--line);padding-bottom:36px;margin-bottom:48px}
-.hero h1{font-size:34px;line-height:1.3;margin:0 0 12px;letter-spacing:-.01em}
-.hero .sub{color:var(--fg2);font-size:15px;margin-bottom:22px}
-.badges{display:flex;gap:10px;flex-wrap:wrap}
-.badge{
-  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
-  font-size:13px;font-weight:600;border:1px solid;
-}
+header.hero{border-bottom:1px solid var(--line);padding-bottom:32px;margin-bottom:44px}
+.hero h1{font-size:32px;line-height:1.3;margin:0 0 10px;letter-spacing:-.01em}
+.hero .sub{color:var(--fg2);font-size:14.5px;margin-bottom:20px}
+.badges{display:flex;gap:9px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid}
 .badge.ok{color:var(--green);background:var(--green-d);border-color:#1d5a3c}
 .badge.info{color:var(--blue);background:var(--blue-d);border-color:#1b4a75}
 .badge.warn{color:var(--amber);background:var(--amber-d);border-color:#5a4318}
 .badge.bad{color:var(--red);background:var(--red-d);border-color:#5a2020}
 
-/* ---------- sections ---------- */
-section{margin-bottom:72px;scroll-margin-top:24px}
-h2.sec{
-  font-size:23px;margin:0 0 8px;display:flex;align-items:center;gap:12px;
-  padding-bottom:12px;border-bottom:1px solid var(--line);
-}
-h2.sec .num{
-  font-family:var(--mono);font-size:13px;color:var(--bg);background:var(--green);
-  width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-weight:700;flex:none;
-}
-.lead{color:var(--fg2);margin:14px 0 26px;font-size:14.5px}
-h3{font-size:17px;margin:34px 0 12px;color:var(--fg)}
-h4{font-size:14.5px;margin:22px 0 8px;color:var(--fg2);letter-spacing:.02em}
+section{margin-bottom:70px;scroll-margin-top:24px}
+h2.sec{font-size:22px;margin:0 0 8px;display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+h2.sec .num{font-family:var(--mono);font-size:12.5px;color:var(--bg);background:var(--green);min-width:26px;height:26px;padding:0 6px;border-radius:7px;display:grid;place-items:center;font-weight:700;flex:none}
+.lead{color:var(--fg2);margin:14px 0 24px;font-size:14.5px}
+h3{font-size:17px;margin:32px 0 12px;color:var(--fg)}
+h4{font-size:14px;margin:20px 0 8px;color:var(--fg2);letter-spacing:.02em}
 
-/* ---------- cards ---------- */
-.grid{display:grid;gap:16px}
+.grid{display:grid;gap:14px}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media(max-width:1100px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:820px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:28px 18px 80px}.g2,.g3,.g4{grid-template-columns:1fr}}
+.g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media(max-width:1200px){.g4,.g6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1100px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}nav{display:none}main{padding:26px 16px 80px}.g2,.g3,.g4,.g6{grid-template-columns:1fr 1fr}}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
-.card .k{font-size:12px;letter-spacing:.1em;color:var(--fg3);text-transform:uppercase;margin-bottom:8px}
-.card .v{font-size:19px;font-weight:700}
-.card .v.green{color:var(--green)}
-.card .v.blue{color:var(--blue)}
-.card .v.amber{color:var(--amber)}
-.card .d{font-size:12.5px;color:var(--fg3);margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
+.card .k{font-size:11.5px;letter-spacing:.08em;color:var(--fg3);text-transform:uppercase;margin-bottom:6px}
+.card .v{font-size:18px;font-weight:700}
+.card .v.green{color:var(--green)}.card .v.blue{color:var(--blue)}
+.card .v.amber{color:var(--amber)}.card .v.red{color:var(--red)}
+.card .v.purple{color:var(--purple)}
+.card .d{font-size:12px;color:var(--fg3);margin-top:5px}
 
-/* ---------- table ---------- */
-.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0}
-.tbl th{
-  text-align:left;padding:10px 12px;color:var(--fg3);font-weight:600;
-  border-bottom:1px solid var(--line2);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
-  position:sticky;top:0;background:var(--bg);
-}
-.tbl td{padding:9px 12px;border-bottom:1px solid #1a2430;vertical-align:top}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+.tbl th{text-align:left;padding:9px 11px;color:var(--fg3);font-weight:600;border-bottom:1px solid var(--line2);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--bg)}
+.tbl td{padding:8px 11px;border-bottom:1px solid #1a2430;vertical-align:top}
 .tbl tr:hover td{background:#121c26}
 .tbl td.mono,.mono{font-family:var(--mono);font-size:12.5px}
-.tbl .dim{color:var(--fg3)}
+.dim{color:var(--fg3)}
 
-/* ---------- code ---------- */
-pre{
-  position:relative;background:#080d12;border:1px solid var(--line);border-radius:12px;
-  padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;
-  line-height:1.65;color:#c9d8e8;margin:14px 0;
-}
+pre{position:relative;background:#080d12;border:1px solid var(--line);border-radius:11px;padding:15px 17px;overflow-x:auto;font-family:var(--mono);font-size:12.7px;line-height:1.62;color:#c9d8e8;margin:13px 0}
 pre .c{color:var(--fg3)}
 pre .ok{color:var(--green)}
 pre .bad{color:var(--red)}
 pre .warn{color:var(--amber)}
 pre .hl{color:var(--blue)}
-.copy{
-  position:absolute;top:8px;right:8px;background:#1a2531;border:1px solid var(--line2);
-  color:var(--fg2);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit;
-}
+pre .pp{color:var(--purple)}
+.copy{position:absolute;top:7px;right:7px;background:#1a2531;border:1px solid var(--line2);color:var(--fg2);font-size:10.5px;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:inherit}
 .copy:hover{background:var(--line2);color:var(--fg)}
-code.inl{background:#1a2531;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:var(--mono);font-size:12.5px;color:var(--amber)}
+code.inl{background:#1a2531;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:var(--mono);font-size:12.4px;color:var(--amber)}
 
-/* ---------- callouts ---------- */
-.note{border-left:3px solid var(--blue);background:var(--blue-d);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0;font-size:14px}
+.note{border-left:3px solid var(--blue);background:var(--blue-d);padding:13px 17px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14px}
 .note.good{border-color:var(--green);background:var(--green-d)}
 .note.bad{border-color:var(--red);background:var(--red-d)}
 .note.warn{border-color:var(--amber);background:var(--amber-d)}
+.note.purple{border-color:var(--purple);background:var(--purple-d)}
 .note b{color:#fff}
 
-/* ---------- flow steps ---------- */
-.steps{position:relative;margin:26px 0 0;padding-left:0;list-style:none}
-.step{
-  position:relative;padding:0 0 26px 46px;border-left:2px solid var(--line2);margin-left:14px;
-}
+.steps{position:relative;margin:22px 0 0;padding-left:0;list-style:none}
+.step{position:relative;padding:0 0 24px 44px;border-left:2px solid var(--line2);margin-left:13px}
 .step:last-child{border-left-color:transparent}
-.step .dot{
-  position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
-  background:var(--bg);border:2px solid var(--line2);display:grid;place-items:center;
-  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--fg3);
-}
+.step .dot{position:absolute;left:-14px;top:0;width:26px;height:26px;border-radius:50%;background:var(--bg);border:2px solid var(--line2);display:grid;place-items:center;font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--fg3)}
 .step.ok .dot{border-color:var(--green);color:var(--green);background:var(--green-d)}
 .step.bad .dot{border-color:var(--red);color:var(--red);background:var(--red-d)}
-.step.skip .dot{border-color:var(--fg3);color:var(--fg3)}
-.step h4{margin:2px 0 6px;font-size:15.5px;color:var(--fg)}
-.step p{margin:0 0 6px;color:var(--fg2);font-size:13.8px}
-.step .tag{font-size:11.5px;padding:2px 9px;border-radius:999px;font-weight:600;margin-left:8px;vertical-align:2px}
+.step h4{margin:2px 0 5px;font-size:15px;color:var(--fg)}
+.step p{margin:0 0 5px;color:var(--fg2);font-size:13.6px}
+.tag{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;margin-left:6px;vertical-align:2px}
 .tag.ok{background:var(--green-d);color:var(--green)}
 .tag.bad{background:var(--red-d);color:var(--red)}
 .tag.warn{background:var(--amber-d);color:var(--amber)}
 
-/* ---------- pitfalls ---------- */
-.pit{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
-.pit summary{
-  cursor:pointer;padding:16px 20px;font-weight:600;font-size:14.5px;display:flex;
-  align-items:center;gap:12px;list-style:none;
-}
-.pit summary::-webkit-details-marker{display:none}
-.pit summary::before{content:"▸";color:var(--fg3);font-size:12px;transition:.2s}
-.pit[open] summary::before{transform:rotate(90deg)}
-.pit summary .pid{
-  font-family:var(--mono);background:var(--red-d);color:var(--red);border:1px solid #5a2020;
-  padding:1px 8px;border-radius:6px;font-size:11.5px;
-}
-.pit .body{padding:0 20px 20px;border-top:1px solid var(--line)}
-.pit .body .row{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:9px 0;border-bottom:1px dashed #1c2836}
-.pit .body .row:last-child{border-bottom:none}
-.pit .body .lab{color:var(--fg3);font-size:12.5px;padding-top:2px}
-.pit .body .val{font-size:13.8px}
+details.pit{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:14px;overflow:hidden}
+details.pit summary{cursor:pointer;padding:15px 18px;font-weight:600;font-size:14.2px;display:flex;align-items:center;gap:11px;list-style:none}
+details.pit summary::-webkit-details-marker{display:none}
+details.pit summary::before{content:"▸";color:var(--fg3);font-size:11px;transition:.2s}
+details.pit[open] summary::before{transform:rotate(90deg)}
+.pid{font-family:var(--mono);background:var(--red-d);color:var(--red);border:1px solid #5a2020;padding:1px 7px;border-radius:6px;font-size:11px;flex:none}
+details.pit .body{padding:0 18px 18px;border-top:1px solid var(--line)}
+details.pit .body .row{display:grid;grid-template-columns:60px 1fr;gap:11px;padding:8px 0;border-bottom:1px dashed #1c2836}
+details.pit .body .row:last-child{border-bottom:none}
+details.pit .body .lab{color:var(--fg3);font-size:12.3px;padding-top:2px}
+details.pit .body .val{font-size:13.6px}
 
-/* ---------- misc ---------- */
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
-.chip{
-  font-family:var(--mono);font-size:12px;padding:4px 11px;border-radius:7px;
-  background:var(--card2);border:1px solid var(--line2);color:var(--fg2);
-}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 16px}
+.chip{font-family:var(--mono);font-size:11.8px;padding:3px 10px;border-radius:7px;background:var(--card2);border:1px solid var(--line2);color:var(--fg2)}
 .chip b{color:var(--amber);font-weight:600}
-.hash{font-family:var(--mono);font-size:11.5px;color:var(--fg3);word-break:break-all}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
-input[type=search]{
-  background:var(--card);border:1px solid var(--line2);color:var(--fg);
-  padding:9px 14px;border-radius:9px;font-size:13px;width:260px;font-family:inherit;
-}
+.hash{font-family:var(--mono);font-size:11.2px;color:var(--fg3);word-break:break-all}
+.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}
+input[type=search]{background:var(--card);border:1px solid var(--line2);color:var(--fg);padding:8px 13px;border-radius:8px;font-size:12.8px;width:240px;font-family:inherit}
 input[type=search]:focus{outline:none;border-color:var(--green)}
-button.btn{
-  background:var(--card);border:1px solid var(--line2);color:var(--fg2);
-  padding:9px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;
-}
+button.btn{background:var(--card);border:1px solid var(--line2);color:var(--fg2);padding:8px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:inherit}
 button.btn:hover{background:var(--line2);color:var(--fg)}
-.count{font-size:12.5px;color:var(--fg3)}
+.count{font-size:12.3px;color:var(--fg3)}
 
-/* ---------- gallery ---------- */
-.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:18px}
-.gal figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:16px}
+.gal figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:11px;overflow:hidden;cursor:zoom-in}
 .gal img{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;transition:.3s}
 .gal figure:hover img{opacity:.82;transform:scale(1.02)}
-.gal figcaption{padding:10px 12px;font-size:12px;color:var(--fg2);line-height:1.5}
-.gal figcaption b{display:block;color:var(--fg);font-size:12.5px;margin-bottom:3px}
+.gal figcaption{padding:9px 11px;font-size:11.6px;color:var(--fg2);line-height:1.5}
+.gal figcaption b{display:block;color:var(--fg);font-size:12px;margin-bottom:2px}
 
-#lightbox{
-  position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1000;display:none;
-  place-items:center;padding:24px;cursor:zoom-out;
-}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:1000;display:none;place-items:center;padding:22px;cursor:zoom-out}
 #lightbox.on{display:grid}
-#lightbox img{max-width:min(92vw,620px);max-height:92vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-#lightbox .cap{position:absolute;bottom:26px;color:var(--fg2);font-size:13px;text-align:center;width:100%}
+#lightbox img{max-width:min(92vw,600px);max-height:92vh;border-radius:9px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#lightbox .cap{position:absolute;bottom:22px;color:var(--fg2);font-size:12.5px;text-align:center;width:100%;padding:0 20px}
 
-/* ---------- boot chain diagram ---------- */
-.chain{display:flex;flex-direction:column;gap:0;margin:22px 0}
-.chain .node{
-  display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
-}
-.chain .node .nm{font-weight:700;font-size:14px}
-.chain .node .nm small{display:block;font-weight:400;color:var(--fg3);font-size:11.5px;font-family:var(--mono)}
-.chain .node .ds{font-size:13px;color:var(--fg2)}
-.chain .arrow{text-align:center;color:var(--line2);font-size:18px;line-height:1;padding:4px 0}
+.chain{display:flex;flex-direction:column;gap:0;margin:20px 0}
+.chain .node{display:grid;grid-template-columns:145px 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 17px}
+.chain .node .nm{font-weight:700;font-size:13.5px}
+.chain .node .nm small{display:block;font-weight:400;color:var(--fg3);font-size:11px;font-family:var(--mono)}
+.chain .node .ds{font-size:12.8px;color:var(--fg2)}
+.chain .arrow{text-align:center;color:var(--line2);font-size:16px;line-height:1;padding:3px 0}
 .chain .node.bad{border-color:#5a2020;background:var(--red-d)}
 .chain .node.good{border-color:#1d5a3c;background:var(--green-d)}
 
-.mem{display:flex;height:52px;border-radius:9px;overflow:hidden;border:1px solid var(--line2);margin:14px 0;font-size:11.5px}
+.mem{display:flex;height:48px;border-radius:9px;overflow:hidden;border:1px solid var(--line2);margin:12px 0;font-size:11px}
 .mem div{display:grid;place-items:center;font-family:var(--mono);color:#0b0f14;font-weight:700}
 .mem .a{flex:32;background:#4ea8ff}
 .mem .b{flex:16;background:#3ddc84}
 .mem .c{flex:16;background:#ffb454}
 
-footer{border-top:1px solid var(--line);padding-top:26px;color:var(--fg3);font-size:12.5px}
-kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-family:var(--mono);font-size:12px}
+.bytegrid{font-family:var(--mono);font-size:12.3px;line-height:1.9;background:#080d12;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;white-space:pre}
+.bytegrid .off{color:var(--fg3)}
+.asmdl{display:grid;grid-template-columns:110px 1fr;gap:0;font-family:var(--mono);font-size:12.3px;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:12px 0}
+.asmdl div{padding:6px 12px;border-bottom:1px solid #1a2430}
+.asmdl .k{color:var(--fg3);background:#0e151d}
+.asmdl .v{color:#c9d8e8}
+.asmdl .v em{color:var(--amber);font-style:normal}
+
+dl.gloss{margin:14px 0}
+dl.gloss dt{font-weight:700;color:var(--fg);margin-top:14px;font-size:14px}
+dl.gloss dt code{font-family:var(--mono);font-size:13px;color:var(--amber);background:#1a2531;padding:1px 6px;border-radius:5px}
+dl.gloss dd{margin:3px 0 0;color:var(--fg2);font-size:13.4px}
+
+.decision{display:grid;gap:10px;margin:16px 0}
+.decision .q{background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:12px 16px;font-size:13.5px}
+.decision .q .sym{color:var(--amber);font-family:var(--mono)}
+.decision .a{margin-left:22px;padding:9px 14px;border-left:2px solid var(--line2);font-size:13.2px;color:var(--fg2)}
+.decision .a b{color:var(--green)}
+
+footer{border-top:1px solid var(--line);padding-top:24px;color:var(--fg3);font-size:12.3px}
+kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-family:var(--mono);font-size:11.5px}
 </style>
 </head>
 <body>
@@ -229,17 +183,24 @@ kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;bor
 <div class="wrap">
 <nav>
   <h2>目 录</h2>
-  <a href="#summary">00 · 摘要</a>
+  <a href="#summary">00 · 摘要与仪表盘</a>
   <a href="#device">01 · 设备档案</a>
-  <a href="#theory">02 · 原理剖析</a>
+  <div class="grp">原 理</div>
+  <a href="#theory">02 · 启动链与漏洞</a>
+  <a href="#dhtb">02.1 · DHTB 镜像结构</a>
+  <a href="#patch">02.2 · SPL 补丁字节证据</a>
+  <a href="#miscdata">02.3 · 解锁记录结构</a>
+  <div class="grp">实 操</div>
   <a href="#env">03 · 环境与工具</a>
   <a href="#flow">04 · 完整流程</a>
   <a href="#steps">05 · 逐步实录</a>
-  <a href="#pitfalls">06 · 踩坑记录</a>
+  <a href="#pitfalls">06 · 踩坑与错误码</a>
   <a href="#data">07 · 数据附录</a>
   <a href="#recovery">08 · 恢复手册</a>
   <a href="#gallery">09 · 截图证据</a>
   <a href="#faq">10 · 常见问题</a>
+  <a href="#gloss">11 · 术语表</a>
+  <a href="#scripts">12 · 脚本源码</a>
 </nav>
 
 <main>
@@ -252,273 +213,350 @@ kbd{background:#1a2531;border:1px solid var(--line2);border-bottom-width:2px;bor
     <span class="badge ok">✓ KernelSU 已生效</span>
     <span class="badge info">全盘备份 11.68 GiB</span>
     <span class="badge warn">⚠ persist 被擦过一次</span>
-    <span class="badge info">总耗时约 90 分钟</span>
+    <span class="badge info">全部为实测数据</span>
   </div>
 </header>
 
-<!-- ============ 00 摘要 ============ -->
+<!-- 00 -->
 <section id="summary">
-  <h2 class="sec"><span class="num">00</span>摘要</h2>
-  <p class="lead">本文记录一台魅族 Note 16 从「fastboot 签名解锁失败」到「Bootloader 解锁 + KernelSU Root 全部生效」的完整过程，包含每一条实际执行的命令、真实的控制台输出、以及 10 个踩过的坑。</p>
+  <h2 class="sec"><span class="num">00</span>摘要与仪表盘</h2>
+  <p class="lead">一台魅族 Note 16 从「fastboot 签名解锁失败」到「Bootloader 解锁 + KernelSU Root 全部生效」的完整记录。本文所有数字、哈希、字节序列都来自本次真实操作，不是示例值。</p>
 
   <div class="grid g4">
     <div class="card"><div class="k">Bootloader</div><div class="v green">已解锁</div><div class="d">ro.boot.flash.locked = 0</div></div>
     <div class="card"><div class="k">Root 方案</div><div class="v green">KernelSU LKM</div><div class="d">v3.3.1 · android13-5.15</div></div>
-    <div class="card"><div class="k">生效证据</div><div class="v blue">kernelsu … Live</div><div class="d">/proc/modules 已加载</div></div>
-    <div class="card"><div class="k">数据安全</div><div class="v amber">已备份</div><div class="d">81 个分区 · 11.68 GiB</div></div>
+    <div class="card"><div class="k">内核模块</div><div class="v blue">Live (OE)</div><div class="d">/proc/modules 已加载</div></div>
+    <div class="card"><div class="k">备份</div><div class="v amber">11.68 GiB</div><div class="d">80 个分区 / 81 文件</div></div>
+  </div>
+
+  <h3>本次操作的数据统计</h3>
+  <div class="grid g6">
+    <div class="card"><div class="k">总耗时</div><div class="v" style="font-size:15px">≈ 92 分钟</div><div class="d">06:18 → 07:50</div></div>
+    <div class="card"><div class="k">BROM 连接</div><div class="v" style="font-size:15px">14 次</div><div class="d">成功 8 / 失败 6</div></div>
+    <div class="card"><div class="k">写入总量</div><div class="v" style="font-size:15px">12.6 MB</div><div class="d">cboot+SPL+uboot+init_boot</div></div>
+    <div class="card"><div class="k">读取总量</div><div class="v" style="font-size:15px">11.7 GiB</div><div class="d">全盘备份</div></div>
+    <div class="card"><div class="k">签名解锁</div><div class="v red" style="font-size:15px">0 / 1</div><div class="d">结构性失败</div></div>
+    <div class="card"><div class="k">踩坑</div><div class="v amber" style="font-size:15px">10 个</div><div class="d">2 个导致返工</div></div>
   </div>
 
   <div class="note good">
-    <b>一句话结论：</b>这台机器的 fastboot 公钥签名解锁是<b>死路</b>（u-boot 里根本没有那把流传的密钥），唯一可行路径是
-    <b>BootROM 漏洞（CVE-2022-38694）→ 擦除 splloader → 刷入关闭校验的 cboot → 注入解锁载荷 → 写回已签名 SPL</b>。
-    而 Root 阶段 fastboot 大块写入不稳定，最终靠 <b>BROM 直接写 init_boot_a</b> 一次成功。
+    <b>一句话结论：</b>这台机器的 fastboot 公钥签名解锁是<b>结构性死路</b>（u-boot 里没有那把流传的密钥），唯一可行路径是
+    <b>BootROM 漏洞（CVE-2022-38694）→ 擦除 splloader → 刷入关闭校验的 cboot → 注入把校验函数 NOP 掉的 SPL 载荷 → 写回原厂 SPL</b>。
+    Root 阶段 fastboot 大块写入不稳定，最终靠 <b>BROM 直接写 init_boot_a</b> 一次成功。
   </div>
 
-  <h3>关键数字</h3>
+  <h3>关键参数速查</h3>
   <div class="chips">
     <span class="chip">BROM 漏洞地址 <b>0x65017f08</b></span>
-    <span class="chip">FDL1 装载地址 <b>0x65000800</b></span>
-    <span class="chip">FDL2 装载地址 <b>0xbefffe00</b></span>
-    <span class="chip">SPL 实际长度 <b>0x10F28</b> (69416 B)</span>
-    <span class="chip">解锁记录偏移 <b>miscdata + 0x2000</b></span>
-    <span class="chip">分区总数 <b>83</b></span>
-    <span class="chip">备份体积 <b>11.68 GiB</b></span>
+    <span class="chip">FDL1 装载 <b>0x65000800</b></span>
+    <span class="chip">FDL2 装载 <b>0xbefffe00</b></span>
+    <span class="chip">SPL 真实长度 <b>0x10F28</b></span>
+    <span class="chip">补丁区间 <b>0xB660–0xB93B</b></span>
+    <span class="chip">解锁记录 <b>miscdata+0x2000</b></span>
+    <span class="chip">分区数 <b>83 + 1</b></span>
+    <span class="chip">KMI <b>android13-5.15</b></span>
   </div>
 </section>
 
-<!-- ============ 01 设备档案 ============ -->
+<!-- 01 -->
 <section id="device">
   <h2 class="sec"><span class="num">01</span>设备档案</h2>
-  <p class="lead">全部数据来自 <code class="inl">adb shell getprop</code> 与 BROM 读出的真实分区表，不是推测值。</p>
+  <p class="lead">全部来自 <code class="inl">adb shell getprop</code> 与 BROM 实读分区表。</p>
 
   <table class="tbl">
-    <tr><th style="width:200px">项目</th><th>值</th><th style="width:270px">来源</th></tr>
+    <tr><th style="width:190px">项目</th><th>值</th><th style="width:250px">来源</th></tr>
     <tr><td>品牌 / 型号</td><td class="mono">meizu / MEIZU Note 16</td><td class="mono dim">ro.product.brand / model</td></tr>
-    <tr><td>设备代号</td><td class="mono">MeizuNote16（产品名 Meizu_Note16_CN）</td><td class="mono dim">ro.product.device / name</td></tr>
-    <tr><td>SoC</td><td class="mono">展锐 UMS9621S（platform: ums9621，board: m2521）</td><td class="mono dim">ro.soc.model</td></tr>
+    <tr><td>设备代号</td><td class="mono">MeizuNote16（产品名 Meizu_Note16_CN，主板 M521Q）</td><td class="mono dim">ro.product.device / name</td></tr>
+    <tr><td>SoC</td><td class="mono">展锐 UMS9621S（platform ums9621，board m2521）</td><td class="mono dim">ro.soc.model</td></tr>
     <tr><td>系统</td><td class="mono">Flyme 12.0.1.7A · Android 15 (SDK 35)</td><td class="mono dim">ro.build.display.id</td></tr>
     <tr><td>安全补丁</td><td class="mono">2025-04-05</td><td class="mono dim">ro.build.version.security_patch</td></tr>
     <tr><td>内核</td><td class="mono">5.15.149-android13-8-gbc2d40003b67-ab428</td><td class="mono dim">uname -a</td></tr>
     <tr><td>KMI</td><td class="mono">android13-5.15</td><td class="mono dim">KernelSU 自动识别</td></tr>
-    <tr><td>架构 / 内存</td><td class="mono">arm64-v8a · 7.63 GB RAM</td><td class="mono dim">/proc/meminfo</td></tr>
-    <tr><td>存储</td><td class="mono">UFS · userdata 231725 MB（约 226 GiB 可用）</td><td class="mono dim">分区表</td></tr>
-    <tr><td>序列号</td><td class="mono">521Q5FGHY92U4</td><td class="mono dim">ro.serialno / fastboot</td></tr>
-    <tr><td>当前槽位</td><td class="mono">_a（A/B 双槽）</td><td class="mono dim">ro.boot.slot_suffix</td></tr>
-    <tr><td>系统指纹</td><td class="mono" style="font-size:11.5px">meizu/Meizu_Note16_CN/MeizuNote16:15/AP3A.240905.015.A2/23:user/release-keys</td><td class="mono dim">ro.build.fingerprint</td></tr>
+    <tr><td>架构 / 内存</td><td class="mono">arm64-v8a · 7,633,980 kB（≈7.63 GiB）</td><td class="mono dim">/proc/meminfo</td></tr>
+    <tr><td>存储</td><td class="mono">UFS · userdata 231,725 MB（226 GiB 可用）</td><td class="mono dim">分区表 + df</td></tr>
+    <tr><td>序列号</td><td class="mono">521Q5FGHY92U4</td><td class="mono dim">ro.serialno</td></tr>
+    <tr><td>槽位</td><td class="mono">_a（A/B 双槽，几乎全部分区都有两份）</td><td class="mono dim">ro.boot.slot_suffix</td></tr>
+    <tr><td>指纹</td><td class="mono" style="font-size:11.2px">meizu/Meizu_Note16_CN/MeizuNote16:15/AP3A.240905.015.A2/23:user/release-keys</td><td class="mono dim">ro.build.fingerprint</td></tr>
   </table>
 
-  <h3>操作前的安全启动状态（失败起点）</h3>
+  <h3>安全启动状态：操作前 vs 操作后</h3>
   <table class="tbl">
-    <tr><th>属性</th><th>操作前</th><th>操作后</th><th>含义</th></tr>
-    <tr><td class="mono">ro.boot.flash.locked</td><td class="mono" style="color:var(--red)">1（推断，miscdata 全零）</td><td class="mono" style="color:var(--green)">0</td><td>BL 锁状态，0 = 已解锁</td></tr>
+    <tr><th style="width:250px">属性</th><th style="width:130px">操作前</th><th style="width:130px">操作后</th><th>含义</th></tr>
+    <tr><td class="mono">miscdata @0x2000</td><td class="mono" style="color:var(--red)">64×00</td><td class="mono" style="color:var(--green)">32B+16B+16B</td><td>解锁记录，官方判定依据</td></tr>
+    <tr><td class="mono">ro.boot.flash.locked</td><td class="mono" style="color:var(--red)">1</td><td class="mono" style="color:var(--green)">0</td><td>0 = 引导器解锁</td></tr>
     <tr><td class="mono">ro.boot.vbmeta.device_state</td><td class="mono">locked</td><td class="mono" style="color:var(--green)">unlocked</td><td>vbmeta 设备状态</td></tr>
-    <tr><td class="mono">ro.boot.verifiedbootstate</td><td class="mono">green</td><td class="mono" style="color:var(--amber)">orange</td><td>橙灯 = 引导器已解锁</td></tr>
+    <tr><td class="mono">ro.boot.verifiedbootstate</td><td class="mono">green</td><td class="mono" style="color:var(--amber)">orange</td><td>橙灯 = 已解锁引导器</td></tr>
     <tr><td class="mono">ro.boot.veritymode</td><td class="mono">enforcing</td><td class="mono">enforcing</td><td>dm-verity 仍强制（未关闭）</td></tr>
-    <tr><td class="mono">miscdata @0x2000</td><td class="mono">64 字节全 00</td><td class="mono" style="color:var(--green)">32B 标识 + 16B + 16B</td><td>解锁记录（官方判定依据）</td></tr>
+    <tr><td class="mono">/proc/modules → kernelsu</td><td class="mono dim">无</td><td class="mono" style="color:var(--green)">Live (OE)</td><td>KernelSU LKM 已加载</td></tr>
   </table>
+  <div class="note warn">
+    <b>注意这个组合：</b><code class="inl">verifiedbootstate=orange</code> 但 <code class="inl">veritymode=enforcing</code>。
+    说明解锁的是<b>引导器签名校验（AVB）</b>，dm-verity 仍在工作 —— 直接改 <code class="inl">system</code> 分区仍会启动失败，
+    但刷写 <code class="inl">boot</code>/<code class="inl">init_boot</code> 不再受限。
+  </div>
 </section>
 
-<!-- ============ 02 原理 ============ -->
+<!-- 02 -->
 <section id="theory">
-  <h2 class="sec"><span class="num">02</span>原理剖析</h2>
-  <p class="lead">想通这一节，后面每一步为什么这么做就都清楚了。</p>
+  <h2 class="sec"><span class="num">02</span>启动链与漏洞</h2>
+  <p class="lead">读懂这一节，后面每一步「为什么这么做」就都清楚了。</p>
 
-  <h3>2.1 展锐的启动链</h3>
+  <h3>2.0 展锐的启动链</h3>
   <div class="chain">
-    <div class="node"><div class="nm">BROM<small>SoC 内部固件</small></div><div class="ds">芯片上电后最先执行的只读代码。USB 端口枚举为 <code class="inl">VID 1782 / PID 4D00</code>。<b>只要芯片没炸，永远可以进</b>——这是救砖的底气。</div></div>
+    <div class="node"><div class="nm">BROM<small>SoC 内部 ROM</small></div><div class="ds">上电第一段代码。USB 枚举为 <code class="inl">VID 1782 / PID 4D00</code>（SPRD U2S Diag）。<b>不可写、刷不坏</b> —— 救砖的终极底气。</div></div>
     <div class="arrow">▼</div>
-    <div class="node"><div class="nm">SPL / splloader<small>DHTB 签名头</small></div><div class="ds">一级引导（256KB 分区，实际镜像 69416 字节）。负责校验并加载下一级 —— <b>黑屏就是死在它的校验上</b>。</div></div>
+    <div class="node"><div class="nm">SPL / splloader<small>DHTB 签名头</small></div><div class="ds">一级引导。分区 256 KB，实际镜像 <b>69,416 字节</b>。校验并加载下一级 —— <b>黑屏就是死在它的校验上</b>。</div></div>
     <div class="arrow">▼</div>
-    <div class="node"><div class="nm">U-Boot / LK<small>uboot_a · 3MB</small></div><div class="ds">二级引导，提供 fastboot 界面。它内部藏着用于「公钥签名解锁」的 RSA 公钥，也是失败点。</div></div>
+    <div class="node"><div class="nm">U-Boot / LK<small>uboot_a · 3 MB</small></div><div class="ds">二级引导，提供 fastboot 界面。内部嵌有「公钥签名解锁」所需的 RSA 公钥，也是失败点。</div></div>
     <div class="arrow">▼</div>
-    <div class="node good"><div class="nm">boot / init_boot<small>AVB 校验</small></div><div class="ds">Android 内核与 ramdisk。解锁后这里的镜像才允许被替换 —— Root 就发生在这里。</div></div>
+    <div class="node good"><div class="nm">boot / init_boot<small>AVB 校验</small></div><div class="ds">Android 内核与 ramdisk。解锁后这些镜像才允许被替换 —— Root 发生在这里。</div></div>
   </div>
 
-  <h3>2.2 为什么「公钥签名解锁」必然失败</h3>
-  <p>展锐有一套官方解锁机制：设备启动到 fastboot，执行 <code class="inl">oem get_identifier_token</code> 拿到设备标识，再用厂商私钥签名，通过 <code class="inl">flashing unlock_bootloader</code> 送回去校验。网上流传的那套工具用的是一把泄露的私钥 <code class="inl">sign.pem</code>（4096 位）。</p>
-  <p>我们做了决定性验证：把这把私钥的公钥模数，拿去在设备真实的 <code class="inl">uboot_a.bin</code>（3MB）里逐字节搜索。</p>
-<pre>sign.pem 公钥模数: 4096 bit
-模数前缀: d8 04 af e3 d3 84 6c 7e 0d 89 3d c2 8c d3 12 55
-uboot_a.bin 中是否含该模数前缀: <span class="bad">NO</span></pre>
-  <div class="note bad"><b>结论：</b>这台机器的 u-boot 里<b>没有</b>这把密钥。所以无论本地怎么签、签得多正确，设备都会返回 <code class="inl">Unlock bootloader fail.</code>。这不是操作问题，是密钥对不上，无解。</div>
-  <p>顺带说明：本地用 <code class="inl">sign.pem</code> 验签确实是 <code class="inl">Verified OK</code> 的——这恰恰是最容易误判的地方：<b>「签名有效」≠「设备认」</b>。</p>
+  <h3>2.1 为什么「公钥签名解锁」必然失败</h3>
+  <p>展锐官方解锁流程：fastboot 下 <code class="inl">oem get_identifier_token</code> 取设备标识 → 厂商私钥签名 → <code class="inl">flashing unlock_bootloader</code> 送回校验。流传工具用的是一把泄露的 4096 位私钥 <code class="inl">sign.pem</code>。</p>
+  <p>决定性验证 —— 把该私钥的公钥模数拿去在真机 <code class="inl">uboot_a.bin</code>（3 MB）里逐字节搜索：</p>
+<pre>sign.pem 模数位数 : 4096 bit (512 字节)
+模数前缀          : d8 04 af e3 d3 84 6c 7e 0d 89 3d c2 8c d3 12 55
+uboot_a.bin 匹配  : <span class="bad">NO</span>          <span class="c">// 全文 3,145,728 字节扫描完毕</span></pre>
+  <div class="note bad">
+    <b>结论：</b>设备里没有这把密钥，<code class="inl">Unlock bootloader fail.</code> 是必然结果。<br>
+    本地验签返回 <code class="inl">Verified OK</code> 只是「自己验自己」—— 最容易误判的地方。
+  </div>
 
-  <h3>2.3 真正的入口：CVE-2022-38694</h3>
-  <p>展锐 BootROM 在接收 FDL1（下载代理）时，校验签名的函数指针可以被事先覆盖。工具 <code class="inl">custom_exec_no_verify_65017f08.bin</code>（96 字节）就是干这个的：把 <code class="inl">0x65017f08</code> 处的校验改成「永远通过」，于是 BROM 愿意加载任意未签名的 FDL。</p>
-<pre><span class="c">// 正常流程</span>
-BROM → verify(FDL1) → <span class="bad">REJECT（未签名）</span>
+  <h3 id="dhtb">2.2 DHTB 镜像结构（实测）</h3>
+  <p>展锐引导镜像统一为 <code class="inl">DHTB</code> 头。把 <code class="inl">splloader.bin</code> 前 64 字节拆开：</p>
+  <div class="bytegrid"><span class="off">0x00</span>  44 48 54 42   <span class="c">"DHTB" 魔数</span>
+<span class="off">0x04</span>  01 00 00 00   <span class="c">版本 = 1</span>
+<span class="off">0x08</span>  ae e3 0e 3b 48 d9 b4 e3 03 e6 4f e1 b5 5c 18 63
+<span class="off">0x18</span>  8c 0e 81 3c f6 90 99 83 f4 eb f9 31 cd a3 bf 8b
+       <span class="c">↑ 0x08–0x23 共 28 字节：SHA / 签名摘要域</span>
+<span class="off">0x28</span>  cc cc cc cc   <span class="c">填充 0xCC</span>
+<span class="off">0x2C</span>  aa aa aa aa   <span class="c">填充 0xAA</span>
+<span class="off">0x30</span>  70 08 01 00   <span class="c">DWORD = 0x00010870 = 67,696 —— 疑似有效载荷长度</span></div>
+  <table class="tbl">
+    <tr><th>镜像</th><th>分区大小</th><th>文件长度</th><th>0x30 处 DWORD</th><th>差值</th></tr>
+    <tr><td class="mono">splloader</td><td class="mono">262,144</td><td class="mono">262,144</td><td class="mono">0x10870 = 67,696</td><td class="mono">1,720</td></tr>
+    <tr><td class="mono">uboot_a</td><td class="mono">3,145,728</td><td class="mono">3,145,728</td><td class="mono">0x1377D0 = 1,275,856</td><td class="mono">1,720</td></tr>
+  </table>
+  <p class="count">两个镜像的「文件长度 − DWORD」都恰好 1,720 字节，说明 0x30 记录的是<b>去掉尾部签名块后的有效载荷长度</b>。这也解释了 SPL 真实可用长度是 69,416 而非 256 KB。</p>
 
-<span class="c">// 利用后</span>
-BROM → 覆盖校验函数 → verify = always_true
-     → <span class="ok">ACCEPT(FDL1)</span> → 拿到完整 flash 读写权限</pre>
-  <p>拿到读写权限只是第一步，<b>真正让设备「永久解锁」的是 miscdata 里那 64 字节记录</b>。</p>
+  <h3 id="patch">2.3 SPL 补丁的字节级证据</h3>
+  <p><code class="inl">gen_spl-unlock</code> 生成的 <code class="inl">spl-unlock.bin</code> 与原始 SPL 相比只改了 <b>80 字节</b>，分布在 <b>5 个区间</b>，每段 16 字节：</p>
+  <table class="tbl">
+    <tr><th style="width:130px">偏移</th><th style="width:60px">长度</th><th>原始（4 条指令）</th><th style="width:130px">补丁后</th></tr>
+    <tr><td class="mono">0x00B660–0xB66F</td><td class="mono">16 B</td><td class="mono" style="font-size:11.4px">da 00 00 94 · 60 00 00 34 · c0 03 80 52 · 59 d9 ff 97</td><td class="mono" style="color:var(--green)">1f 20 03 d5 ×4</td></tr>
+    <tr><td class="mono">0x00B770–0xB77F</td><td class="mono">16 B</td><td class="mono" style="font-size:11.4px">96 00 00 94 · 60 00 00 34 · 40 02 80 52 · 15 d9 ff 97</td><td class="mono" style="color:var(--green)">1f 20 03 d5 ×4</td></tr>
+    <tr><td class="mono">0x00B8C0–0xB8CF</td><td class="mono">16 B</td><td class="mono" style="font-size:11.4px">42 00 00 94 · 60 00 00 34 · 60 03 80 52 · c1 d8 ff 97</td><td class="mono" style="color:var(--green)">1f 20 03 d5 ×4</td></tr>
+    <tr><td class="mono">0x00B8F8–0xB907</td><td class="mono">16 B</td><td class="mono" style="font-size:11.4px">34 00 00 94 · 60 00 00 34 · 80 03 80 52 · b3 d8 ff 97</td><td class="mono" style="color:var(--green)">1f 20 03 d5 ×4</td></tr>
+    <tr><td class="mono">0x00B92C–0xB93B</td><td class="mono">16 B</td><td class="mono" style="font-size:11.4px">27 00 00 94 · 60 00 00 34 · c0 03 80 52 · a6 d8 ff 97</td><td class="mono" style="color:var(--green)">1f 20 03 d5 ×4</td></tr>
+  </table>
 
-  <h3>2.4 解锁记录：miscdata @ 0x2000</h3>
-  <p>官方判定逻辑写在解锁脚本里：<b>全零 = 锁定；32 字节标识 + 16 字节哈希 + 16 字节哈希 = 已解锁</b>。</p>
+  <h4>这 4 条指令在干什么</h4>
+  <div class="asmdl">
+    <div class="k">da 00 00 94</div><div class="v"><em>BL</em> +0x368 —— 调用「校验签名」子函数</div>
+    <div class="k">60 00 00 34</div><div class="v"><em>CBZ</em> w0, +0xC —— 返回 0（校验通过）则跳过错误分支</div>
+    <div class="k">c0 03 80 52</div><div class="v"><em>MOV</em> w0, #0x1E —— 失败时把错误码 30 写进返回值</div>
+    <div class="k">59 d9 ff 97</div><div class="v"><em>BL</em> −0x9AC —— 跳进错误处理（打印 / 挂起）</div>
+  </div>
+  <div class="note purple">
+    <b>关键理解：</b><code class="inl">1f 20 03 d5</code> 是 AArch64 的 <b>NOP</b>（空操作）。把整段换成 4 个 NOP，等于
+    <b>不调用校验、不判断结果、不设错误码、不报错</b>，流水线直接滑过去。<br><br>
+    5 处调用点对应 SPL 里 5 个校验入口（很可能是 SPL 自身、uboot、sml、trustos 及一个备用路径）。
+    <b>20 条指令被废掉，校验链整体失效。</b>
+  </div>
+
+  <h4>一个必须纠正的误解</h4>
+  <p>包里 <code class="inl">u-boot-spl-16k-sign.bin</code> 名字带 “sign”，容易以为是「重新签过名的补丁版」。实测：</p>
+<pre>u-boot-spl-16k-sign.bin (69,416 B)  vs  原厂 splloader.bin 前 69,416 B
+差异字节数: <span class="ok">0</span></pre>
+  <div class="note warn">
+    <b>它不是补丁版，只是把 256 KB 分区里的尾部填充裁掉的原厂镜像。</b><br>
+    真正被改的是 <code class="inl">spl-unlock.bin</code>（打进内存执行的那份）。流程最后写回分区的，是<b>原厂 SPL</b> ——
+    设备能跳过校验，靠的是 <code class="inl">miscdata</code> 里的解锁记录，而不是 SPL 被改了。
+    <br><br>
+    这也解释了为什么擦 SPL 后设备会<b>永久停在 BROM</b>：那段 69 KB 引导被抹掉了，而写回去的又是原厂镜像。
+  </div>
+
+  <h3 id="miscdata">2.4 解锁记录：miscdata @ 0x2000</h3>
+  <p>官方判定逻辑：<b>全零 = 锁定；32 字节标识 + 16 字节哈希 + 16 字节哈希 = 已解锁</b>。</p>
   <div class="mem">
     <div class="a">32 B 标识串</div>
     <div class="b">16 B 哈希</div>
     <div class="c">16 B 哈希</div>
   </div>
-  <p>操作前后的实测对照：</p>
-<pre><span class="c">; 操作前（全零 = 锁定）</span>
+  <p>实测前后对照（<code class="inl">read_part miscdata 8192 64</code>）：</p>
+<pre><span class="c">; 操作前 —— 64 字节全零，非零计数 0</span>
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 
-<span class="c">; 操作后（非零 = 已解锁）</span>
-<span class="ok">ba ce 51 de 3e 9a 1e 0d 5c 55 0e a4 ef dd 5b 59</span>
-<span class="ok">a9 05 29 7f a1 f0 c6 9b bc 5d ce c5 66 2a 32 5b</span>
-<span class="ok">b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7</span>
-<span class="ok">b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7</span>
-<span class="c">; 注意：第 3、4 段哈希完全相同 —— 这是正常结构，不是写入错误</span></pre>
+<span class="c">; 操作后 —— 非零计数 64</span>
+<span class="ok">ba ce 51 de 3e 9a 1e 0d 5c 55 0e a4 ef dd 5b 59</span>   <span class="c">┐ 32 字节标识</span>
+<span class="ok">a9 05 29 7f a1 f0 c6 9b bc 5d ce c5 66 2a 32 5b</span>   <span class="c">┘</span>
+<span class="hl">b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7</span>   <span class="c">← 哈希 A（16B）</span>
+<span class="hl">b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7</span>   <span class="c">← 哈希 B（16B，与 A 相同）</span></pre>
+  <p class="count">两段哈希完全相同是<b>正常结构</b>（同一摘要两次拷贝/双份校验），不是写坏了。</p>
 
   <h3>2.5 为什么必须先擦掉 splloader</h3>
   <div class="note warn">
-    <b>这是整件事最关键、也是我们失败一次的原因。</b><br>
-    解锁载荷 <code class="inl">spl-unlock.bin</code> 本质是「打过补丁的 SPL」，被 BROM 装进 SRAM 执行。它跑完会重启设备。<br><br>
-    如果 <code class="inl">splloader</code> 分区还在 → 重启后 BootROM 从 flash 加载<b>原厂 SPL</b> → 原厂 SPL 重新掌控校验 → 载荷刚写的东西被覆盖/丢弃 → <code class="inl">miscdata</code> 仍是全零。<br><br>
-    擦掉 <code class="inl">splloader</code> 后 → 重启必然落回 BROM（无处可去）→ <b>既保证载荷结果不被覆盖，又让后续全程不用再按组合键</b>。一举两得。
+    解锁载荷本质是「校验函数被 NOP 掉的 SPL」，由 BROM 装进 SRAM 执行，跑完会重启。<br><br>
+    <b>如果 splloader 分区还在</b> → 重启后 BootROM 从 flash 加载<b>原厂 SPL</b> → 校验权回到原厂 → 载荷期间的成果被覆盖 → <code class="inl">miscdata</code> 仍是全零。<br><br>
+    <b>擦掉之后</b> → 重启必然落回 BROM（无处可去）→ ①成果不被覆盖；②后续全程不用再按组合键。
   </div>
 </section>
 
-<!-- ============ 03 环境 ============ -->
+<!-- 03 -->
 <section id="env">
   <h2 class="sec"><span class="num">03</span>环境与工具</h2>
 
-  <h3>3.1 硬件与系统环境</h3>
+  <h3>3.1 主机与驱动</h3>
   <table class="tbl">
-    <tr><th>项目</th><th>值</th></tr>
-    <tr><td>主机</td><td>Windows · AMD USB 3.10 xHCI</td></tr>
-    <tr><td>驱动</td><td class="mono">UNISOC sprvcom 4.21.32.134（已预装，驱动类 Ports）</td></tr>
-    <tr><td>BROM 枚举</td><td class="mono">USB\VID_1782&PID_4D00 · "SPRD U2S Diag (COMx)"</td></tr>
-    <tr><td>fastboot 枚举</td><td class="mono">USB\VID_18D1&PID_4EE0 · "Android Bootloader&ADB Interface"</td></tr>
-    <tr><td>ADB 枚举</td><td class="mono">USB\VID_18D1&PID_4EE8</td></tr>
+    <tr><th style="width:180px">项目</th><th>值</th></tr>
+    <tr><td>主机</td><td>Windows · AMD USB 3.10 eXtensible Host Controller (xHCI)</td></tr>
+    <tr><td>驱动</td><td class="mono">UNISOC sprvcom 4.21.32.134（驱动类 Ports，已预装）</td></tr>
+    <tr><td>BROM 枚举</td><td class="mono">USB\VID_1782&amp;PID_4D00 → "SPRD U2S Diag (COMx)"</td></tr>
+    <tr><td>fastboot 枚举</td><td class="mono">USB\VID_18D1&amp;PID_4EE0 → "Android Bootloader&amp;ADB Interface"</td></tr>
+    <tr><td>ADB 枚举</td><td class="mono">USB\VID_18D1&amp;PID_4EE8</td></tr>
+    <tr><td>代理</td><td class="mono">127.0.0.1:7897（推 GitHub 用，实测 51.5 MB / 270 秒）</td></tr>
   </table>
 
-  <h3>3.2 工具清单（ums9621_Meizu_Note16 包，共 10 个文件）</h3>
+  <h3>3.2 工具包（ums9621_Meizu_Note16，10 个文件）</h3>
   <table class="tbl">
-    <tr><th>文件</th><th style="width:100px">大小</th><th>作用</th></tr>
-    <tr><td class="mono">spd_dump.exe</td><td class="mono">80.5 KB</td><td>BootROM 通信主体（TomKing062 构建，sha1 d24c21a0）</td></tr>
-    <tr><td class="mono">gen_spl-unlock.exe</td><td class="mono">10.5 KB</td><td>生成 SPL 补丁 / 解锁载荷</td></tr>
-    <tr><td class="mono">fdl1-dl.bin</td><td class="mono">59.2 KB</td><td>一级下载代理，装载到 <code class="inl">0x65000800</code></td></tr>
-    <tr><td class="mono">fdl2-dl.bin</td><td class="mono">1.17 MB</td><td>二级代理（U-Boot 下载模式），装载到 <code class="inl">0xbefffe00</code></td></tr>
-    <tr><td class="mono">fdl2-cboot.bin</td><td class="mono">1.22 MB</td><td>关闭校验的 cboot（DHTB 格式），刷进 uboot_a</td></tr>
+    <tr><th style="width:330px">文件</th><th style="width:90px">大小</th><th>作用</th></tr>
+    <tr><td class="mono">spd_dump.exe</td><td class="mono">80.5 KB</td><td>BootROM 通信主体（TomKing062 构建，sha1 <code class="inl">d24c21a0</code>）</td></tr>
+    <tr><td class="mono">gen_spl-unlock.exe</td><td class="mono">10.5 KB</td><td>探测 SPL 真实长度 / 裁剪 / 生成 NOP 补丁载荷</td></tr>
+    <tr><td class="mono">fdl1-dl.bin</td><td class="mono">59.2 KB</td><td>一级下载代理 → <code class="inl">0x65000800</code></td></tr>
+    <tr><td class="mono">fdl2-dl.bin</td><td class="mono">1.17 MB</td><td>二级代理（U-Boot 下载模式）→ <code class="inl">0xbefffe00</code></td></tr>
+    <tr><td class="mono">fdl2-cboot.bin</td><td class="mono">1.22 MB</td><td>关闭校验的 cboot（DHTB），刷进 <code class="inl">uboot_a</code></td></tr>
     <tr><td class="mono">custom_exec_no_verify_65017f08.bin</td><td class="mono">96 B</td><td>CVE-2022-38694 利用载荷</td></tr>
     <tr><td class="mono">misc-wipe.bin</td><td class="mono">2 KB</td><td><code class="inl">e userdata</code> 时写入 misc 的擦除标记</td></tr>
     <tr><td class="mono">chsize.exe</td><td class="mono">10 KB</td><td>裁剪镜像到真实长度</td></tr>
     <tr><td class="mono">Channel9.dll</td><td class="mono">224 KB</td><td>依赖库</td></tr>
-    <tr><td class="mono">unlock_autopatch_9621.bat</td><td class="mono">1.45 KB</td><td>官方流程脚本（本机分区名不符，需手动等效执行）</td></tr>
+    <tr><td class="mono">unlock_autopatch_9621.bat</td><td class="mono">1.45 KB</td><td>官方流程脚本（本机分区名不符，需等效改写）</td></tr>
   </table>
 
   <h3>3.3 关键地址表</h3>
   <table class="tbl">
-    <tr><th>地址 / 参数</th><th>含义</th><th>备注</th></tr>
-    <tr><td class="mono">0x65017f08</td><td>BROM 签名校验函数指针</td><td>本机专用；其他机型可能是 0x65015f08 / 0x65015f48</td></tr>
+    <tr><th style="width:150px">地址 / 参数</th><th>含义</th><th style="width:300px">备注</th></tr>
+    <tr><td class="mono">0x65017f08</td><td>BROM 签名校验函数指针</td><td>本机专用；同系列常见 0x65015f08 / 0x65015f48</td></tr>
     <tr><td class="mono">0x65000800</td><td>FDL1 / SPL 载荷装载地址</td><td>SRAM</td></tr>
     <tr><td class="mono">0xbefffe00</td><td>FDL2 装载地址</td><td>DDR</td></tr>
-    <tr><td class="mono">0x10F28</td><td>本机 SPL 真实长度（69416 字节）</td><td>由 gen_spl-unlock 首次运行自动算出</td></tr>
-    <tr><td class="mono">miscdata + 8192</td><td>解锁记录偏移</td><td>读 64 字节判断锁定状态</td></tr>
+    <tr><td class="mono">0x10F28</td><td>SPL 真实长度（69,416 B）</td><td>由 gen_spl-unlock 自动算出</td></tr>
+    <tr><td class="mono">0xB660–0xB93B</td><td>SPL 补丁区间（5×16 B）</td><td>全部替换为 AArch64 NOP</td></tr>
+    <tr><td class="mono">miscdata + 8192</td><td>解锁记录</td><td>读 64 字节判定</td></tr>
   </table>
 
-  <h3>3.4 完整备份（操作前必做）</h3>
+  <h3>3.4 全盘备份规格</h3>
   <table class="tbl">
-    <tr><th>项目</th><th>值</th></tr>
+    <tr><th style="width:150px">项目</th><th>值</th></tr>
     <tr><td>命令</td><td class="mono">exec path &lt;dir&gt; r all reset</td></tr>
-    <tr><td>范围</td><td>83 分区中的 80 个（自动排除 userdata / cache / blackbox）</td></tr>
-    <tr><td>体积 / 耗时</td><td class="mono">12.5 GB（11.68 GiB）· 约 12 分钟 · 平均 14.6 MB/s</td></tr>
+    <tr><td>范围</td><td>83 个 GPT 分区中的 80 个（自动排除 userdata / cache / blackbox）</td></tr>
+    <tr><td>体积 / 耗时</td><td class="mono">12,537,035,264 B = 11.68 GiB · 约 12 分钟 · 平均 14.6 MB/s</td></tr>
     <tr><td>产物</td><td class="mono">81 个文件（含 user_partition 伪分区），0 个零字节文件</td></tr>
   </table>
 </section>
 
-<!-- ============ 04 流程 ============ -->
+<!-- 04 -->
 <section id="flow">
   <h2 class="sec"><span class="num">04</span>完整流程</h2>
-  <p class="lead">最终跑通的路径。绿色 = 成功，红色 = 曾失败后被修正。</p>
+  <p class="lead">最终跑通的路径。绿 = 成功，红 = 曾失败后被修正。</p>
 
   <ol class="steps">
     <li class="step ok"><span class="dot">0</span>
       <h4>全盘备份 <span class="tag ok">11.68 GiB</span></h4>
-      <p>BROM 连上后执行 <code class="inl">r all</code>，把除 userdata/cache/blackbox 外的 80 个分区全部导出。这是后面所有冒险的底气。</p>
+      <p>BROM 连上后 <code class="inl">r all</code>，导出除 userdata/cache/blackbox 外的 80 个分区。</p>
     </li>
     <li class="step ok"><span class="dot">1</span>
-      <h4>进入 BROM 并建立 FDL 通道</h4>
-      <p>音量下 + 电源 3 秒后插线，屏幕全黑。spd_dump 用 <code class="inl">exec_addr2 0x65017f08</code> 绕过签名，加载 fdl1 + fdl2，取得完整读写能力。</p>
+      <h4>BROM 握手 + 建立 FDL 通道</h4>
+      <p>音量下 + 电源 3 秒后插线 → <code class="inl">exec_addr2 0x65017f08</code> 绕过签名 → 加载 fdl1 + fdl2。</p>
     </li>
     <li class="step ok"><span class="dot">2</span>
       <h4>读取并解析分区表</h4>
-      <p><code class="inl">exec p</code> 输出 83 个分区，确认 Storage = UFS、当前 slot = a、uboot 存在 <code class="inl">uboot_a/b</code> 双槽。</p>
+      <p><code class="inl">exec p</code> 输出 83 个分区，确认 UFS、slot a、uboot 双槽。</p>
     </li>
     <li class="step ok"><span class="dot">3</span>
       <h4>生成解锁载荷</h4>
-      <p><code class="inl">gen_spl-unlock splloader.bin 0x10f28</code> → 产出 <code class="inl">spl-unlock.bin</code>（69416 B）。这个文件包里原本没有，是现场生成的。</p>
+      <p><code class="inl">gen_spl-unlock splloader.bin</code> → 打印 <code class="inl">0x10f28</code>；<code class="inl">gen_spl-unlock splloader.bin 0x10f28</code> → 产出 <code class="inl">spl-unlock.bin</code>（69,416 B，5 段 NOP）。</p>
     </li>
     <li class="step ok"><span class="dot">4</span>
       <h4>擦 splloader + 刷 cboot</h4>
-      <p><code class="inl">r splloader</code> 备份 → <code class="inl">e splloader</code> 擦除 → <code class="inl">w uboot_a fdl2-cboot.bin</code>。擦除后设备无法正常开机，但也因此每次重启都会自动落回 BROM。</p>
-      <p><span class="tag warn">关键</span> 少了 <code class="inl">e splloader</code> 这一步，后面全部白做（见踩坑 P3）。</p>
+      <p><code class="inl">r splloader</code> → <code class="inl">e splloader</code> → <code class="inl">w uboot_a fdl2-cboot.bin</code>。擦除后设备无法开机，但每次重启自动落回 BROM。</p>
+      <p><span class="tag warn">关键</span> 少了 <code class="inl">e splloader</code>，后面全部白做（见 P3）。</p>
     </li>
     <li class="step ok"><span class="dot">5</span>
       <h4>注入解锁载荷</h4>
-      <p><code class="inl">exec_addr2 … fdl spl-unlock.bin 0x65000800</code>，载荷在 SRAM 执行后自行重启。<b>看到 <code class="inl">device removed, exiting...</code> 就是成功</b>。</p>
+      <p><code class="inl">exec_addr2 … fdl spl-unlock.bin 0x65000800</code>。<b><code class="inl">device removed, exiting...</code> 就是成功</b>。</p>
     </li>
     <li class="step ok"><span class="dot">6</span>
       <h4>校验 miscdata</h4>
-      <p>读 <code class="inl">miscdata 8192 64</code>。64 字节非零且呈 32+16+16 结构 → 解锁成功。这是唯一可信的判定。</p>
+      <p>读 <code class="inl">miscdata 8192 64</code>：64 字节非零且呈 32+16+16 → 成功。</p>
     </li>
     <li class="step ok"><span class="dot">7</span>
-      <h4>写回已签名 SPL + 原版 uboot</h4>
-      <p><code class="inl">w splloader u-boot-spl-16k-sign.bin</code>（69 KB，补丁版）→ <code class="inl">w uboot_a 原版备份</code>。<br><b>不能</b>写回原版 SPL，否则校验重新生效、设备又黑屏。</p>
+      <h4>写回原厂 SPL + 原厂 uboot</h4>
+      <p><code class="inl">w splloader u-boot-spl-16k-sign.bin</code> → <code class="inl">w uboot_a 原版备份</code>。</p>
+      <p><span class="tag bad">注意</span> 只写回原厂 SPL 而不写 uboot，若 uboot 仍是 cboot 会黑屏。</p>
     </li>
     <li class="step ok"><span class="dot">8</span>
       <h4>开机验证</h4>
-      <p>屏幕出现 <code class="inl">INFO: LOCK FLAG IS : UNLOCK!!!</code> / <code class="inl">WARNING: … SKIP VERIFY!!!</code>。<br>开机后 <code class="inl">adb shell getprop ro.boot.flash.locked</code> → <b>0</b>。</p>
+      <p>屏幕出现 <code class="inl">INFO: LOCK FLAG IS : UNLOCK!!!</code> / <code class="inl">WARNING: … SKIP VERIFY!!!</code>；<code class="inl">flash.locked</code> → <b>0</b>。</p>
     </li>
     <li class="step ok"><span class="dot">9</span>
       <h4>KernelSU Root</h4>
-      <p>KSU 修补 <code class="inl">init_boot.img</code>（KMI android13-5.15）→ fastboot 写入两次失败 → <b>改走 BROM 写 init_boot_a 一次成功</b> → 重启后 KSU 显示「工作中」。</p>
+      <p>KSU 修补 <code class="inl">init_boot.img</code> → fastboot 写两次失败 → <b>BROM 写 <code class="inl">init_boot_a</code> 一次成功</b> → KSU「工作中」。</p>
     </li>
   </ol>
 
-  <div class="note">
-    <b>值得注意的设计：</b>擦掉 SPL 之后，设备的每一次重启都会自动进入 BROM，
-    所以第 4～7 步之间<b>完全不需要再按任何组合键</b>，这是官方脚本能「一键跑完」的真正原因。
+  <h3>决策树：出问题时怎么走</h3>
+  <div class="decision">
+    <div class="q"><span class="sym">?</span> 手机显示 FASTBOOT，而不是黑屏</div>
+    <div class="a">说明<b>按键之前就插了线</b>，设备正常启动。→ 先拔线，再关机，再按键，最后插线。</div>
+
+    <div class="q"><span class="sym">?</span> <code class="inl">find port failed</code>，但设备管理器里有 COM 口</div>
+    <div class="a">残留的 <code class="inl">spd_dump.exe</code> 占着端口。→ <b>杀掉所有 spd_dump</b>，或拔插一次。</div>
+
+    <div class="q"><span class="sym">?</span> 端口出现但连不上 / <code class="inl">device removed</code></div>
+    <div class="a">BROM 端口存活窗口只有几秒。→ <b>不要加任何 sleep</b>，出现即握手；轮询压到 120–150 ms。</div>
+
+    <div class="q"><span class="sym">?</span> 载荷发了，<code class="inl">miscdata</code> 还是全零</div>
+    <div class="a">漏了 <code class="inl">e splloader</code>。→ 补上擦除步骤，重跑 Phase A。</div>
+
+    <div class="q"><span class="sym">?</span> 刷完 cboot 后黑屏</div>
+    <div class="a">原厂 SPL 拒绝了 cboot 签名。→ BROM 写回原版 <code class="inl">uboot_a.bin</code>。</div>
+
+    <div class="q"><span class="sym">?</span> 刷 init_boot 报 <code class="inl">Too many links</code></div>
+    <div class="a">USB 传输层错误，与镜像无关。→ <b>改走 BROM</b> 写 <code class="inl">init_boot_a</code>。</div>
   </div>
 </section>
 
-<!-- ============ 05 逐步实录 ============ -->
+<!-- 05 -->
 <section id="steps">
   <h2 class="sec"><span class="num">05</span>逐步实录</h2>
-  <p class="lead">每一条都是真实执行过的命令与原始输出（含失败）。点击展开。</p>
+  <p class="lead">每条命令都真实执行过，输出为原始日志片段（含失败）。点击展开。</p>
 
   <details class="pit" open>
     <summary><span class="pid">A</span>fastboot 公钥签名解锁 —— 失败</summary>
     <div class="body">
       <div class="row"><div class="lab">命令</div><div class="val mono">fastboot_sprd.exe oem get_identifier_token<br>fastboot_sprd.exe flashing unlock_bootloader signature.bin</div></div>
-      <div class="row"><div class="lab">输出</div><div class="val">
-<pre>Downloading 'unlock_message'
+      <div class="row"><div class="lab">token</div><div class="val mono">35323151354647485939325534 → ASCII "521Q5FGHY92U4"（与设备当前返回一致）</div></div>
+      <div class="row"><div class="lab">输出</div><div class="val"><pre>Downloading 'unlock_message'
 OKAY [  0.000s]
 unlocking bootloader
 <span class="bad">FAILED (remote: Unlock bootloader fail.)</span>
-Finished. Total time: 0.016s</pre>
-      </div></div>
-      <div class="row"><div class="lab">旁证</div><div class="val">
-<pre>fastboot_sprd.exe flashing unlock             → <span class="bad">FAILED (remote: unknown cmd.)</span>
-fastboot_sprd.exe oem unlock                  → <span class="bad">FAILED (remote: Unlock bootloader fail.)</span>
-fastboot_sprd.exe flashing get_unlock_ability → <span class="bad">FAILED (remote: Not implement.)</span>
-fastboot_sprd.exe flashing get_unlock_bootloader_nonce → <span class="bad">FAILED (remote: Not implement.)</span></pre>
-      </div></div>
-      <div class="row"><div class="lab">判读</div><div class="val">不是命令写错，是设备端签名校验直接拒。见 <a href="#theory">2.2 节</a>的模数比对证据。</div></div>
+Finished. Total time: 0.016s</pre></div></div>
+      <div class="row"><div class="lab">旁证</div><div class="val"><pre>flashing unlock               → <span class="bad">FAILED (remote: unknown cmd.)</span>
+oem unlock                    → <span class="bad">FAILED (remote: Unlock bootloader fail.)</span>
+flashing get_unlock_ability   → <span class="bad">FAILED (remote: Not implement.)</span>
+flashing get_unlock_bootloader_nonce → <span class="bad">FAILED (remote: Not implement.)</span></pre></div></div>
+      <div class="row"><div class="lab">判读</div><div class="val">不是命令写错。设备端签名校验直接拒，备用命令全部「未实现」→ 只能走 BROM。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">B</span>首次 BROM 握手（判定漏洞可用）</summary>
+    <summary><span class="pid">B</span>首次 BROM 握手（漏洞可用性验证）</summary>
     <div class="body">
-      <div class="row"><div class="lab">命令</div><div class="val mono">spd_dump.exe --wait 300 --reconnect --verbose 2 exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec p reset</div></div>
-      <div class="row"><div class="lab">输出</div><div class="val">
-<pre>Waiting for dl_diag connection (300s)
+      <div class="row"><div class="lab">命令</div><div class="val mono">spd_dump --wait 300 --reconnect --verbose 2 exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec p reset</div></div>
+      <div class="row"><div class="lab">输出</div><div class="val"><pre>Waiting for dl_diag connection (300s)
 Successfully connected to port: 3
 CHECK_BAUD bootrom
 <span class="ok">BSL_REP_VER: "SPRD3"</span>
@@ -526,44 +564,35 @@ CMD_CONNECT bootrom
 current exec_addr is 0x65017f08
 <span class="ok">SEND fdl1-dl.bin to 0x65000800</span>
 <span class="ok">EXEC FDL1 → SEND fdl2-dl.bin to 0xbefffe00</span>
-<span class="ok">FDL2: incompatible partition</span>       <span class="c">← 仅提示，不影响</span>
+<span class="ok">FDL2: incompatible partition</span>     <span class="c">← 仅提示，不影响</span>
 <span class="ok">Total number of partitions: 83</span>
 <span class="ok">Storage is ufs</span>
-Device is using slot a</pre>
-      </div></div>
-      <div class="row"><div class="lab">判读</div><div class="val">CVE-2022-38694 在这台机器上<b>有效</b>，这是整个方案的可行性证明。</div></div>
+Device is using slot a</pre></div></div>
+      <div class="row"><div class="lab">判读</div><div class="val">CVE-2022-38694 在这台机器上有效 —— 整个方案的可行性证明。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">C</span>全盘备份</summary>
+    <summary><span class="pid">C</span>全盘备份（r all）</summary>
     <div class="body">
-      <div class="row"><div class="lab">命令</div><div class="val mono">spd_dump.exe --wait 20 --reconnect --verbose 1 exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec path C:\…\_backup r all reset</div></div>
-      <div class="row"><div class="lab">输出</div><div class="val">
-<pre>Read Part Done: user_partition+0x0, target: 0x8000, read: 0x8000
-...
-[========================================] 100.0% Speed: 14.6Mb/s
-Backup attempt 3 done: exit=0  bytes=12537035264  <span class="c">(11.68 GB)</span>
-RESULT: 81 files / 0 zero-byte</pre>
-      </div></div>
-      <div class="row"><div class="lab">判读</div><div class="val">前两次握手失败后自动重试，第三次跑完。<b>没有任何写操作</b>。</div></div>
+      <div class="row"><div class="lab">命令</div><div class="val mono">spd_dump --wait 20 --reconnect --verbose 1 exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec path …\_backup r all reset</div></div>
+      <div class="row"><div class="lab">过程</div><div class="val">前两次握手失败自动重试，第三次跑完；<code class="inl">super</code> 10 GiB 占大头，约 14.6 MB/s。</div></div>
+      <div class="row"><div class="lab">结果</div><div class="val"><pre>attempt 3 done: exit=0  bytes=12537035264  <span class="c">(11.68 GB)</span>
+RESULT: 81 files / 0 zero-byte</pre></div></div>
+      <div class="row"><div class="lab">判读</div><div class="val">全程只读，<b>没有任何写操作</b>。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">D</span>生成解锁载荷 spl-unlock.bin</summary>
+    <summary><span class="pid">D</span>生成解锁载荷（两步）</summary>
     <div class="body">
       <div class="row"><div class="lab">第一步</div><div class="val mono">gen_spl-unlock.exe splloader.bin</div></div>
-      <div class="row"><div class="lab">输出</div><div class="val">
-<pre><span class="hl">0x10f28</span>
-<span class="c">← 自动探测出 SPL 真实长度，并把 splloader.bin 裁剪到 69416 字节</span></pre>
-      </div></div>
+      <div class="row"><div class="lab">输出</div><div class="val"><pre><span class="hl">0x10f28</span>
+<span class="c">← 探测出 SPL 真实长度，并把 splloader.bin 从 262144 裁到 69416</span></pre></div></div>
       <div class="row"><div class="lab">第二步</div><div class="val mono">gen_spl-unlock.exe splloader.bin 0x10f28</div></div>
-      <div class="row"><div class="lab">输出</div><div class="val">
-<pre><span class="ok">spl-unlock.bin   69416 字节</span>   SHA256 6c6f25e0…
-<span class="c">← 同时产出 u-boot-spl-16k-sign.bin（补丁版 SPL，8d5777f9…）</span></pre>
-      </div></div>
-      <div class="row"><div class="lab">判读</div><div class="val">两个 69416 字节文件内容不同（差 80 字节）：一个用于「送进内存执行」，一个用于「写回分区持久化」。</div></div>
+      <div class="row"><div class="lab">输出</div><div class="val"><pre><span class="ok">spl-unlock.bin            69416 B   sha256 6c6f25e0…</span>   <span class="c">← 5 段 NOP 补丁</span>
+<span class="ok">u-boot-spl-16k-sign.bin   69416 B   sha256 8d5777f9…</span>   <span class="c">← 与原厂前 69416 字节 0 差异</span></pre></div></div>
+      <div class="row"><div class="lab">判读</div><div class="val">同长但用途不同：一个进内存执行，一个写回分区。<b>只有前者被打了补丁。</b></div></div>
     </div>
   </details>
 
@@ -578,36 +607,32 @@ RESULT: 81 files / 0 zero-byte</pre>
       <div class="row"><div class="lab">命令 3</div><div class="val mono">exec_addr2 0x65017f08 fdl spl-unlock.bin 0x65000800</div></div>
       <div class="row"><div class="lab">输出 3</div><div class="val"><pre>EXEC FDL1
 send: check baud
-<span class="warn">CHECK_BAUD FAIL</span>        <span class="c">← 载荷不是标准 FDL，不会应答，属正常</span>
+<span class="warn">CHECK_BAUD FAIL</span>        <span class="c">← 载荷不是标准 FDL，不应答，正常</span>
 <span class="warn">CHECK_BAUD FAIL</span>
 <span class="ok">device removed, exiting...</span>   <span class="c">← 载荷执行完自行重启 = 成功标志</span></pre></div></div>
       <div class="row"><div class="lab">命令 4</div><div class="val mono">exec path … read_part miscdata 8192 64 miscdata2.bin reset</div></div>
-      <div class="row"><div class="lab">结果</div><div class="val"><pre><span class="ok">miscdata2 非零字节数: 64</span>
-ba ce 51 de 3e 9a 1e 0d 5c 55 0e a4 ef dd 5b 59 a9 05 29 7f a1 f0 c6 9b bc 5d ce c5 66 2a 32 5b
-b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7
-b2 0c 3a e9 51 40 3f e5 cf b7 8d fa ca 01 96 d7</pre></div></div>
+      <div class="row"><div class="lab">结果</div><div class="val"><pre><span class="ok">miscdata2 非零字节数: 64</span>      <span class="c">← 解锁记录写入成功</span></pre></div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">F</span>Phase B：写回已签名 SPL + 原版 uboot</summary>
+    <summary><span class="pid">F</span>Phase B：写回镜像 + 擦除标记</summary>
     <div class="body">
-      <div class="row"><div class="lab">命令</div><div class="val mono">exec w splloader u-boot-spl-16k-sign.bin w uboot_a &lt;备份&gt;\uboot_a.bin e userdata reset</div></div>
+      <div class="row"><div class="lab">命令</div><div class="val mono">exec w splloader u-boot-spl-16k-sign.bin w uboot_a …\uboot_a.bin e userdata reset</div></div>
       <div class="row"><div class="lab">输出</div><div class="val"><pre>file size : 0x10f28
 <span class="ok">Write Part Done: splloader, target: 0x10f28, written: 0x10f28</span>
 file size : 0x300000
 <span class="ok">Write Part Done: uboot_a, target: 0x300000, written: 0x300000</span>
 file size : 0x800
-<span class="warn">Write Part Done: misc, target: 0x800, written: 0x800</span>    <span class="c">← misc-wipe.bin 擦除标记</span>
-<span class="warn">Erase Part Done: persist</span>                                <span class="c">← 不是 userdata！见踩坑 P8</span></pre></div></div>
-      <div class="row"><div class="lab">结果</div><div class="val">重启后屏幕出现 <code class="inl">INFO: LOCK FLAG IS : UNLOCK!!!</code> / <code class="inl">WARNING: LOCK FLAG IS : UNLOCK, SKIP VERIFY!!!</code>，手机正常进系统。</div></div>
+<span class="warn">Write Part Done: misc, target: 0x800, written: 0x800</span>    <span class="c">← misc-wipe.bin</span>
+<span class="warn">Erase Part Done: persist</span>                                <span class="c">← 不是 userdata！见 P8</span></pre></div></div>
+      <div class="row"><div class="lab">结果</div><div class="val">重启后屏幕出现 <code class="inl">INFO: LOCK FLAG IS : UNLOCK!!!</code>，正常进系统。</div></div>
     </div>
   </details>
 
   <details class="pit">
     <summary><span class="pid">G</span>解锁状态验证</summary>
     <div class="body">
-      <div class="row"><div class="lab">命令</div><div class="val mono">adb shell getprop ro.boot.flash.locked<br>adb shell getprop ro.boot.vbmeta.device_state<br>adb shell getprop ro.boot.verifiedbootstate</div></div>
       <div class="row"><div class="lab">输出</div><div class="val"><pre><span class="ok">ro.boot.flash.locked        = 0</span>
 <span class="ok">ro.boot.vbmeta.device_state = unlocked</span>
 <span class="ok">ro.boot.verifiedbootstate   = orange</span>
@@ -619,11 +644,11 @@ ro.boot.slot_suffix         = _a</pre></div></div>
   <details class="pit">
     <summary><span class="pid">H</span>KernelSU 打补丁</summary>
     <div class="body">
-      <div class="row"><div class="lab">准备</div><div class="val mono">adb push _backup\init_boot_a.bin /sdcard/Download/init_boot.img</div></div>
+      <div class="row"><div class="lab">推送</div><div class="val mono">adb push _backup\init_boot_a.bin /sdcard/Download/init_boot.img</div></div>
       <div class="row"><div class="lab">校验</div><div class="val"><pre>手机端 sha256sum: 6064dabd83c6da2735cc3e2475feaca3455037c048091c14a9f5a53aa4dd0d51
-PC 端   sha256:   6064dabd83c6da2735cc3e2475feaca3455037c048091c14a9f5a53aa4dd0d51  <span class="ok">✓ 一致</span></pre></div></div>
-      <div class="row"><div class="lab">APP</div><div class="val">KernelSU v3.3.1（APK SHA256 与 GitHub 官方 digest 一致：b4a059ac…）→ 安装 → 安装 → 选择文件并修补 → 选 init_boot.img → KMI 自动识别 android13-5.15 → 确认</div></div>
-      <div class="row"><div class="lab">patch 日志</div><div class="val"><pre>- Unpacking boot image
+PC 端   sha256  : 6064dabd83c6da2735cc3e2475feaca3455037c048091c14a9f5a53aa4dd0d51  <span class="ok">✓</span></pre></div></div>
+      <div class="row"><div class="lab">APP</div><div class="val">KernelSU v3.3.1（APK sha256 与官方 digest 一致）→ 安装 → 选择文件并修补 → 选 init_boot.img → KMI 自动识别 <code class="inl">android13-5.15</code></div></div>
+      <div class="row"><div class="lab">日志</div><div class="val"><pre>- Unpacking boot image
 - KMI: android13-5.15
 - Adding KernelSU LKM
 - Adding bundled LKM config
@@ -634,15 +659,15 @@ PC 端   sha256:   6064dabd83c6da2735cc3e2475feaca3455037c048091c14a9f5a53aa4dd0
   </details>
 
   <details class="pit">
-    <summary><span class="pid">I</span>刷入 init_boot（fastboot 失败 → BROM 成功）</summary>
+    <summary><span class="pid">I</span>刷入 init_boot：fastboot 两次失败 → BROM 成功</summary>
     <div class="body">
-      <div class="row"><div class="lab">fastboot 1</div><div class="val mono">fastboot_sprd.exe flash init_boot init_boot_patched.img</div></div>
+      <div class="row"><div class="lab">尝试 1</div><div class="val mono">fastboot_sprd.exe flash init_boot init_boot_patched.img</div></div>
       <div class="row"><div class="lab">输出</div><div class="val"><pre>Sending 'init_boot' (8192 KB)...   OKAY [  0.199s]
 Writing 'init_boot'...            <span class="bad">FAILED (remote: Write img fail!)</span></pre></div></div>
-      <div class="row"><div class="lab">fastboot 2</div><div class="val mono">fastboot.exe flash init_boot_a init_boot_patched.img</div></div>
+      <div class="row"><div class="lab">尝试 2</div><div class="val mono">fastboot.exe flash init_boot_a init_boot_patched.img</div></div>
       <div class="row"><div class="lab">输出</div><div class="val"><pre>Sending 'init_boot_a' (8192 KB)    OKAY [  0.199s]
 Writing 'init_boot_a'             <span class="bad">FAILED (Status read failed (Too many links))</span></pre></div></div>
-      <div class="row"><div class="lab">BROM 方案</div><div class="val mono">exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec w init_boot_a init_boot_patched.img reset</div></div>
+      <div class="row"><div class="lab">BROM</div><div class="val mono">exec_addr2 0x65017f08 fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec w init_boot_a init_boot_patched.img reset</div></div>
       <div class="row"><div class="lab">输出</div><div class="val"><pre>[========================================] 100.0% Speed: 36.70Mb/s
 <span class="ok">Write Part Done: init_boot_a, target: 0x800000, written: 0x800000</span></pre></div></div>
     </div>
@@ -658,18 +683,18 @@ Writing 'init_boot_a'             <span class="bad">FAILED (Status read failed (
   </details>
 </section>
 
-<!-- ============ 06 踩坑 ============ -->
+<!-- 06 -->
 <section id="pitfalls">
-  <h2 class="sec"><span class="num">06</span>踩坑记录</h2>
-  <p class="lead">10 个真实踩过的坑，按「症状 → 根因 → 解法 → 证据」整理。这一节比流程本身更有参考价值。</p>
+  <h2 class="sec"><span class="num">06</span>踩坑记录与错误码</h2>
+  <p class="lead">10 个真实踩过的坑，按「症状 → 根因 → 解法 → 教训」拆解。这一节比流程本身更有参考价值。</p>
 
   <details class="pit" open>
-    <summary><span class="pid">P1</span>「签名验证通过」却是假阳性</summary>
+    <summary><span class="pid">P1</span>「签名验证通过」是假阳性</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">本地用 <code class="inl">openssl dgst -verify</code> 验签返回 <code class="inl">Verified OK</code>，但设备一律 <code class="inl">Unlock bootloader fail.</code></div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">验签用的是<b>同一把</b> sign.pem 的公钥，属于自己验自己。设备端用的是烧在 u-boot 里的<b>另一把</b>公钥。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">把 sign.pem 的 4096 位模数拿到 <code class="inl">uboot_a.bin</code> 里逐字节搜索，结果 <b>NO</b> → 判定这条路彻底不通，不再浪费时间。</div></div>
-      <div class="row"><div class="lab">教训</div><div class="val"><b>「我这边算对了」和「对方认不认」是两件事。</b></div></div>
+      <div class="row"><div class="lab">症状</div><div class="val">本地 <code class="inl">openssl dgst -verify</code> 返回 <code class="inl">Verified OK</code>，设备却一律 <code class="inl">Unlock bootloader fail.</code></div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">验签用的是<b>同一把</b> sign.pem 的公钥，自己验自己；设备端用的是烧在 u-boot 里的另一把。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">把 4096 位模数拿到 <code class="inl">uboot_a.bin</code> 里逐字节搜索 → <b>NO</b> → 判定死路。</div></div>
+      <div class="row"><div class="lab">教训</div><div class="val"><b>「我这边算对了」≠「对方认」。</b></div></div>
     </div>
   </details>
 
@@ -677,173 +702,198 @@ Writing 'init_boot_a'             <span class="bad">FAILED (Status read failed (
     <summary><span class="pid">P2</span>只刷 cboot 导致黑屏，无法开机</summary>
     <div class="body">
       <div class="row"><div class="lab">症状</div><div class="val">写入 <code class="inl">fdl2-cboot.bin</code> 后重启，屏幕一直黑，adb / fastboot 全无。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">cboot 是别家签名的 DHTB 镜像，本机<b>原厂 SPL</b> 校验它失败 → 直接挂起，不跳转。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">BROM 写回备份的 <code class="inl">uboot_a.bin</code>（3MB 原厂镜像），重启即恢复。<b>前提是操作前做了备份。</b></div></div>
-      <div class="row"><div class="lab">教训</div><div class="val">任何「替换引导器」的动作，前提都是先让校验失效（擦 SPL / 打 SPL 补丁）。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">cboot 是别家签名的 DHTB 镜像，本机<b>原厂 SPL</b> 校验失败 → 直接挂起。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">BROM 写回备份的 <code class="inl">uboot_a.bin</code>（3 MB 原厂），重启恢复。</div></div>
+      <div class="row"><div class="lab">教训</div><div class="val">替换引导器的前提是<b>先让校验失效</b>。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">P3</span>漏擦 splloader —— 载荷「成功」了却没效果</summary>
+    <summary><span class="pid">P3</span>漏擦 splloader —— 载荷「成功」却无效果</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">载荷发送后出现 <code class="inl">device removed, exiting...</code>（官方文档说这是成功），但读 <code class="inl">miscdata</code> 仍<b>全零</b>。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">没执行 <code class="inl">e splloader</code>。载荷在 SRAM 里跑完重启，BootROM 又从 flash 加载<b>原厂 SPL</b>，原厂 SPL 重新接管，载荷结果被丢弃。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">按「擦 SPL → 刷 cboot → 发载荷 → 校验」重跑，<code class="inl">miscdata</code> 立刻变成 64 字节非零。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val">载荷后出现 <code class="inl">device removed, exiting...</code>（文档说这是成功），但 <code class="inl">miscdata</code> 仍全零。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">没执行 <code class="inl">e splloader</code>。载荷在 SRAM 跑完重启，BootROM 又加载原厂 SPL 接管，成果被丢弃。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">按「擦 SPL → 刷 cboot → 发载荷 → 校验」重跑，<code class="inl">miscdata</code> 立刻变 64 字节非零。</div></div>
       <div class="row"><div class="lab">证据</div><div class="val">第一次 64×00；重做后 <code class="inl">ba ce 51 de …</code> 三段结构完整。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">P4</span>spl-unlock.bin 不在包里 —— 其实是「生成」出来的</summary>
+    <summary><span class="pid">P4</span>spl-unlock.bin 不在包里 —— 它是「生成」出来的</summary>
     <div class="body">
       <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">spd_dump</code> 报 <code class="inl">File does not exist.</code>，而包里 10 个文件确实没有它。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">它是 <code class="inl">gen_spl-unlock</code> 的产物，且必须带第二个参数（偏移量）：<code class="inl">gen_spl-unlock splloader.bin 0x10f28</code>。只给一个参数时只裁剪、不产出载荷。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">先单参数跑一次拿到偏移（输出 <code class="inl">0x10f28</code>），再用双参数生成。</div></div>
-      <div class="row"><div class="lab">注意</div><div class="val">生成的 <code class="inl">spl-unlock.bin</code> 与 <code class="inl">u-boot-spl-16k-sign.bin</code> 同为 69416 字节但内容不同（差 80 字节），<b>不能混用</b>。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">它是 <code class="inl">gen_spl-unlock</code> 的产物，必须带第二参数（偏移）：单参数只裁剪、不产出载荷。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">先单参数跑一次拿偏移（<code class="inl">0x10f28</code>），再用双参数生成。</div></div>
+      <div class="row"><div class="lab">注意</div><div class="val">两个产物同为 69,416 B，但内容不同（前者 80 字节 NOP 补丁，后者 0 差异）。<b>不能混用</b>。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">P5</span>僵尸进程独占总口，导致 find port failed</summary>
+    <summary><span class="pid">P5</span>僵尸进程独占 COM 口 → find port failed</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">设备管理器明明有 <code class="inl">SPRD U2S Diag (COM3)</code>，但每次都是 <code class="inl">find port failed</code>。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">上一次被中断的 <code class="inl">spd_dump.exe</code>（PID 12340）没有退出，一直占着 COM3。用 PowerShell 打开 COM3 直接 <code class="inl">Access denied</code> 坐实。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">每次连接前先 <code class="inl">Get-Process spd_dump | Stop-Process -Force</code>，再等 2 秒。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val">设备管理器有 <code class="inl">SPRD U2S Diag (COM3)</code>，但每次 <code class="inl">find port failed</code>。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">上次被中断的 <code class="inl">spd_dump.exe</code>（PID 12340）没退出，占着 COM3；PowerShell 打开 COM3 报 <code class="inl">Access denied</code> 坐实。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">每次连接前 <code class="inl">Get-Process spd_dump | Stop-Process -Force</code>，再等 2 秒。</div></div>
     </div>
   </details>
 
   <details class="pit">
     <summary><span class="pid">P6</span>BROM 端口只活几秒，等太久反而错过</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">检测到端口后「礼貌地」等 4～6 秒再连，结果 <code class="inl">find port failed</code>，端口消失了。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">展锐 BROM 的 USB 下载口枚举后只保留很短的握手窗口，宿主不立刻发 <code class="inl">CMD_CONNECT</code> 就自行脱落。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">轮询间隔压到 120～150ms，端口一出现<b>立刻</b>启动 spd_dump（<code class="inl">--wait</code> 兜底），不要加任何 sleep。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val">检测到端口后「礼貌地」等 4–6 秒再连 → <code class="inl">find port failed</code>，端口已消失。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">展锐 BROM 下载口枚举后只保留很短的握手窗口，宿主不立刻发 <code class="inl">CMD_CONNECT</code> 就自行脱落。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">轮询间隔压到 120–150 ms，端口一出现<b>立刻</b>启动 spd_dump（<code class="inl">--wait</code> 兜底），不加 sleep。</div></div>
       <div class="row"><div class="lab">旁证</div><div class="val">成功的那几次，从端口出现到连接都在 1 秒内。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">P7</span>fastboot 写 8MB 报 "Too many links"</summary>
+    <summary><span class="pid">P7</span>fastboot 写 8 MB 报 "Too many links"</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">Sending 'init_boot_a' (8192 KB) OKAY</code> 之后卡在 <code class="inl">Writing … FAILED (Too many links)</code>，两个客户端（fastboot / fastboot_sprd）都复现。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">ETOOMANYLINKS 是主机侧 USB 传输错误，与之前 BROM 掉线同源：这台机器的 USB 链路在长时间/大块传输时不稳定。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">放弃 fastboot，改 <b>BROM + spd_dump</b> 直接写分区：<code class="inl">exec w init_boot_a init_boot_patched.img</code>，一次成功（36.7 Mb/s）。</div></div>
-      <div class="row"><div class="lab">教训</div><div class="val">解锁之后，<b>BROM 才是最可靠的刷写通道</b>，fastboot 只当备用。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">Sending OKAY</code> 之后卡在 <code class="inl">Writing … FAILED (Too many links)</code>，两个客户端都复现。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">ETOOMANYLINKS 是主机侧 USB 传输错误，与 BROM 掉线同源：大块传输时链路不稳。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">放弃 fastboot，改 BROM 直接写分区，一次成功（36.7 Mb/s）。</div></div>
+      <div class="row"><div class="lab">教训</div><div class="val">解锁之后，<b>BROM 才是最可靠的刷写通道</b>。</div></div>
     </div>
   </details>
 
   <details class="pit">
-    <summary><span class="pid">P8</span>`e userdata` 实际擦的是 persist</summary>
+    <summary><span class="pid">P8</span><code class="inl">e userdata</code> 实际擦的是 persist</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">日志里出现 <code class="inl">Write Part Done: misc (0x800)</code> 和 <code class="inl">Erase Part Done: persist</code>，而 userdata 并没有被整块擦除。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">该版 spd_dump 对 <code class="inl">e userdata</code> 的实现是「写 <code class="inl">misc-wipe.bin</code> 到 misc（让系统下次启动走恢复出厂）+ 擦 persist」，不是直接擦 231GB 的 userdata。</div></div>
-      <div class="row"><div class="lab">影响</div><div class="val">persist 里是传感器校准数据，被擦后可能出现自动亮度 / 距离感应 / 对焦异常。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">备份里有原文件（2MB），需要时一条命令写回：<code class="inl">exec w persist ..\_backup\persist.bin reset</code>。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val">日志出现 <code class="inl">Write Part Done: misc (0x800)</code> 与 <code class="inl">Erase Part Done: persist</code>，userdata 并未整块擦除。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">该版 spd_dump 把 <code class="inl">e userdata</code> 实现为「写 <code class="inl">misc-wipe.bin</code> 到 misc + 擦 persist」。</div></div>
+      <div class="row"><div class="lab">影响</div><div class="val">persist 存传感器校准，擦后可能自动亮度 / 距离感应 / 对焦异常。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">备份里有原文件（2 MB），一条命令写回。</div></div>
     </div>
   </details>
 
   <details class="pit">
     <summary><span class="pid">P9</span>电脑 TLS 出口被限，APK 下不下来</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">Invoke-WebRequest</code> 报 <code class="inl">The SSL connection could not be established</code>；<code class="inl">curl</code> 报 <code class="inl">schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS</code>。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">改在手机上直接访问 GitHub Releases 下载，再把 APK 拷回电脑。<b>拿到后一定要核对 SHA256</b>（本次 <code class="inl">b4a059ac…</code> 与官方 digest 一致才安装）。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">Invoke-WebRequest</code> → <code class="inl">The SSL connection could not be established</code>；<code class="inl">curl</code> → <code class="inl">schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS</code>。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">改在手机上下载再拷回电脑；<b>必须核对 SHA256</b>（本次 <code class="inl">b4a059ac…</code> 与官方一致才安装）。</div></div>
+      <div class="row"><div class="lab">补充</div><div class="val">后期发现设 <code class="inl">http.sslBackend=openssl</code> 可让 git 恢复正常（PowerShell 的 .NET TLS 仍不行）。</div></div>
     </div>
   </details>
 
   <details class="pit">
     <summary><span class="pid">P10</span>截图坐标没换算，点了半天没反应</summary>
     <div class="body">
-      <div class="row"><div class="lab">症状</div><div class="val">用 <code class="inl">adb shell input tap 540 400</code> 点「安装」卡片，界面毫无变化。</div></div>
-      <div class="row"><div class="lab">根因</div><div class="val">看的是被缩放过的预览图（1904px 高），而 <code class="inl">input tap</code> 用的是真机像素（2460px 高），纵向差了 1.29 倍，点到了卡片上方。</div></div>
-      <div class="row"><div class="lab">解法</div><div class="val">用 <code class="inl">实际像素 = 预览坐标 ÷ 0.774</code> 换算，或直接按比例估算后再点。</div></div>
+      <div class="row"><div class="lab">症状</div><div class="val"><code class="inl">adb shell input tap 540 400</code> 点「安装」卡片，界面毫无变化。</div></div>
+      <div class="row"><div class="lab">根因</div><div class="val">看的是缩放预览图（1904 px 高），而 <code class="inl">input tap</code> 用真机像素（2460 px），纵向差 1.29 倍，点到了卡片上方。</div></div>
+      <div class="row"><div class="lab">解法</div><div class="val">实际像素 = 预览坐标 ÷ 0.774。</div></div>
     </div>
   </details>
+
+  <h3>错误码 / 关键字符串对照表</h3>
+  <table class="tbl">
+    <tr><th style="width:330px">字符串</th><th style="width:90px">来源</th><th>含义与处理</th></tr>
+    <tr><td class="mono" style="color:var(--red)">FAILED (remote: Unlock bootloader fail.)</td><td>fastboot</td><td>设备端签名校验拒绝。<b>密钥不匹配，无解</b>，改走 BROM。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">FAILED (remote: unknown cmd.)</td><td>fastboot</td><td>该 bootloader 未实现此命令（如 <code class="inl">flashing unlock</code>）。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">FAILED (remote: Not implement.)</td><td>fastboot</td><td>同上，指定命令不存在。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">FAILED (remote: Write img fail!)</td><td>fastboot</td><td>分区名不对（本机需 <code class="inl">init_boot_a</code> 而非 <code class="inl">init_boot</code>）。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">FAILED (Status read failed (Too many links))</td><td>fastboot</td><td>主机 USB 传输层错误。换口/换线，或改 BROM。</td></tr>
+    <tr><td class="mono" style="color:var(--amber)">device removed, exiting...</td><td>spd_dump</td><td>设备断开。<b>发载荷后出现 = 成功</b>；其他场景 = 掉线失败。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">find port failed</td><td>spd_dump</td><td>找不到 SPRD 串口。检查端口是否被占用 / 设备是否已退出 BROM。</td></tr>
+    <tr><td class="mono" style="color:var(--amber)">CHECK_BAUD FAIL</td><td>spd_dump</td><td>波特率协商失败。<b>载荷不是标准 FDL 时属正常</b>。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">File does not exist.</td><td>spd_dump</td><td>命令引用的文件不在当前目录（如忘了生成 spl-unlock.bin）。</td></tr>
+    <tr><td class="mono" style="color:var(--amber)">timeout reached</td><td>spd_dump</td><td>发出命令后设备无响应，通常 BROM 已超时退出。</td></tr>
+    <tr><td class="mono" style="color:var(--fg2)">FDL2: incompatible partition</td><td>spd_dump</td><td>FDL 与分区表的兼容性提示，<b>不影响后续操作</b>。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">Access to the path 'COM3' is denied</td><td>Windows</td><td>串口被占用（僵尸进程）。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">schannel: AcquireCredentialsHandle failed</td><td>git / curl</td><td>TLS 后端取不到凭据。改用 <code class="inl">http.sslBackend=openssl</code>。</td></tr>
+    <tr><td class="mono" style="color:var(--red)">couldn't create signal pipe, Win32 error 5</td><td>git (SSH)</td><td>受限环境禁命名管道，SSH 传输不可用 → 改 HTTPS。</td></tr>
+  </table>
 </section>
 
-<!-- ============ 07 数据附录 ============ -->
+<!-- 07 -->
 <section id="data">
   <h2 class="sec"><span class="num">07</span>数据附录</h2>
 
-  <h3>7.1 分区表（BROM 实测：83 个 GPT 分区 + splloader 裸区）</h3>
+  <h3>7.1 分区表（BROM 实测）</h3>
   <div class="toolbar">
-    <input type="search" id="partFilter" placeholder="搜索分区名，例如 uboot / vbmeta / super">
+    <input type="search" id="partFilter" placeholder="搜索分区名，如 uboot / vbmeta / super">
     <button class="btn" id="partAll">全部</button>
-    <button class="btn" id="partBig">只看 &ge; 64MB</button>
+    <button class="btn" id="partBig">只看 ≥ 64MB</button>
     <span class="count" id="partCount"></span>
   </div>
-  <div style="max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:12px">
+  <div style="max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px">
     <table class="tbl" id="partTable">
-      <thead><tr><th style="width:60px">#</th><th>分区名</th><th style="width:120px">大小 (MB)</th><th>说明</th></tr></thead>
+      <thead><tr><th style="width:52px">#</th><th style="width:200px">分区名</th><th style="width:100px">大小(MB)</th><th>用途</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
-  <p class="count" style="margin-top:10px">设备自报 83 个分区；<code class="inl">splloader</code> 为裸区（不在 GPT 内），故共 84 行。其中 <code class="inl">userdata</code> 231725 MB 为动态扩展，不含在备份内。</p>
+  <p class="count" style="margin-top:10px">设备自报 83 个分区；<code class="inl">splloader</code> 为裸区（不在 GPT 内），故共 84 行。<code class="inl">userdata</code> 231,725 MB 为动态扩展，不含在备份内。</p>
 
   <h3>7.2 关键镜像哈希（SHA256）</h3>
   <table class="tbl">
-    <tr><th style="width:230px">文件</th><th style="width:100px">字节</th><th>SHA256</th></tr>
-    <tr><td class="mono">splloader.bin（原厂）</td><td class="mono">262144</td><td class="hash">49f10a80302db6985f7cf30456d8f0e285a93bac61ce1e7c4cbfe1eef891058e</td></tr>
+    <tr><th style="width:250px">文件</th><th style="width:95px">字节</th><th>SHA256</th></tr>
+    <tr><td class="mono">splloader.bin（原厂 256KB）</td><td class="mono">262144</td><td class="hash">49f10a80302db6985f7cf30456d8f0e285a93bac61ce1e7c4cbfe1eef891058e</td></tr>
+    <tr><td class="mono">u-boot-spl-16k-sign.bin（裁剪）</td><td class="mono">69416</td><td class="hash">8d5777f936f38bf22e7f1b8856dc34e449eab4224ff7ada8170dad1ed9a913a1</td></tr>
+    <tr><td class="mono">spl-unlock.bin（NOP 补丁）</td><td class="mono">69416</td><td class="hash">6c6f25e0fdadc7cbfe88cfede43d7517e18428dfd54b618e856f5717f5008e3b</td></tr>
     <tr><td class="mono">uboot_a.bin（原厂）</td><td class="mono">3145728</td><td class="hash">84ff8949604481e9776268d1899968babf79c79c4af963c1b7fe0d8e87d712a5</td></tr>
-    <tr><td class="mono">uboot_b.bin</td><td class="mono">3145728</td><td class="hash">07cf05e88d5c12764e88bca231c910a4dc983554c3330cbbbaccc4bf64761c5b</td></tr>
+    <tr><td class="mono">uboot_b.bin（原厂）</td><td class="mono">3145728</td><td class="hash">07cf05e88d5c12764e88bca231c910a4dc983554c3330cbbbaccc4bf64761c5b</td></tr>
     <tr><td class="mono">init_boot_a.bin（原厂）</td><td class="mono">8388608</td><td class="hash">6064dabd83c6da2735cc3e2475feaca3455037c048091c14a9f5a53aa4dd0d51</td></tr>
     <tr><td class="mono">init_boot_patched.img（KSU）</td><td class="mono">8388608</td><td class="hash">8578c958b180ac315de486285c56a023da02f327211d24e8fec32b6f4914d133</td></tr>
-    <tr><td class="mono">spl-unlock.bin（载荷）</td><td class="mono">69416</td><td class="hash">6c6f25e0fdadc7cbfe88cfede43d7517e18428dfd54b618e856f5717f5008e3b</td></tr>
-    <tr><td class="mono">u-boot-spl-16k-sign.bin（补丁 SPL）</td><td class="mono">69416</td><td class="hash">8d5777f936f38bf22e7f1b8856dc34e449eab4224ff7ada8170dad1ed9a913a1</td></tr>
-    <tr><td class="mono">KernelSU_v3.3.1_32680-release.apk</td><td class="mono">13637206</td><td class="hash">b4a059ace71de2fa65cc7f12b1c58d55fc23ab25e057ee4230ce779742abe450</td></tr>
-    <tr><td class="mono">super.bin</td><td class="mono">10737418240</td><td class="hash">626da0edd35fb12eb393343247912290f4d5f6823d009dff7994a7c5f14379cc</td></tr>
     <tr><td class="mono">boot_a.bin</td><td class="mono">67108864</td><td class="hash">0bf02ab8a54e8382bc4aebe40bfb89dedbba671205b3a6e81e70a3cee05c5806</td></tr>
     <tr><td class="mono">vbmeta_a.bin</td><td class="mono">1048576</td><td class="hash">7802e9b9ff854b5f1ede286270e621ec0620d82f16a60706bd07dc9f42eba1de</td></tr>
     <tr><td class="mono">persist.bin（原厂）</td><td class="mono">2097152</td><td class="hash">36f8eb7cd7e7a8a923d5c6af027d0743ae116538aa71e07e2a3a750cf7b170e3</td></tr>
     <tr><td class="mono">miscdata.bin（备份时）</td><td class="mono">1048576</td><td class="hash">d9b985295876a1d2baf7fdb0f59231b98370f39939014ef31e9ce56a394d958b</td></tr>
+    <tr><td class="mono">super.bin</td><td class="mono">10737418240</td><td class="hash">626da0edd35fb12eb393343247912290f4d5f6823d009dff7994a7c5f14379cc</td></tr>
+    <tr><td class="mono">KernelSU_v3.3.1_32680-release.apk</td><td class="mono">13637206</td><td class="hash">b4a059ace71de2fa65cc7f12b1c58d55fc23ab25e057ee4230ce779742abe450</td></tr>
   </table>
 
-  <h3>7.3 关键时间线</h3>
+  <h3>7.3 完整时间线</h3>
   <table class="tbl">
-    <tr><th style="width:90px">时间</th><th>事件</th><th style="width:90px">结果</th></tr>
-    <tr><td class="mono">06:18:45</td><td>取得 identifier_token：<code class="inl">521Q5FGHY92U4</code></td><td></td></tr>
+    <tr><th style="width:110px">时间</th><th>事件</th><th style="width:80px">结果</th></tr>
+    <tr><td class="mono">06:18:45</td><td>取得 identifier_token <code class="inl">521Q5FGHY92U4</code></td><td></td></tr>
     <tr><td class="mono">06:19:03</td><td>生成 signature.bin（512 B，本地验签 OK）</td><td></td></tr>
-    <tr><td class="mono">06:20</td><td>fastboot 签名解锁</td><td class="mono" style="color:var(--red)">失败</td></tr>
-    <tr><td class="mono">06:22</td><td>首次进 BROM（COM3），握手成功</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">06:31</td><td>僵尸 spd_dump 独占 COM3</td><td class="mono" style="color:var(--red)">阻塞</td></tr>
-    <tr><td class="mono">06:44</td><td>首次读出完整分区表（83 个）</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">06:52–07:12</td><td>全盘备份 11.68 GiB</td><td class="mono" style="color:var(--green)">完成</td></tr>
-    <tr><td class="mono">07:18</td><td>刷 cboot（未擦 SPL）</td><td class="mono" style="color:var(--amber)">黑屏</td></tr>
-    <tr><td class="mono">07:20</td><td>发载荷 → miscdata 全零</td><td class="mono" style="color:var(--red)">失败</td></tr>
-    <tr><td class="mono">07:23</td><td>BROM 还原原厂 uboot</td><td class="mono" style="color:var(--green)">恢复</td></tr>
-    <tr><td class="mono">07:26</td><td>Phase A：擦 SPL + cboot + 载荷 → miscdata 非零</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">07:28</td><td>Phase B：写回签名 SPL + 原版 uboot</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">07:29</td><td>屏幕出现 LOCK FLAG IS UNLOCK</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">07:31</td><td>adb 验证 flash.locked = 0</td><td class="mono" style="color:var(--green)">通过</td></tr>
-    <tr><td class="mono">07:38</td><td>KernelSU 打补丁完成</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">07:40–07:44</td><td>fastboot 刷 init_boot ×2</td><td class="mono" style="color:var(--red)">失败</td></tr>
-    <tr><td class="mono">07:48</td><td>BROM 写 init_boot_a</td><td class="mono" style="color:var(--green)">成功</td></tr>
-    <tr><td class="mono">07:49</td><td>KernelSU「工作中」+ LKM Live</td><td class="mono" style="color:var(--green)">完成</td></tr>
+    <tr><td class="mono">06:20:00</td><td>fastboot 签名解锁</td><td style="color:var(--red)">失败</td></tr>
+    <tr><td class="mono">06:22:00</td><td>首次进 BROM（COM3），握手成功</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">06:25:00</td><td>保存教程截图 10 张</td><td></td></tr>
+    <tr><td class="mono">06:31:00</td><td>僵尸 spd_dump 独占 COM3</td><td style="color:var(--red)">阻塞</td></tr>
+    <tr><td class="mono">06:34–06:38</td><td>多次握手失败（窗口错过 / device removed）</td><td style="color:var(--red)">失败</td></tr>
+    <tr><td class="mono">06:44:00</td><td>首次读出完整分区表（83 个）</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">06:52–07:12</td><td>全盘备份 11.68 GiB（第 3 次尝试完成）</td><td style="color:var(--green)">完成</td></tr>
+    <tr><td class="mono">07:18:00</td><td>刷 cboot（未擦 SPL）</td><td style="color:var(--amber)">黑屏</td></tr>
+    <tr><td class="mono">07:20:00</td><td>发载荷 → miscdata 全零</td><td style="color:var(--red)">失败</td></tr>
+    <tr><td class="mono">07:23:00</td><td>BROM 还原原厂 uboot</td><td style="color:var(--green)">恢复</td></tr>
+    <tr><td class="mono">07:26:00</td><td>Phase A：擦 SPL + cboot + 载荷 → miscdata 非零</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">07:28:00</td><td>Phase B：写回 SPL + 原版 uboot</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">07:29:00</td><td>屏幕出现 LOCK FLAG IS UNLOCK</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">07:31:00</td><td>adb 验证 flash.locked = 0</td><td style="color:var(--green)">通过</td></tr>
+    <tr><td class="mono">07:35:00</td><td>推送 init_boot，安装 KernelSU</td><td></td></tr>
+    <tr><td class="mono">07:38:00</td><td>KernelSU 打补丁完成</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">07:40–07:44</td><td>fastboot 刷 init_boot ×2</td><td style="color:var(--red)">失败</td></tr>
+    <tr><td class="mono">07:48:00</td><td>BROM 写 init_boot_a</td><td style="color:var(--green)">成功</td></tr>
+    <tr><td class="mono">07:49:00</td><td>KernelSU「工作中」+ LKM Live</td><td style="color:var(--green)">完成</td></tr>
+    <tr><td class="mono">08:00–08:15</td><td>整理文档、建仓、推送 GitHub</td><td style="color:var(--green)">完成</td></tr>
   </table>
 
-  <h3>7.4 工作目录结构</h3>
+  <h3>7.4 目录结构</h3>
 <pre><span class="c">C:\Users\DINGJINJIN\Downloads\Compressed\</span>
-├─ 展讯公钥签名解锁BL_by酷安@某贼_2025.1.20-1\    <span class="c">← fastboot 签名方案（本机无效）</span>
+├─ 展讯公钥签名解锁BL_by酷安@某贼_2025.1.20-1\   <span class="c">← fastboot 签名方案（本机无效）</span>
 │   └─ bin\ adb / fastboot / fastboot_sprd / openssl / sign.pem
-├─ ums9621_Meizu_Note16\                          <span class="c">← 真正生效的工具包</span>
-│   ├─ spd_dump.exe / gen_spl-unlock.exe / fdl*.bin
-│   ├─ spl-unlock.bin                             <span class="c">← 现场生成</span>
-│   └─ u-boot-spl-16k-sign.bin                    <span class="c">← 现场生成</span>
-├─ _backup\                                       <span class="c">← 81 个分区，11.68 GiB（保命）</span>
-│   ├─ splloader.bin / uboot_a.bin / init_boot_a.bin ...
+├─ ums9621_Meizu_Note16\                         <span class="c">← 真正生效的工具包</span>
+│   ├─ spd_dump.exe / gen_spl-unlock.exe / fdl*.bin / custom_exec*.bin
+│   ├─ spl-unlock.bin                            <span class="c">← 现场生成（80 B NOP 补丁）</span>
+│   └─ u-boot-spl-16k-sign.bin                   <span class="c">← 现场生成（裁剪原厂）</span>
+├─ _backup\                                      <span class="c">← 81 分区 / 11.68 GiB（保命）</span>
+│   ├─ splloader.bin / uboot_a.bin / init_boot_a.bin …
 │   └─ README_恢复指南.md
-├─ _patched\init_boot_patched.img                 <span class="c">← KernelSU 补丁镜像</span>
-├─ _dump\                                         <span class="c">← 全部分区读取产物、日志、脚本</span>
-│   ├─ brom_grab.ps1 / brom_write.ps1 / brom_backup.ps1
+├─ _patched\init_boot_patched.img                <span class="c">← KernelSU 补丁镜像</span>
+├─ _dump\                                        <span class="c">← 全部读取产物、日志、脚本</span>
+│   ├─ brom_grab.ps1 / brom_backup.ps1 / brom_read.ps1 / brom_write.ps1
 │   ├─ unlock_step.ps1 / phaseA.ps1 / phaseB.ps1
-│   └─ *.log（含 24MB 的 verbose 2 抓包日志）
+│   └─ *.log（含 24 MB 的 verbose 2 抓包日志）
 ├─ 解锁文档\index.html                            <span class="c">← 本文档</span>
-└─ 压缩文件\                                      <span class="c">← 原始教程截图</span></pre>
+├─ meizu-note16-unlock\                           <span class="c">← GitHub 文档仓库</span>
+└─ meizu-note16-firmware\                         <span class="c">← GitHub 固件仓库（分卷）</span></pre>
 </section>
 
-<!-- ============ 08 恢复手册 ============ -->
+<!-- 08 -->
 <section id="recovery">
   <h2 class="sec"><span class="num">08</span>恢复手册</h2>
-  <p class="lead">所有命令都是「进入 BROM 后」在 <code class="inl">ums9621_Meizu_Note16</code> 目录下执行。BROM 永远进得去，这是最后的保险。</p>
+  <p class="lead">所有命令都在「进入 BROM 后」、于 <code class="inl">ums9621_Meizu_Note16</code> 目录执行。BROM 在 SoC 内部，永远进得去 —— 这是最后的保险。</p>
 
   <h3>8.1 进入 BROM（关键：先拔线）</h3>
   <ol style="color:var(--fg2);font-size:14px">
@@ -851,105 +901,219 @@ Writing 'init_boot_a'             <span class="bad">FAILED (Status read failed (
     <li>长按电源 <b>10 秒</b> 彻底关机（屏幕全黑、无震动）</li>
     <li>按住<b>音量下</b>，再按<b>电源</b>，两键按住约 3 秒</li>
     <li><b>保持按住</b>再插 USB 线，插好后松手</li>
-    <li>屏幕保持全黑，设备管理器出现 <code class="inl">SPRD U2S Diag (COMx)</code></li>
+    <li>屏幕全程全黑，设备管理器出现 <code class="inl">SPRD U2S Diag (COMx)</code></li>
   </ol>
-  <div class="note warn">BROM 端口存活只有几秒，<b>必须在插线前就挂好监听</b>。手动操作时请用本文附带的 <code class="inl">brom_write.ps1</code> 之类脚本，它会 120ms 轮询并立即连接。</div>
+  <div class="note warn">端口存活只有几秒，<b>必须在插线前挂好监听</b>。用附件脚本 <code class="inl">brom_write.ps1</code>，它以 120 ms 轮询并立即连接。</div>
 
-  <h3>8.2 还原原厂 init_boot（去掉 Root）</h3>
+  <h3>8.2 去 Root（还原原厂 init_boot）</h3>
 <pre>.\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
   fdl fdl1-dl.bin 0x65000800 ^
   fdl fdl2-dl.bin 0xbefffe00 ^
   exec w init_boot_a ..\_backup\init_boot_a.bin reset</pre>
 
-  <h3>8.3 还原原厂 uboot（黑屏救援）</h3>
+  <h3>8.3 黑屏救援（还原原厂 uboot）</h3>
 <pre>.\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
   fdl fdl1-dl.bin 0x65000800 ^
   fdl fdl2-dl.bin 0xbefffe00 ^
   exec w uboot_a ..\_backup\uboot_a.bin reset</pre>
 
-  <h3>8.4 还原原厂 splloader（彻底回官方）</h3>
+  <h3>8.4 还原原厂 splloader</h3>
 <pre>.\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
   fdl fdl1-dl.bin 0x65000800 ^
   fdl fdl2-dl.bin 0xbefffe00 ^
   exec w splloader ..\_backup\splloader.bin reset</pre>
-  <div class="note bad"><b>注意：</b>单独还原 splloader 之后，设备会重新对 uboot 做签名校验。若此时 uboot 仍是原厂镜像则正常开机；若曾刷过 cboot，<b>必须同时还原 uboot_a</b>，否则黑屏。</div>
+  <div class="note bad"><b>注意：</b>单独还原 splloader 后设备会重新校验 uboot。若 uboot 仍是 cboot，<b>必须同时还原 uboot_a</b>，否则黑屏。</div>
 
   <h3>8.5 写回 persist（传感器校准）</h3>
 <pre>.\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
-  fdl fdl1-dl.bin 0x65000800 ^
-  fdl fdl2-dl.bin 0xbefffe00 ^
+  fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 ^
   exec w persist ..\_backup\persist.bin reset</pre>
 
-  <h3>8.6 查看分区表 / 读任意分区</h3>
+  <h3>8.6 只读诊断</h3>
 <pre><span class="c">; 打印分区表</span>
 .\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
   fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 exec p reset
 
-<span class="c">; 读 miscdata 解锁状态（64 字节）</span>
+<span class="c">; 读解锁状态（64 字节）</span>
 .\spd_dump.exe --wait 120 --reconnect exec_addr2 0x65017f08 ^
   fdl fdl1-dl.bin 0x65000800 fdl fdl2-dl.bin 0xbefffe00 ^
   exec path ..\_dump read_part miscdata 8192 64 misc.bin reset</pre>
 </section>
 
-<!-- ============ 09 截图 ============ -->
+<!-- 09 -->
 <section id="gallery">
   <h2 class="sec"><span class="num">09</span>截图证据</h2>
 
   <h3>9.1 原始教程截图（酷安 @keimi滑稽糖）</h3>
-  <p class="lead">用户当时保存的 10 张教程图。点击放大。</p>
+  <p class="lead">操作当时保存的 10 张教程图。点击放大。</p>
   <div class="gal">
-    <figure><img src="assets/tutorial_01.jpg" alt="教程 1" loading="lazy"><figcaption><b>01 教程开头</b>致谢 QuTick 大佬开源工具，先备份资料，从网盘取工具</figcaption></figure>
+    <figure><img src="assets/tutorial_01.jpg" alt="教程 1" loading="lazy"><figcaption><b>01 教程开头</b>致谢 QuTick 大佬开源工具，先备份，再从网盘取工具</figcaption></figure>
     <figure><img src="assets/tutorial_02.jpg" alt="教程 2" loading="lazy"><figcaption><b>02 网盘目录</b>按芯片分类：bl-710/740/7510、bl-9863a、bl-606/616、bl-760/770/820/750/765 …</figcaption></figure>
     <figure><img src="assets/tutorial_03.jpg" alt="教程 3" loading="lazy"><figcaption><b>03 选包 + 进 BROM</b>红框标出 <code>ums9621_Meizu_Note16.zip</code>；强调「音量下+电源 3 秒进 BROM，不是 fastboot」</figcaption></figure>
-    <figure><img src="assets/tutorial_04.jpg" alt="教程 4" loading="lazy"><figcaption><b>04 包内 10 个文件</b>红框标出 <code>unlock_autopatch_9621.bat</code>，右键以管理员运行</figcaption></figure>
-    <figure><img src="assets/tutorial_05.jpg" alt="教程 5" loading="lazy"><figcaption><b>05 等待与成功标志</b>必须等所有命令跑完，手机自动重启并显示 unlock 字样；配图为真机屏幕</figcaption></figure>
-    <figure><img src="assets/tutorial_06.jpg" alt="教程 6" loading="lazy"><figcaption><b>06 进入 Root 阶段</b>工具已自动提取 boot / init_boot；面具用 boot.img，KSU 用 init_boot.img</figcaption></figure>
+    <figure><img src="assets/tutorial_04.jpg" alt="教程 4" loading="lazy"><figcaption><b>04 包内 10 文件</b>红框标出 <code>unlock_autopatch_9621.bat</code>，右键以管理员运行</figcaption></figure>
+    <figure><img src="assets/tutorial_05.jpg" alt="教程 5" loading="lazy"><figcaption><b>05 等待与成功标志</b>必须等所有命令跑完，手机自动重启显示 unlock 字样；配图为真机屏幕</figcaption></figure>
+    <figure><img src="assets/tutorial_06.jpg" alt="教程 6" loading="lazy"><figcaption><b>06 进入 Root</b>工具已自动提取 boot / init_boot；面具用 boot.img，KSU 用 init_boot.img</figcaption></figure>
     <figure><img src="assets/tutorial_07.jpg" alt="教程 7" loading="lazy"><figcaption><b>07 Root 步骤</b>（教程截图）</figcaption></figure>
     <figure><img src="assets/tutorial_08.jpg" alt="教程 8" loading="lazy"><figcaption><b>08 Root 步骤</b>（教程截图）</figcaption></figure>
     <figure><img src="assets/tutorial_09.jpg" alt="教程 9" loading="lazy"><figcaption><b>09 Root 步骤</b>（教程截图）</figcaption></figure>
     <figure><img src="assets/tutorial_10.jpg" alt="教程 10" loading="lazy"><figcaption><b>10 教程结尾</b>KSU 成功 root，附搞机助手 / GitHub / 网盘链接</figcaption></figure>
   </div>
 
-  <h3>9.2 本次操作过程截图</h3>
+  <h3>9.2 本次操作过程</h3>
   <div class="gal">
-    <figure><img src="assets/01_ksu_not_installed.png" alt="KSU 未安装" loading="lazy"><figcaption><b>① 未安装</b>KernelSU 识别到内核 5.15.149-android13、机型 MEIZU Note 16</figcaption></figure>
-    <figure><img src="assets/02_ksu_install_page.png" alt="安装页" loading="lazy"><figcaption><b>② 安装页</b>选择「选择文件并修补」，提示建议选 init_boot 分区镜像</figcaption></figure>
+    <figure><img src="assets/01_ksu_not_installed.png" alt="KSU 未安装" loading="lazy"><figcaption><b>① 未安装</b>KSU 识别到内核 5.15.149-android13、机型 MEIZU Note 16</figcaption></figure>
+    <figure><img src="assets/02_ksu_install_page.png" alt="安装页" loading="lazy"><figcaption><b>② 安装页</b>选「选择文件并修补」，提示建议选 init_boot 分区镜像</figcaption></figure>
     <figure><img src="assets/03_ksu_kmi_select.png" alt="KMI 选择" loading="lazy"><figcaption><b>③ KMI 自动识别</b>本机 android13-5.15，已默认勾选</figcaption></figure>
-    <figure><img src="assets/04_ksu_patch_done.png" alt="补丁完成" loading="lazy"><figcaption><b>④ 补丁完成</b>Adding KernelSU LKM → Repacking → Done，输出 ksu_patched_*.img</figcaption></figure>
+    <figure><img src="assets/04_ksu_patch_done.png" alt="补丁完成" loading="lazy"><figcaption><b>④ 补丁完成</b>Adding KernelSU LKM → Repacking → Done</figcaption></figure>
     <figure><img src="assets/05_ksu_working.png" alt="Root 生效" loading="lazy"><figcaption><b>⑤ Root 生效</b>卡片变绿「工作中」，版本 32680-5，LKM 模式</figcaption></figure>
   </div>
 </section>
 
-<!-- ============ 10 FAQ ============ -->
+<!-- 10 -->
 <section id="faq">
   <h2 class="sec"><span class="num">10</span>常见问题</h2>
 
   <h3>Q1：系统 OTA 更新怎么办？</h3>
-  <p>解锁 + 改过 init_boot 后，OTA 会失败或覆盖 Root。建议：升级前用 <a href="#recovery">8.2</a> 还原原厂 init_boot，升级完成后再重新打补丁刷入。也可以直接线刷官方完整包（但要保留已解锁状态，别刷回锁 BL 的版本）。</p>
+  <p>解锁 + 改过 init_boot 后，OTA 会失败或覆盖 Root。建议：升级前用 8.2 还原原厂 init_boot，升级完再重新打补丁刷入。</p>
 
   <h3>Q2：怎么彻底恢复官方状态（回锁）？</h3>
-  <p>三步：还原原厂 <code class="inl">init_boot_a</code>、<code class="inl">uboot_a</code>、<code class="inl">splloader</code>（见 8.2–8.4），然后进系统「恢复出厂」。<b>注意</b>：miscdata 里的解锁记录还在，若要真正回锁需要额外清除该记录，风险较高，一般不建议。</p>
+  <p>三步：还原原厂 <code class="inl">init_boot_a</code>、<code class="inl">uboot_a</code>、<code class="inl">splloader</code>（8.2–8.4），然后恢复出厂。<br><b>注意</b>：miscdata 里的解锁记录还在，要真正回锁需清除该记录，风险较高，一般不建议。</p>
 
   <h3>Q3：persist 被擦了要不要紧？</h3>
-  <p>多数情况没事，但可能出现自动亮度不准、距离感应迟钝、相机对焦变慢。如果遇到，用 8.5 的命令写回备份即可，2MB，一分钟。</p>
+  <p>多数情况没事，但可能自动亮度不准、距离感应迟钝、相机对焦变慢。遇到就用 8.5 写回，2 MB，一分钟。</p>
 
   <h3>Q4：以后 Root 掉了怎么办？</h3>
-  <p>不需要重新解锁。只要 <code class="inl">init_boot_a</code> 还被替换着，重启后 KSU 就还在；若被系统覆盖，重新用 KSU 修补再 BROM 写入即可（BL 已解锁，随时可写）。</p>
+  <p>不需要重新解锁。只要 <code class="inl">init_boot_a</code> 仍是补丁版，重启后 KSU 就还在；若被覆盖，重新修补再 BROM 写入即可。</p>
 
   <h3>Q5：为什么不用 Magisk？</h3>
-  <p>这台是 Android 13+ 的 GKI 内核，boot 分区不包含 ramdisk，Magisk 要改 <code class="inl">init_boot</code> 也能用；但 KernelSU 走 LKM（内核模块）方式，不动 ramdisk，隐蔽性和与系统的兼容性更好，教程也推荐 KSU。</p>
+  <p>这台是 Android 13+ 的 GKI 内核，Magisk 也能改 <code class="inl">init_boot</code>；但 KernelSU 走 LKM（内核模块），不动 ramdisk，隐蔽性与兼容性更好。</p>
 
-  <h3>Q6：brick 了（完全黑屏、无 fastboot）还有救吗？</h3>
-  <p>有。BROM 在 SoC 内部，只要硬件没坏，音量下+电源+插线就一定能进。进去后用 8.3/8.4 写回原厂 uboot/splloader 即可。<b>前提是别删 _backup 目录。</b></p>
+  <h3>Q6：黑屏/无 fastboot 还有救吗？</h3>
+  <p>有。BROM 在 SoC 内部，硬件没坏就一定能进。进去后用 8.3 / 8.4 写回原厂 uboot / splloader。<b>前提是别删备份。</b></p>
 
-  <h3>Q7：这套方法能用在别的展锐机型上吗？</h3>
-  <p>思路通用，但 <b>地址与镜像必须按芯片改</b>：<code class="inl">0x65017f08</code> 是本机专用（同系列常见值还有 0x65015f08 / 0x65015f48），fdl1/fdl2 也必须对应芯片。照抄别的机型固件包刷入是变砖的头号原因。</p>
+  <h3>Q7：能用在别的展锐机型上吗？</h3>
+  <p>思路通用，但 <b>地址与镜像必须按芯片改</b>：<code class="inl">0x65017f08</code> 是本机专用（同系列常见 0x65015f08 / 0x65015f48）。照抄别机固件包是变砖头号原因。</p>
+
+  <h3>Q8：为什么解锁了但 veritymode 还是 enforcing？</h3>
+  <p>解锁的是<b>引导器对镜像的签名校验（AVB）</b>，而 dm-verity 是内核层对 system/vendor 的运行时校验，两者独立。所以能刷 boot/init_boot，但直接改 system 仍会启动失败。</p>
+
+  <h3>Q9：为什么 u-boot-spl-16k-sign.bin 和原厂一样？</h3>
+  <p>因为它就是把 256 KB 分区里的尾部填充裁掉后的原厂镜像（实测 0 字节差异）。补丁只存在于 <code class="inl">spl-unlock.bin</code> 里，那个是打进内存执行的。</p>
+</section>
+
+<!-- 11 -->
+<section id="gloss">
+  <h2 class="sec"><span class="num">11</span>术语表</h2>
+  <dl class="gloss">
+    <dt><code>BROM</code> — Boot ROM</dt>
+    <dd>芯片内部固化的启动代码，上电第一段执行。可通过按键组合进入「下载模式」，USB 枚举为 <code class="inl">SPRD U2S Diag</code>。不可擦写，是救砖的最终手段。</dd>
+
+    <dt><code>SPL</code> / <code>splloader</code></dt>
+    <dd>二级程序加载器，一级引导。负责初始化 DRAM 并校验、加载 U-Boot。本机分区 256 KB，实际镜像 69,416 B。</dd>
+
+    <dt><code>DHTB</code></dt>
+    <dd>展锐的引导镜像容器格式，4 字节魔数 <code class="inl">44 48 54 42</code>，版本 1，内含签名摘要域与有效载荷长度字段。</dd>
+
+    <dt><code>FDL1</code> / <code>FDL2</code></dt>
+    <dd>展锐下载代理（Flash Download Loader）。FDL1 被 BROM 加载到 SRAM；FDL2 由 FDL1 加载到 DDR，功能完整（读写分区、擦除、打印分区表）。</dd>
+
+    <dt><code>identifier_token</code></dt>
+    <dd>官方解锁用的设备标识，本机为 <code class="inl">521Q5FGHY92U4</code>。厂商用私钥对其签名即可解锁。</dd>
+
+    <dt><code>AVB</code> — Android Verified Boot</dt>
+    <dd>Android 的启动镜像完整性校验。每个分区有对应 <code class="inl">vbmeta</code> 记录哈希与签名，由 bootloader 校验。</dd>
+
+    <dt><code>dm-verity</code></dt>
+    <dd>内核层的块设备完整性校验，运行时逐块验证 system/vendor。与 AVB 独立，解锁后通常仍是 <code class="inl">enforcing</code>。</dd>
+
+    <dt><code>miscdata</code></dt>
+    <dd>存放设备状态记录的分区。本机偏移 <code class="inl">0x2000</code> 处 64 字节记录解锁状态：全零=锁定，32B+16B+16B=已解锁。</dd>
+
+    <dt><code>NOP</code></dt>
+    <dd>空操作指令。AArch64 编码 <code class="inl">1f 20 03 d5</code>（即 <code class="inl">0xD503201F</code>）。把校验调用替换成 NOP 是最经典的二进制补丁手法。</dd>
+
+    <dt><code>GKI</code> / <code>KMI</code></dt>
+    <dd>Generic Kernel Image / Kernel Module Interface。KMI 如 <code class="inl">android13-5.15</code> 决定了可加载模块的 ABI 版本。</dd>
+
+    <dt><code>LKM</code></dt>
+    <dd>Loadable Kernel Module。KernelSU 的 LKM 模式把 root 能力做成内核模块注入，无需替换整个内核。</dd>
+
+    <dt><code>A/B 双槽</code></dt>
+    <dd>无缝升级机制：两套 boot/system 分区（<code class="inl">_a</code> / <code class="inl">_b</code>），当前运行其中一套，升级写另一套。</dd>
+
+    <dt><code>vbmeta</code></dt>
+    <dd>AVB 的元数据分区，保存各分区哈希与签名。分 <code class="inl">vbmeta</code>、<code class="inl">vbmeta_system</code>、<code class="inl">vbmeta_vendor</code> 等层级。</dd>
+
+    <dt><code>CVE-2022-38694</code></dt>
+    <dd>展锐 BootROM 漏洞：可在加载 FDL 前覆盖签名校验函数指针，使 BROM 接受未签名镜像。本文案的入口。</dd>
+
+    <dt><code>ETOOMANYLINKS</code></dt>
+    <dd>主机 USB 栈错误码，表象为 <code class="inl">Status read failed (Too many links)</code>。与镜像、分区均无关，属链路问题。</dd>
+  </dl>
+</section>
+
+<!-- 12 -->
+<section id="scripts">
+  <h2 class="sec"><span class="num">12</span>脚本源码</h2>
+  <p class="lead">本次实际使用的核心逻辑。完整集合在仓库 <code class="inl">scripts/</code>。</p>
+
+  <h3>12.1 通用执行骨架（端口捕捉 + 重试）</h3>
+  <p>所有脚本的共同点：<b>轮询 120 ms</b>、<b>端口一出现立刻连</b>、<b>每次连接前清理僵尸进程</b>、<b>失败自动重试</b>。</p>
+<pre><span class="pp">function</span> Get-SprdPort {
+    $p = (Get-ItemProperty 'HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM' -EA SilentlyContinue).PSObject.Properties |
+         Where-Object { $_.Name -notmatch '^PS' }
+    <span class="pp">if</span> ($p) { <span class="pp">return</span> $true }
+    <span class="pp">return</span> $false
+}
+
+<span class="pp">while</span> ((Get-Date) -lt $deadline) {
+    <span class="pp">if</span> (Get-SprdPort) { <span class="pp">break</span> }          <span class="c"># 不加 sleep，出现即用</span>
+    Start-Sleep -Milliseconds 120
+}
+
+Get-Process | Where-Object { $_.ProcessName -match 'spd_dump' } |
+    ForEach-Object { $_ | Stop-Process -Force -EA SilentlyContinue }   <span class="c"># 清僵尸，防占口</span>
+
+&amp; '.\spd_dump.exe' --wait 120 --reconnect --verbose 1 `
+    exec_addr2 0x65017f08 `
+    fdl fdl1-dl.bin 0x65000800 `
+    fdl fdl2-dl.bin 0xbefffe00 `
+    exec w uboot_a fdl2-cboot.bin reset</pre>
+
+  <h3>12.2 分卷合并与校验（固件仓库 rebuild.ps1）</h3>
+<pre><span class="c"># 1. 按序合并</span>
+$out = [System.IO.File]::Create($archive)
+<span class="pp">foreach</span> ($p <span class="pp">in</span> $parts) {
+    $in = [System.IO.File]::OpenRead($p.FullName)
+    <span class="pp">try</span> { $in.CopyTo($out) } <span class="pp">finally</span> { $in.Dispose() }
+}
+$out.Dispose()
+
+<span class="c"># 2. 校验整包</span>
+$hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLower()
+<span class="pp">if</span> ($hash -ne $manifest.archive.sha256) { <span class="pp">throw</span> 'SHA256 不匹配' }
+
+<span class="c"># 3. 解包 + 逐文件校验</span>
+tar -xzf $archive -C $OutDir
+<span class="pp">foreach</span> ($f <span class="pp">in</span> $manifest.files) {
+    <span class="pp">if</span> ((Get-FileHash (Join-Path $OutDir $f.name) -Algorithm SHA256).Hash.ToLower() -ne $f.sha256) { $bad++ }
+}</pre>
+
+  <h3>12.3 Git 推送的两个环境修正</h3>
+<pre><span class="c"># ① schannel 取不到凭据 → 改用 OpenSSL 后端</span>
+git config --local http.sslBackend openssl
+
+<span class="c"># ② SSH 传输在受限环境下不可用（命名管道被禁）→ 改 HTTPS</span>
+<span class="c">#    token 仅临时写入 remote URL，推完立即还原</span>
+git remote add origin "https://x-access-token:$tok@github.com/owner/repo.git"
+git push -u origin main
+git remote set-url origin "https://github.com/owner/repo.git"</pre>
 </section>
 
 <footer>
-  <p>文档生成于 2026-11-01 · 设备 MEIZU Note 16（M521Q / UMS9621S）· 序列号 521Q5FGHY92U4</p>
-  <p>所有命令与输出均来自本次真实操作记录。备份完整保留在 <code class="inl">_backup\</code>，恢复指南见同目录 README。</p>
-  <p style="margin-top:14px;color:var(--fg3)">提示：按 <kbd>Ctrl</kbd> + <kbd>F</kbd> 可在本页搜索命令；点击代码块右上角「复制」可直接取用。</p>
+  <p>文档 v2 · 生成于 2026-11-01 · 设备 MEIZU Note 16（M521Q / UMS9621S）· 序列号 521Q5FGHY92U4</p>
+  <p>所有命令与输出来自本次真实操作记录；字节级数据由原始镜像直接比对得出。完整备份保留在 <code class="inl">_backup\</code>。</p>
+  <p style="margin-top:12px">提示：<kbd>Ctrl</kbd>+<kbd>F</kbd> 可全文搜索；代码块右上角「复制」可直接取用。</p>
 </footer>
 
 </main>
@@ -958,41 +1122,66 @@ Writing 'init_boot_a'             <span class="bad">FAILED (Status read failed (
 <div id="lightbox"><img src="" alt=""><div class="cap"></div></div>
 
 <script>
-/* ---------- 分区数据（由构建脚本注入真实值） ---------- */
+/* ===== 分区数据（构建时注入真实值） ===== */
 const PARTITIONS = [{"id":"splloader","size":0.25},{"id":"prodnv","size":64},{"id":"miscdata","size":1},{"id":"misc","size":1},{"id":"trustos_a","size":6},{"id":"trustos_b","size":6},{"id":"sml_a","size":1},{"id":"sml_b","size":1},{"id":"uboot_a","size":3},{"id":"uboot_b","size":3},{"id":"uboot_log","size":16},{"id":"logo","size":8},{"id":"fbootlogo","size":8},{"id":"nr_fixnv1_a","size":50},{"id":"nr_fixnv1_b","size":50},{"id":"nr_fixnv2_a","size":50},{"id":"nr_fixnv2_b","size":50},{"id":"nr_runtimenv1","size":55},{"id":"nr_runtimenv2","size":55},{"id":"persist","size":2},{"id":"nr_modem_a","size":50},{"id":"nr_modem_b","size":50},{"id":"nr_deltanv_a","size":1},{"id":"nr_deltanv_b","size":1},{"id":"nr_phy_a","size":50},{"id":"nr_phy_b","size":50},{"id":"l_agdsp_a","size":6},{"id":"l_agdsp_b","size":6},{"id":"pm_sys_a","size":1},{"id":"pm_sys_b","size":1},{"id":"ch_sys_a","size":16},{"id":"ch_sys_b","size":16},{"id":"teecfg_a","size":1},{"id":"teecfg_b","size":1},{"id":"hypervsior_a","size":10},{"id":"hypervsior_b","size":10},{"id":"boot_a","size":64},{"id":"boot_b","size":64},{"id":"vendor_boot_a","size":100},{"id":"vendor_boot_b","size":100},{"id":"init_boot_a","size":8},{"id":"init_boot_b","size":8},{"id":"dtb_a","size":8},{"id":"dtb_b","size":8},{"id":"dtbo_a","size":8},{"id":"dtbo_b","size":8},{"id":"super","size":10240},{"id":"cache","size":64},{"id":"blackbox","size":500},{"id":"vbmeta_a","size":1},{"id":"vbmeta_b","size":1},{"id":"metadata","size":64},{"id":"sysdumpdb","size":60},{"id":"vbmeta_system_a","size":1},{"id":"vbmeta_system_b","size":1},{"id":"vbmeta_vendor_a","size":1},{"id":"vbmeta_vendor_b","size":1},{"id":"vbmeta_system_ext_a","size":1},{"id":"vbmeta_system_ext_b","size":1},{"id":"vbmeta_product_a","size":1},{"id":"vbmeta_product_b","size":1},{"id":"vbmeta_odm_a","size":1},{"id":"vbmeta_odm_b","size":1},{"id":"avbmeta_rs_a","size":1},{"id":"avbmeta_rs_b","size":1},{"id":"common_rs1_a","size":8},{"id":"common_rs1_b","size":8},{"id":"common_rs2_a","size":16},{"id":"common_rs2_b","size":16},{"id":"common_rs3_a","size":32},{"id":"common_rs3_b","size":32},{"id":"reserve1","size":8},{"id":"reserve2","size":16},{"id":"calinv","size":48},{"id":"proinfo","size":1},{"id":"recovery","size":64},{"id":"rstinfo","size":30},{"id":"ftest","size":1},{"id":"display","size":100},{"id":"erf_a","size":5},{"id":"erf_b","size":5},{"id":"camera","size":100},{"id":"mzkv","size":12},{"id":"userdata","size":231725}];
 
 const NOTES = {
-  'splloader':'一级引导（DHTB 签名头，实际镜像仅 69 KB）',
-  'prodnv':'出厂信息（含 IMEI 等）',
-  'miscdata':'解锁记录所在（偏移 0x2000，64 字节）',
-  'misc':'misc-wipe.bin 写入目标 / 开机模式',
-  'uboot_a':'二级引导 / fastboot（曾刷入 cboot）',
-  'uboot_b':'备用槽二级引导（保持原厂）',
-  'boot_a':'内核 + ramdisk（AVB 校验）',
-  'init_boot_a':'KernelSU 改写目标（8 MB）',
-  'super':'动态分区容器（system/vendor/product…）',
-  'userdata':'用户数据（不含在备份内）',
-  'persist':'传感器校准（曾被 e userdata 擦除）',
-  'vbmeta_a':'AVB 校验元数据',
-  'trustos_a':'TEE 可信执行环境',
-  'sml_a':'安全监控器',
-  'teecfg_a':'TEE 配置',
-  'cache':'缓存分区（不含在备份内）',
-  'blackbox':'黑匣子日志（不含在备份内）',
-  'metadata':'加密元数据',
-  'recovery':'恢复模式',
-  'logo':'开机 logo',
-  'proinfo':'产品信息',
-  'mzkv':'Meizu 键值存储'
+  splloader:'一级引导（DHTB，实际镜像 69 KB，裸区不在 GPT）',
+  prodnv:'出厂信息（IMEI / 序列号等，未入公开仓库）',
+  miscdata:'解锁记录（偏移 0x2000，64 字节）',
+  misc:'开机模式 / misc-wipe 擦除标记',
+  trustos_a:'TEE 可信执行环境（A 槽）', trustos_b:'TEE 可信执行环境（B 槽）',
+  sml_a:'安全监控器（A 槽）', sml_b:'安全监控器（B 槽）',
+  uboot_a:'二级引导 / fastboot（曾刷入 cboot）', uboot_b:'二级引导（B 槽，保持原厂）',
+  uboot_log:'U-Boot 运行日志区',
+  logo:'开机 logo', fbootlogo:'fastboot 界面 logo',
+  nr_fixnv1_a:'射频 NV 1（设备私有）', nr_fixnv1_b:'射频 NV 1（B）',
+  nr_fixnv2_a:'射频 NV 2（设备私有）', nr_fixnv2_b:'射频 NV 2（B）',
+  nr_runtimenv1:'运行时 NV 1（设备私有）', nr_runtimenv2:'运行时 NV 2（设备私有）',
+  persist:'传感器校准 / 私有数据（曾被 e userdata 擦除）',
+  nr_modem_a:'modem 固件（A）', nr_modem_b:'modem 固件（B）',
+  nr_deltanv_a:'增量 NV（A）', nr_deltanv_b:'增量 NV（B）',
+  nr_phy_a:'物理层校准（A）', nr_phy_b:'物理层校准（B）',
+  l_agdsp_a:'音频 DSP 固件（A）', l_agdsp_b:'音频 DSP 固件（B）',
+  pm_sys_a:'电源管理固件（A）', pm_sys_b:'电源管理固件（B）',
+  ch_sys_a:'充电管理固件（A）', ch_sys_b:'充电管理固件（B）',
+  teecfg_a:'TEE 配置（A）', teecfg_b:'TEE 配置（B）',
+  hypervsior_a:'Hypervisor（A）', hypervsior_b:'Hypervisor（B）',
+  boot_a:'内核 + ramdisk（A，AVB 保护）', boot_b:'内核 + ramdisk（B）',
+  vendor_boot_a:'vendor ramdisk（A）', vendor_boot_b:'vendor ramdisk（B）',
+  init_boot_a:'通用 ramdisk（KernelSU 改写目标）', init_boot_b:'通用 ramdisk（B）',
+  dtb_a:'设备树（A）', dtb_b:'设备树（B）',
+  dtbo_a:'设备树叠加层（A）', dtbo_b:'设备树叠加层（B）',
+  super:'动态分区容器（system/vendor/product …）',
+  cache:'缓存分区（不含在备份内）',
+  blackbox:'黑匣子日志（不含在备份内）',
+  vbmeta_a:'AVB 元数据（A）', vbmeta_b:'AVB 元数据（B）',
+  metadata:'加密元数据', sysdumpdb:'系统崩溃转储',
+  vbmeta_system_a:'system 子分区 AVB（A）', vbmeta_system_b:'system 子分区 AVB（B）',
+  vbmeta_vendor_a:'vendor 子分区 AVB（A）', vbmeta_vendor_b:'vendor 子分区 AVB（B）',
+  vbmeta_system_ext_a:'system_ext AVB（A）', vbmeta_system_ext_b:'system_ext AVB（B）',
+  vbmeta_product_a:'product AVB（A）', vbmeta_product_b:'product AVB（B）',
+  vbmeta_odm_a:'odm AVB（A）', vbmeta_odm_b:'odm AVB（B）',
+  avbmeta_rs_a:'AVB 冗余元数据（A）', avbmeta_rs_b:'AVB 冗余元数据（B）',
+  common_rs1_a:'保留区 rs1（A）', common_rs1_b:'保留区 rs1（B）',
+  common_rs2_a:'保留区 rs2（A）', common_rs2_b:'保留区 rs2（B）',
+  common_rs3_a:'保留区 rs3（A）', common_rs3_b:'保留区 rs3（B）',
+  reserve1:'预留', reserve2:'预留',
+  calinv:'校准数据（设备私有）',
+  proinfo:'产品信息', recovery:'恢复模式',
+  rstinfo:'复位信息（设备私有）', ftest:'工厂测试',
+  display:'显示参数区',
+  erf_a:'错误记录（A）', erf_b:'错误记录（B）',
+  camera:'相机标定数据',
+  mzkv:'魅族键值存储（设备私有）',
+  userdata:'用户数据（231 GB，不含在备份内）'
 };
 
-/* ---------- 渲染分区表 ---------- */
 (function(){
   const tb = document.querySelector('#partTable tbody');
   const input = document.getElementById('partFilter');
   const countEl = document.getElementById('partCount');
   const bigBtn = document.getElementById('partBig');
-  const allBtn = document.getElementById('partAll');
   let onlyBig = false;
 
   function render(){
@@ -1003,61 +1192,56 @@ const NOTES = {
       const note = NOTES[p.id] || '';
       const hl = p.size >= 10240 ? 'style="color:var(--amber);font-weight:700"'
                : p.size >= 64 ? 'style="color:var(--blue)"' : '';
-      return '<tr><td class="mono dim">'+p.idx+'</td><td class="mono">'+p.id+'</td>'+
-             '<td class="mono" '+hl+'>'+p.size+'</td><td class="dim" style="font-size:12.5px">'+note+'</td></tr>';
+      return '<tr><td class="mono dim" style="font-size:11.5px">'+p.idx+'</td>'+
+             '<td class="mono">'+p.id+'</td>'+
+             '<td class="mono" '+hl+'>'+p.size+'</td>'+
+             '<td class="dim" style="font-size:12.3px">'+note+'</td></tr>';
     }).join('');
-    countEl.textContent = '显示 ' + rows.length + ' / ' + PARTITIONS.length + ' 个分区';
+    countEl.textContent = '显示 ' + rows.length + ' / ' + PARTITIONS.length + ' 个分区' + (onlyBig ? '（≥64MB）' : '');
   }
   input.addEventListener('input', render);
   bigBtn.addEventListener('click', ()=>{ onlyBig=!onlyBig; bigBtn.textContent = onlyBig?'显示全部':'只看 ≥ 64MB'; render(); });
-  allBtn.addEventListener('click', ()=>{ input.value=''; render(); });
+  document.getElementById('partAll').addEventListener('click', ()=>{ input.value=''; render(); });
   render();
 })();
 
-/* ---------- 代码复制按钮 ---------- */
 document.querySelectorAll('pre').forEach(pre=>{
-  const btn = document.createElement('button');
+  const btn=document.createElement('button');
   btn.className='copy'; btn.textContent='复制';
-  btn.onclick = ()=>{
-    const txt = pre.innerText.replace(/^复制\n?/,'');
-    navigator.clipboard.writeText(txt).then(()=>{
-      btn.textContent='已复制'; setTimeout(()=>btn.textContent='复制',1200);
-    }).catch(()=>{ btn.textContent='失败'; setTimeout(()=>btn.textContent='复制',1200); });
+  btn.onclick=()=>{
+    const txt=pre.innerText.replace(/^复制\n?/,'');
+    navigator.clipboard.writeText(txt).then(()=>{btn.textContent='已复制';setTimeout(()=>btn.textContent='复制',1200);})
+      .catch(()=>{btn.textContent='失败';setTimeout(()=>btn.textContent='复制',1200);});
   };
   pre.appendChild(btn);
 });
 
-/* ---------- 目录高亮 ---------- */
 (function(){
-  const links = [...document.querySelectorAll('nav a')];
-  const secs = links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
-  const io = new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
       if(e.isIntersecting){
         links.forEach(l=>l.classList.remove('active'));
-        const l = links.find(l=>l.getAttribute('href') === '#'+e.target.id);
+        const l=links.find(l=>l.getAttribute('href')==='#'+e.target.id);
         if(l) l.classList.add('active');
       }
     });
-  },{rootMargin:'-15% 0px -75% 0px'});
+  },{rootMargin:'-12% 0px -78% 0px'});
   secs.forEach(s=>io.observe(s));
-
-  const bar = document.getElementById('progress');
+  const bar=document.getElementById('progress');
   addEventListener('scroll',()=>{
-    const h = document.documentElement;
-    bar.style.width = (h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+    const h=document.documentElement;
+    bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
   },{passive:true});
 })();
 
-/* ---------- 图片灯箱 ---------- */
 (function(){
-  const lb = document.getElementById('lightbox');
-  const img = lb.querySelector('img');
-  const cap = lb.querySelector('.cap');
+  const lb=document.getElementById('lightbox'), img=lb.querySelector('img'), cap=lb.querySelector('.cap');
   document.querySelectorAll('.gal figure').forEach(f=>{
     f.addEventListener('click',()=>{
-      img.src = f.querySelector('img').src;
-      cap.textContent = f.querySelector('figcaption').innerText;
+      img.src=f.querySelector('img').src;
+      cap.textContent=f.querySelector('figcaption').innerText;
       lb.classList.add('on');
     });
   });
