@@ -1,8 +1,8 @@
 # 魅族冻结助手（自研 App）
 
-> 版本：2.4　·　2026-11-01
+> 版本：2.5　·　2026-11-01
 > 包名：`io.github.dingjinjin.meizufreezer`
-> APK：`app/release/meizu-freezer-2.4.apk`（24.6 KB）
+> APK：`app/release/meizu-freezer-2.5.apk`（24.6 KB）
 > 源码：`app/`　构建脚本：`app/build.ps1`
 
 ---

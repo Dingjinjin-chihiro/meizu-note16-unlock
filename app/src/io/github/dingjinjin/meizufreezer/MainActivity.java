@@ -5,7 +5,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.app.AlertDialog;
+import android.webkit.JsResult;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -61,6 +64,19 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(true);
         web.setFitsSystemWindows(true);
         web.setVerticalScrollBarEnabled(false);
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onJsConfirm(WebView v, String url, String msg, final JsResult res) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("请确认")
+                        .setMessage(msg)
+                        .setPositiveButton("确定", (d, w) -> res.confirm())
+                        .setNegativeButton("取消", (d, w) -> res.cancel())
+                        .setCancelable(false)
+                        .show();
+                return true;
+            }
+        });
         web.addJavascriptInterface(new Bridge(), "Native");
         final android.widget.FrameLayout root = new android.widget.FrameLayout(this);
         root.addView(web, new android.widget.FrameLayout.LayoutParams(
