@@ -39,7 +39,7 @@
 - **补丁点反汇编**（§13）：5 处补丁点全部指向同一个验签函数 `0x0B9C8`，含 `0x0CD00` 的完整反汇编与 C 伪代码（Capstone 5.0.7 生成，含一处极性更正记录）
 - **BROM 协议逐帧解析**（§14）：帧格式、9358 帧的类型统计、握手序列、数据块大小规律
 - **系统精简**（§15）：103 个系统应用冻结 + 7 个第三方卸载，含恢复脚本与验证记录
-- 另有 [去膨胀记录](docs/去膨胀记录.md)、[模块指南](docs/模块指南.md)、[GSI 尝试记录](docs/GSI尝试记录.md) 三份补充文档
+- 另有 [去膨胀记录](docs/去膨胀记录.md)、[模块指南](docs/模块指南.md)、[GSI 尝试记录](docs/GSI尝试记录.md)、[极限精简记录](docs/极限精简记录.md) 四份补充文档
 
 > 启用 GitHub Pages：仓库 **Settings → Pages → Source: Deploy from a branch → Branch: `main` / folder: `/docs`**，
 > 之后访问 `https://Dingjinjin-chihiro.github.io/meizu-note16-unlock/`。
