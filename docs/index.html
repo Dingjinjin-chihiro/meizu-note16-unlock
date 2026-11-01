@@ -1481,6 +1481,18 @@ adb shell cmd package install-existing com.ss.android.ugc.aweme</pre>
   <p class="count">教训：为了跑 GSI 去关 verity，把一条"可救援"的失败路径变成了"不可救援"的路径。</p>
 
   <h3>16.3 救援关键动作</h3>
+  <p>现在这一步已经封装成一键脚本 <code class="inl">scripts/restore-super.ps1</code>，
+  设备在系统里、recovery、bootloader 或 fastbootd 都能直接用：</p>
+<pre><span class="c"># 一条命令：自动找设备 → 还原 vbmeta → 分片写回 super → 重启</span>
+.\scripts\restore-super.ps1 -Backup D:\_backup
+
+<span class="c"># 只检查不刷写</span>
+.\scripts\restore-super.ps1 -DryRun
+
+<span class="c"># 断点续写</span>
+.\scripts\restore-super.ps1 -From 4509715660</pre>
+
+  <p>手动流程（脚本不可用时）仍然有效：</p>
 <pre><span class="c"># 1. 强制复位（电源键在重启循环里会被吞掉，必须双键）</span>
 按住 电源 + 音量下 20 秒  →  停在 fastboot mode
 

@@ -82,6 +82,14 @@ Android sparse 镜像支持 `DONT_CARE`（0xCAC3）块类型——设备读到�
 
 ### 完整回滚命令
 
+**推荐用封装好的一键脚本**（设备在系统/recovery/bootloader/fastbootd 都能直接跑）：
+
+```powershell
+.\scripts\restore-super.ps1 -Backup D:\_backup
+```
+
+手动流程：
+
 ```powershell
 # 1. 进 fastbootd
 adb reboot fastboot
